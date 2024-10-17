@@ -7,7 +7,9 @@
     login_password: '1234'
     login_db: 'mysql'
     login_host: localhost
+    query: "SELECT host, user, Grant_priv FROM user WHERE Grant_priv='Y';"
     regi_users_3: ['mysql', 'root']
+    Grant_priv: 'Grant_priv'
 
   tasks:
   - name: Run Query
@@ -16,7 +18,7 @@
       login_password: "{{ login_password }}"
       login_host: "{{ login_host }}"
       login_db: "{{ login_db }}"
-      query: "SELECT host, user, Grant_priv FROM user WHERE Grant_priv='Y';"
+      query: "{{ query }}"
     register: query_result
 
   - name: Print query_result
@@ -25,7 +27,7 @@
 
   - name: Filter 'Y' User
     set_fact:
-      priv_users: "{{ query_result.query_result[0] | selectattr('Grant_priv', 'equalto', 'Y') | map(attribute='User') | list }}"
+      priv_users: "{{ query_result.query_result[0] | selectattr(Grant_priv, 'equalto', 'Y') | map(attribute='User') | list }}"
 
   - name: Print priv_users
     debug:
@@ -45,4 +47,4 @@
 
   - name: Check
     debug:
-      msg: "{{ 'good' if (priv_users | difference(regi_users_3) | length == 0) else 'bad' }}"
+      msg: "{{ 'good' if (unregi_users_3 | length == 0) else 'bad' }}"

@@ -7,6 +7,7 @@
     login_password: '1234'
     login_db: 'mysql'
     login_host: localhost
+    query: "SELECT host, user, authentication_string FROM user"
     regi_users_1: ['test']
 
   tasks:
@@ -16,7 +17,7 @@
       login_password: "{{ login_password }}"
       login_host: "{{ login_host }}"
       login_db: "{{ login_db }}"
-      query: "SELECT host, user, authentication_string FROM user"
+      query: "{{ query }}"
     register: query_result
 
   - name: Print query_result
@@ -45,4 +46,4 @@
 
   - name: Check
     debug:
-      msg: "{{ 'good' if (users | difference(regi_users_1) | length == 0) else 'bad' }}"
+      msg: "{{ 'good' if (unregi_users | length == 0) else 'bad' }}"
