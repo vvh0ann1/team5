@@ -1,0 +1,21 @@
+# Apache: 파일 업로드 및 다운로드 제한
+---
+- name: Check and set file upload/download limit in Apache
+  hosts: intranetweb  # 변경할 호스트 그룹
+  become: yes  # sudo 권한 사용
+  tasks:
+
+    - name: Check if LimitRequestBody is set in apache2.conf
+      command: grep LimitRequestBody /etc/apache2/apache2.conf
+      register: limit_request_body
+      ignore_errors: true
+
+    - name: Display vulnerability status
+      debug:
+        msg: "Vulnerable: No file upload and download size limit is set."
+      when: limit_request_body.rc != 0
+
+    - name: Display secure status
+      debug:
+        msg: "Secure: File upload and download size limits are set."
+      when: limit_request_body.rc == 0
