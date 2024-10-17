@@ -1,0 +1,24 @@
+# Mysql: "불필요한 계정 제거"
+---
+- name: Mysql_1
+  hosts: internetweb
+  vars:
+    login_user: 'test'
+    login_password: '1234'
+    login_db: 'mysql'
+    login_host: localhost
+    regi_users_1: []
+
+  tasks:
+  - name: Run Query
+    mysql_query:
+      login_user: "{{ login_user }}"
+      login_password: "{{ login_password }}"
+      login_host: "{{ login_host }}"
+      login_db: "{{ login_db }}"
+      query: "SELECT host, user, authentication_string FROM user"
+    register: query_result
+
+  - name: Print query_result
+    debug:
+      var: query_result

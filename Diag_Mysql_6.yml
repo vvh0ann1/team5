@@ -1,0 +1,29 @@
+# Mysql: "환경설정 파일 접근 권한"
+---
+- name: Mysql_6
+  hosts: internetweb
+
+  tasks:
+  - name: get file perm
+    stat:
+      path: /etc/my.cnf.d/mariadb-server.cnf
+    register: file_stat
+  - name: print stat
+    debug:
+      msg: "{{ file_stat.stat.mode }}"
+
+  - name: check perm
+    debug:
+      msg: ( perm = 0644 )
+    when: file_stat.stat.mode == '0644'
+
+  - name: check less perm
+    debug:
+      msg: good( <= 0640)
+    when: file_stat.stat.mode | int <= 640
+  
+  - name: check more perm
+    debug:
+      msg: bad ( > 0640)
+    when: file_stat.stat.mode | int > 640
+
