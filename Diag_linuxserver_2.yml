@@ -19,21 +19,28 @@
       failed_when: false
       changed_when: false
 
-    # 3. pwquality.conf에서 추출한 minlen과 minclass 값을 변수로 저장
+    # 3. pwquality.conf에서 추출한 minlen과 minclass 값을 문자열로 출력
+    # - name: Extract minlen and minclass as string (before conversion)
+    #  debug:
+    #    msg:
+    #      - "Extracted minlen_value (before conversion): {{ pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') }}"
+    #      - "Extracted minclass_value (before conversion): {{ pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') }}"
+
+    # 4. pwquality.conf에서 추출한 minlen과 minclass 값을 변수로 저장 (정수로 변환)
     - name: Extract minlen and minclass from pwquality.conf
       set_fact:
-        minlen_value: "{{ (pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | default(0) | int) }}"
-        minclass_value: "{{ (pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | default(0) | int) }}"
+        minlen_value: "{{ (pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
+        minclass_value: "{{ (pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
 
-    # 4. 변수를 출력하여 값 확인
-    - name: Print extracted minlen and minclass values
-      debug:
-        msg:
-          - "minlen_value: {{ minlen_value }}"
-          - "minclass_value: {{ minclass_value }}"
+    # 5. 추출된 값을 정수로 변환 후 출력하여 확인
+    #  - name: Print extracted minlen and minclass values (after conversion)
+    #  debug:
+    #    msg:
+    #      - "Extracted minlen_value: {{ minlen_value }}"
+    #      - "Extracted minclass_value: {{ minclass_value }}"
 
-    # 5. enforce_for_root 설정 및 패스워드 복잡도 설정 결과 확인 및 출력
+    # 6. enforce_for_root 설정 및 패스워드 복잡도 설정 결과 확인 및 출력
     - name: 결과 확인 및 출력
       debug:
-        msg: "{{ '양호' if (minlen_value >= 8 and minclass_value >= 3) and ('enforce_for_root' in enforce_root_check.stdout) else '취약' }}"
+        msg: "{{ '양호' if (minlen_value | int >= 8 and minclass_value | int >= 3) and ('enforce_for_root' in enforce_root_check.stdout) else '취약' }}"
 
