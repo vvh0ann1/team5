@@ -1,0 +1,24 @@
+# Apache: 불필요한 파일 제거
+---
+- name: Check and remove unnecessary Apache manual files
+  hosts: intranetweb  # 변경할 호스트 그룹
+  become: yes  # sudo 권한 사용
+  tasks:
+    - name: Check if the manual directory exists
+      command: "find /etc/apache2 -name manual"
+      register: manual_dir_check
+      ignore_errors: yes
+
+    - name: Check for manual settings in httpd.conf
+      command: "grep -i 'manual' /etc/apache2/apache2.conf"
+      register: manual_setting_check
+      ignore_errors: yes
+
+    - name: Display status for unnecessary manual files and directories
+      debug:
+        msg: >
+          {% if manual_dir_check.stdout | length == 0 and manual_setting_check.stdout | length == 0 %}
+          Secure: Manual files and directories have been removed.
+          {% else %}
+          Vulnerable: Manual files and/or directories exist.
+          {% endif %}

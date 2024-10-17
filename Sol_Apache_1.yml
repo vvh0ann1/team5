@@ -1,0 +1,49 @@
+# Apache: 웹 서비스 영역의 분리
+---
+- name: Check and update Apache DocumentRoot
+  hosts: intranetweb  # 변경할 호스트 그룹
+  become: yes  # sudo 권한 사용
+  tasks:
+    - name: Ensure Apache is installed
+      apt:
+        name: apache2
+        state: present
+
+    - name: Check current DocumentRoot
+      command: "grep DocumentRoot /etc/apache2/sites-available/000-default.conf"
+      register: document_root_check
+      ignore_errors: yes
+
+    - name: Display current DocumentRoot
+      debug:
+        msg: "Current DocumentRoot is: {{ document_root_check.stdout }}"
+
+    - name: Check if DocumentRoot is vulnerable
+      debug:
+        msg: "Vulnerable: Default DocumentRoot is being used."
+      when: document_root_check.stdout is search('htdocs') or document_root_check.stdout is search('/var/www/html')
+
+    - name: Check if DocumentRoot is secure
+      debug:
+        msg: "Secure: Default DocumentRoot is not being used."
+      when: not (document_root_check.stdout is search('htdocs') or document_root_check.stdout is search('/var/www/html'))
+
+    - name: Create secure directory
+      file:
+        path: /var/secure/mysecurepath  # 안전한 경로
+        state: directory
+        mode: '0755'  # 권한 설정
+
+    - name: Update DocumentRoot
+      lineinfile:
+        path: /etc/apache2/sites-available/000-default.conf
+        regexp: '^\s*DocumentRoot\s+'
+        line: '    DocumentRoot /var/secure/mysecurepath'  # 변경할 안전한 경로
+      when: document_root_check.stdout is search('htdocs') or
+            document_root_check.stdout is search('/var/www/html')
+ 
+  handlers:
+    - name: Restart Apache to apply changes
+      service:
+        name: apache2
+        state: restarted

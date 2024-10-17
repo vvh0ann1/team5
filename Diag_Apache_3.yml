@@ -1,0 +1,33 @@
+# Apache: 링크 사용 금지
+---
+- name: Check for symbolic links and alias restrictions in Apache
+  hosts: intranetweb  # 변경할 호스트 그룹
+  become: yes  # sudo 권한 사용
+  tasks:
+    - name: Check if FollowSymLinks is enabled
+      command: "grep FollowSymLinks /etc/apache2/apache2.conf"
+      register: follow_symlinks_check
+      ignore_errors: yes
+
+    - name: Check for aliases in Apache configuration
+      command: "grep '^Alias' /etc/apache2/mods-enabled/alias.conf"
+      register: alias_check
+      ignore_errors: yes
+
+    - name: Display status for FollowSymLinks
+      debug:
+        msg: >
+          {% if follow_symlinks_check.stdout is search('Indexes') %}
+          Vulnerable: FollowSymLinks is enabled.
+          {% else %}
+          Secure: FollowSymLinks is not enabled.
+          {% endif %}
+
+    - name: Display status for aliases
+      debug:
+        msg: >
+          {% if alias_check.stdout | length > 0 %}
+          Vulnerable: Aliases are configured and not commented out.
+          {% else %}
+          Secure: No aliases are configured or they are commented out.
+          {% endif %}
