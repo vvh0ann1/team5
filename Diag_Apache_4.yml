@@ -1,7 +1,7 @@
 # Apache: 파일 업로드 및 다운로드 제한
 ---
 - name: Check and set file upload/download limit in Apache
-  hosts: intranetweb  # 변경할 호스트 그룹
+  hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
   tasks:
 

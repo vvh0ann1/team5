@@ -1,0 +1,39 @@
+# Apache: 최신 보안 패치 적용
+---
+- name: Check Apache version for security patches
+  hosts: localhost
+  tasks:
+    - name: Check current Apache version
+      command: apache2 -v
+      register: current_apache_version
+      changed_when: false
+
+    - name: Display current Apache version
+      debug:
+        msg: "Current Apache version: {{ current_apache_version.stdout }}"
+
+    - name: Check latest available Apache version
+      command: apt show apache2 | grep Version
+      register: latest_apache_version
+      changed_when: false
+
+    - name: Extract the latest version number
+      set_fact:
+        latest_version: "{{ latest_apache_version.stdout | regex_replace('Version: ', '') | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+
+    - name: Extract the current version number
+      set_fact:
+        current_version: "{{ current_apache_version.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+
+    - name: Compare versions and determine vulnerability status
+      debug:
+        msg: "Vulnerable: The installed version of Apache is outdated. Please update."
+      when: current_version is version(latest_version, '<')
+
+    - name: Display secure status
+      debug:
+        msg: "Secure: The installed version of Apache is up to date."
+      when: current_version is not version(latest_version, '<')
+
+
+

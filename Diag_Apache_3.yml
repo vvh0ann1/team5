@@ -1,7 +1,7 @@
 # Apache: 링크 사용 금지
 ---
 - name: Check for symbolic links and alias restrictions in Apache
-  hosts: intranetweb  # 변경할 호스트 그룹
+  hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
   tasks:
     - name: Check if FollowSymLinks is enabled

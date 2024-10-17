@@ -1,7 +1,7 @@
 # Apache: 웹 서비스 영역의 분리
 ---
 - name: Check and update Apache DocumentRoot
-  hosts: intranetweb  # 변경할 호스트 그룹
+  hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
   tasks:
     - name: Ensure Apache is installed
