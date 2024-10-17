@@ -1,13 +1,13 @@
-# Mysql: "사용자 계정 정보 테이블 접근 권한"
+# Mysql: "타 사용자에 권한 부여 옵션 제한"
 ---
-- name: Mysql_4
+- name: Mysql_3
   hosts: internetweb
   vars:
     login_user: 'test'
     login_password: '1234'
     login_db: 'mysql'
     login_host: localhost
-    regi_users_4: ['root', 'mysql']
+    regi_users_3: ['mysql', 'root']
 
   tasks:
   - name: Run Query
@@ -15,33 +15,34 @@
       login_user: "{{ login_user }}"
       login_password: "{{ login_password }}"
       login_host: "{{ login_host }}"
-      query: "SELECT host, user, select_priv FROM mysql.user;"
+      login_db: "{{ login_db }}"
+      query: "SELECT host, user, Grant_priv FROM user WHERE Grant_priv='Y';"
     register: query_result
 
   - name: Print query_result
     debug:
       var: query_result
-  
+
   - name: Filter 'Y' User
     set_fact:
-      priv_users: "{{ query_result.query_result[0] | selectattr('Select_priv', 'equalto', 'Y') | map(attribute='User') | list }}"
+      priv_users: "{{ query_result.query_result[0] | selectattr('Grant_priv', 'equalto', 'Y') | map(attribute='User') | list }}"
 
   - name: Print priv_users
     debug:
       var: priv_users
 
-  - name: Print regi_users_4
+  - name: Print regi_users_3
     debug:
-      var: regi_users_4
+      var: regi_users_3
 
   - name: Check unregi users
     set_fact:
-      unregi_users: "{{ priv_users | difference(regi_users_4) }}"
+      unregi_users_3: "{{ priv_users | difference(regi_users_3) }}"
 
   - name: Print unregi_users
     debug:
-      var: unregi_users
+      var: unregi_users_3
 
   - name: Check
     debug:
-      msg: "{{ 'good' if (priv_users | difference(regi_users_4) | length == 0) else 'bad' }}"
+      msg: "{{ 'good' if (priv_users | difference(regi_users_3) | length == 0) else 'bad' }}"

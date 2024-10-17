@@ -7,7 +7,7 @@
     login_password: '1234'
     login_db: 'mysql'
     login_host: localhost
-    regi_users_1: []
+    regi_users_1: ['test']
 
   tasks:
   - name: Run Query
@@ -22,3 +22,27 @@
   - name: Print query_result
     debug:
       var: query_result
+
+  - name: Filter User
+    set_fact:
+      users: "{{ query_result.query_result[0] | map(attribute='User') | list }}"
+
+  - name: Print users
+    debug:
+      var: users
+  
+  - name: Print regi_users_1
+    debug:
+      var: regi_users_1
+
+  - name: Check unregi users
+    set_fact:
+      unregi_users: "{{ users | difference(regi_users_1) }}"
+
+  - name: Print unregi_users
+    debug:
+      var: unregi_users
+
+  - name: Check
+    debug:
+      msg: "{{ 'good' if (users | difference(regi_users_1) | length == 0) else 'bad' }}"
