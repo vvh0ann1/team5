@@ -1,0 +1,21 @@
+# Apache: 디렉터리 리스팅 제거
+---
+- name: Check directory listing settings in Apache
+  hosts: intranetweb  # 변경할 호스트 그룹
+  become: yes  # sudo 권한 사용
+  tasks:
+
+    - name: Check if Indexes option is set in Apache configuration
+      command: grep -r 'Indexes' /etc/apache2/
+      register: index_option
+      ignore_errors: true
+
+    - name: Display vulnerability status
+      debug:
+        msg: "Vulnerable: Directory listing is enabled (Indexes option is set)."
+      when: index_option.rc == 0
+
+    - name: Display secure status
+      debug:
+        msg: "Secure: Directory listing is disabled (Indexes option is not set)."
+      when: index_option.rc != 0
