@@ -1,0 +1,29 @@
+# PHP 실행 경로 제한
+---
+- name: Check 
+  hosts: localhost
+  tasks:
+    - name: Check open_basedir in php.ini
+      command: grep "open_basedir =" /etc/php/8.3/cli/php.ini # 추후 변경
+      register: open_basedir_check
+      ignore_errors: yes
+
+    - name: Set open_basedir result
+      set_fact:
+        open_basedir_result: "{{ open_basedir_check.stdout | trim }}"  # 결과만 저장하고 공백 제거
+    - name:
+      debug:
+        msg: "{{ open_basedir_result }}"
+
+
+    - name: fail if open_basedir is empty
+      debug:
+        msg: "Warning - Vulnerability detected: open_basedir is empty."
+      when: open_basedir_check.stdout is search('open_basedir =\s*$')
+      
+    - name: Skip if open_basedir is not empty
+      debug:
+        msg: "No action needed because it's not empty."
+      when: open_basedir_check.stdout is not search('open_basedir\s*=\s*$')
+
+

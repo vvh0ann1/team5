@@ -1,0 +1,19 @@
+---
+- name: Check PHP display_errors setting
+  hosts: localhost
+  tasks:
+    - name: Check display_errors in php.ini
+      command: grep display_errors /etc/php/8.3/cli/php.ini
+      register: display_errors_check
+      ignore_errors: yes
+
+    - name: Fail if display_errors is set to On
+      fail:
+        msg: "Vulnerability detected: display_errors is set to 'On'."
+      when: display_errors_check.stdout is search('display_errors\s*=\s*On')
+
+    - name: Skip if display_errors is set to Off
+      debug:
+        msg: "display_errors is set to 'Off'. No action needed."
+      when: display_errors_check.stdout is search('display_errors\s*=\s*Off')
+

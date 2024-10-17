@@ -1,0 +1,22 @@
+- hosts: localhost
+  tasks:
+    - name: Check for upgradable PHP packages
+      command: apt list --upgradable   # CentOs에선 dnf로 변경예정
+      register: upgrade_check
+
+    - name: Filter PHP packages
+      set_fact:
+        php_upgradable: "{{ upgrade_check.stdout_lines | select('search', 'php') | list }}"
+        # "php_upgradable": []
+  
+
+    - name: fail if exist
+      debug:
+        msg: "php needed upgrade. it's not latest"
+      when: php_upgradable | length != 0
+
+      
+    - name: Skip if latest
+      debug:
+        msg: "No action needed because it's latest."
+      when: php_upgradable | length == 0
