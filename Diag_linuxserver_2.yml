@@ -1,0 +1,32 @@
+#Linux(server): 패스워드 복잡도 설정
+---
+- name: 패스워드 복잡도 설정 진단
+  hosts: all
+  become: yes
+  tasks:
+    # 1. system-auth 파일에서 enforce_for_root 확인
+    - name: Check enforce_for_root in system-auth
+      command: grep enforce_for_root /etc/pam.d/system-auth
+      register: auth_check
+      changed_when: false
+
+    - name: Display enforce_for_root setting (양호 또는 취약)
+      debug:
+        msg: >
+          {{
+            '양호' if auth_check.stdout else '취약'
+          }}
+
+    # 2. pwquality.conf 파일에서 복잡도 설정 확인
+    - name: Check password complexity in pwquality.conf
+      command: grep -v '^#' /etc/security/pwquality.conf | grep -E 'minlen|minclass|maxrepeat'
+      register: pwquality_check
+      changed_when: false
+
+    - name: Display pwquality.conf complexity setting (양호 또는 취약)
+      debug:
+        msg: >
+          {{
+            '양호' if pwquality_check.stdout else '취약'
+          }}
+
