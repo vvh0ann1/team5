@@ -1,32 +1,39 @@
 #Linux(server): 패스워드 복잡도 설정
 ---
-- name: 패스워드 복잡도 설정 진단
+- name: 패스워드 복잡도 설정 및 enforce_for_root 설정 확인
   hosts: all
   become: yes
   tasks:
-    # 1. system-auth 파일에서 enforce_for_root 확인
+
+    # 1. pwquality.conf 파일에서 minlen과 minclass 확인
+    - name: Check minlen and minclass in pwquality.conf
+      shell: grep -E "minlen|minclass" /etc/security/pwquality.conf
+      register: pw_quality_conf_check
+      failed_when: false
+      changed_when: false
+
+    # 2. system-auth 파일에서 enforce_for_root 설정 확인
     - name: Check enforce_for_root in system-auth
-      command: grep enforce_for_root /etc/pam.d/system-auth
-      register: auth_check
+      shell: grep enforce_for_root /etc/pam.d/system-auth
+      register: enforce_root_check
+      failed_when: false
       changed_when: false
 
-    - name: Display enforce_for_root setting (양호 또는 취약)
-      debug:
-        msg: >
-          {{
-            '양호' if auth_check.stdout else '취약'
-          }}
+    # 3. pwquality.conf에서 추출한 minlen과 minclass 값을 변수로 저장
+    - name: Extract minlen and minclass from pwquality.conf
+      set_fact:
+        minlen_value: "{{ (pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | default(0) | int) }}"
+        minclass_value: "{{ (pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | default(0) | int) }}"
 
-    # 2. pwquality.conf 파일에서 복잡도 설정 확인
-    - name: Check password complexity in pwquality.conf
-      command: grep -v '^#' /etc/security/pwquality.conf | grep -E 'minlen|minclass|maxrepeat'
-      register: pwquality_check
-      changed_when: false
-
-    - name: Display pwquality.conf complexity setting (양호 또는 취약)
+    # 4. 변수를 출력하여 값 확인
+    - name: Print extracted minlen and minclass values
       debug:
-        msg: >
-          {{
-            '양호' if pwquality_check.stdout else '취약'
-          }}
+        msg:
+          - "minlen_value: {{ minlen_value }}"
+          - "minclass_value: {{ minclass_value }}"
+
+    # 5. enforce_for_root 설정 및 패스워드 복잡도 설정 결과 확인 및 출력
+    - name: 결과 확인 및 출력
+      debug:
+        msg: "{{ '양호' if (minlen_value >= 8 and minclass_value >= 3) and ('enforce_for_root' in enforce_root_check.stdout) else '취약' }}"
 
