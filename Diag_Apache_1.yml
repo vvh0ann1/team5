@@ -1,8 +1,8 @@
 # Apache: 웹 서비스 영역의 분리
 ---
 - name: Check and update Apache DocumentRoot
-  hosts: localhost  # 변경할 호스트 그룹
-  become: yes  # sudo 권한 사용
+  hosts: aws
+  become: yes
   vars:
     document_root_path: '/var/www/html'  # 기본 DocumentRoot 경로 설정
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일

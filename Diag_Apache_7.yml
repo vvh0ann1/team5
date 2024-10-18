@@ -1,7 +1,7 @@
 # Apache: 최신 보안 패치 적용
 ---
 - name: Check Apache version for security patches
-  hosts: localhost
+  hosts: aws
   tasks:
     - name: Check current Apache version
       command: httpd -v
@@ -16,6 +16,10 @@
       command: yum info httpd | grep Version
       register: latest_apache_version
       changed_when: false
+
+    - name: Display latest Apache version
+      debug:
+        msg: "latest Apache version: {{ latest_apache_version.stdout }}" 
 
     - name: Extract the latest version number
       set_fact:

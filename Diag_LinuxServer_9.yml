@@ -1,8 +1,8 @@
 # Linux Server: 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
 ---
 - name: Check user and environment file ownership and permissions
-  hosts: localhost  # 변경할 호스트 그룹
-  become: yes  # sudo 권한 사용
+  hosts: aws
+  become: yes
   vars:
     home_dirs_path: '/home'  # 홈 디렉터리 경로
     passwd_file_path: '/etc/passwd'  # 사용자 정보 파일 경로

@@ -1,8 +1,8 @@
 # Linux Server: 패스워드 최대 사용 기간 설정
 ---
 - name: Check password maximum age settings
-  hosts: localhost  # 변경할 호스트 그룹
-  become: yes  # sudo 권한 사용
+  hosts: aws
+  become: yes
   vars:
     login_defs_path: '/etc/login.defs'  # 로그인 설정 파일 경로
     max_days: 90  # 최대 사용 기간 기준일

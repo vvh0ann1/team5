@@ -1,8 +1,8 @@
 # Linux Server: /etc/passwd 파일 소유자 및 권한 설정
 ---
 - name: Check /etc/passwd file ownership and permissions
-  hosts: localhost  # 변경할 호스트 그룹
-  become: yes  # sudo 권한 사용
+  hosts: aws
+  become: yes
   vars:
     passwd_file_path: '/etc/passwd'  # 검사할 파일 경로
 
