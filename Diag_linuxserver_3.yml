@@ -1,0 +1,40 @@
+# 계정 잠금 임계값 설정
+---
+    - name: Check pam_faillock.so existence and deny value
+      hosts: all
+      become: yes
+      vars:
+        pam_files:
+          - /etc/pam.d/system-auth
+          - /etc/pam.d/password-auth
+    
+      tasks:
+        # pam_faillock.so 존재 여부 및 deny 값 확인
+        - name: Check pam_faillock.so existence and deny value in system-auth and password-auth
+          shell: "grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}"
+          with_items: "{{ pam_files }}"
+          register: pam_check
+          failed_when: false
+          changed_when: false
+    
+        # deny 값 추출 및 리스트 평탄화 후 출력
+        - name: Extract and flatten deny values from pam_check
+          set_fact:
+            deny_values: "{{ pam_check.results | selectattr('stdout', 'search', 'deny=(\\d+)') | map('regex_search', 'deny=(\\d+)', '\\1') | flatten }}"
+    
+        # deny 값을 정수로 변환 후 출력
+        - name: Convert deny values to integers
+          set_fact:
+            deny_values_int: "{{ deny_values | map('int') | list }}"
+    
+        # pam_faillock.so 모듈이 두 파일에 모두 존재하고, deny 값이 모두 5 이하일 때 양호 출력, 아니면 취약 출력
+        - name: Evaluate pam_faillock.so existence and deny values
+          debug:
+            msg: >
+              {% if pam_check.results | selectattr('stdout', 'search', 'pam_faillock.so') | list | length == 2
+                 and deny_values_int[0] <= 5 and deny_values_int[1] <= 5 %}
+                양호: pam_faillock.so가 두 파일에 모두 존재하며 모든 deny 값이 5 이하입니다.
+              {% else %}
+                취약: pam_faillock.so가 두 파일 중 하나라도 없거나 deny 값이 모두 5 초과로 설정되어 있습니다.
+              {% endif %}
+    
