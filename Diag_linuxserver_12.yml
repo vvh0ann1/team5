@@ -1,0 +1,56 @@
+# DNS 보안 버전 패치 진단 플레이북
+---
+- name: DNS 보안 버전 패치 진단
+  hosts: all
+  become: yes
+  tasks:
+
+    # 1. DNS 서비스(named) 실행 여부 확인
+    - name: Check if DNS service is running
+      shell: ps -ef | grep named | grep -v grep
+      register: named_process
+      failed_when: false
+      changed_when: false
+
+    # 2. DNS 서비스 실행 여부 출력
+    - name: Display DNS service status
+      debug:
+        msg: "{{ 'DNS 서비스를 사용 중입니다.' if named_process.stdout != '' else 'DNS 서비스를 사용하지 않습니다.' }}"
+
+    # 3. BIND 버전 확인 (DNS 서비스가 실행 중일 경우)
+    - name: Check BIND version if DNS service is running
+      shell: named -V
+      when: named_process.stdout != ''
+      register: bind_version
+      failed_when: false
+      changed_when: false
+
+    # 4. yum info bind를 통해 최신 BIND 버전 확인
+    - name: Get latest BIND version from yum
+      shell: yum info bind | grep Version
+      register: yum_bind_version
+      failed_when: false
+      changed_when: false
+
+    # 5. BIND 버전 출력
+    #    - name: Display BIND version
+    #  debug:
+    #    msg: "{{ bind_version.stdout if named_process.stdout != '' else 'BIND 버전을 확인할 수 없습니다. DNS 서비스가 실행 중이지 않습니다.' }}"
+
+    # 6. BIND 최신 버전과 현재 버전 비교
+    - name: Compare BIND version with latest from yum
+      set_fact:
+        bind_up_to_date: "{{ (bind_version.stdout | regex_search('BIND ([\\d\\.]+)', '\\1')) == (yum_bind_version.stdout | regex_search('Version\\s+:\\s+(\\S+)', '\\1')) if named_process.stdout != '' else true }}"
+
+    # 7. 최종 진단 결과 출력
+    - name: Final DNS security patch result
+      debug:
+        msg: >
+          {% if named_process.stdout == '' %}
+            양호: DNS 서비스를 사용하지 않습니다.
+          {% elif bind_up_to_date %}
+            양호: DNS 서비스를 사용 중이며 최신 버전을 사용하고 있습니다.
+          {% else %}
+            취약: DNS 서비스를 사용 중이지만 최신 보안 패치를 적용하지 않았습니다.
+          {% endif %}
+
