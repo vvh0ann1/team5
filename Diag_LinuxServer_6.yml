@@ -14,7 +14,7 @@
 
     - name: Display current permissions in octal
       debug:
-        msg: "Current permissions for /etc/passwd: {{ passwd_file_info.stat.mode | int}}"
+        msg: "Current permissions for /etc/passwd: {{ passwd_file_info.stat.mode | int }}"
 
     - name: Check if /etc/passwd is secure
       debug:

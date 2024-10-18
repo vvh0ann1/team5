@@ -1,0 +1,27 @@
+# Linux Server: /etc/shadow 파일 소유자 및 권한 설정
+---
+- name: Check /etc/shadow file ownership and permissions
+  hosts: localhost  # 변경할 호스트 그룹
+  become: yes  # sudo 권한 사용
+  vars:
+    shadow_file_path: '/etc/shadow'  # 검사할 파일 경로
+
+  tasks:
+    - name: Check ownership and permissions of /etc/shadow
+      stat:
+        path: "{{ shadow_file_path }}"
+      register: shadow_file_info
+
+    - name: Display current permissions in octal
+      debug:
+        msg: "Current permissions for /etc/shadow: {{ shadow_file_info.stat.mode | int }}"
+
+    - name: Check if /etc/shadow is secure
+      debug:
+        msg: "Secure: /etc/shadow is owned by root and permissions are 400 or lower."
+      when: shadow_file_info.stat.pw_name == 'root' and shadow_file_info.stat.mode | int <= 400
+
+    - name: Check if /etc/shadow is vulnerable
+      debug:
+        msg: "Vulnerable: /etc/shadow is either not owned by root or permissions are greater than 400."
+      when: shadow_file_info.stat.pw_name != 'root' or shadow_file_info.stat.mode | int > 400
