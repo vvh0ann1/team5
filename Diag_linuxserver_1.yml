@@ -3,9 +3,12 @@
 - name: root 계정 원격 접속 제한 점검
   hosts: all
   become: yes
+  vars:
+    ssh_config_file: /etc/ssh/sshd_config  # SSH 설정 파일 경로 변수화
+
   tasks:
     - name: Check SSH root login setting
-      command: grep PermitRootLogin /etc/ssh/sshd_config
+      command: grep PermitRootLogin {{ ssh_config_file }}
       register: ssh_check
       changed_when: false
 

@@ -1,46 +1,36 @@
 #Linux(server): 패스워드 복잡도 설정
 ---
-- name: 패스워드 복잡도 설정 및 enforce_for_root 설정 확인
-  hosts: all
-  become: yes
-  tasks:
+  - name: 패스워드 복잡도 설정 및 enforce_for_root 설정 확인
+    hosts: all
+    become: yes
+    vars:
+      pwquality_conf_file: /etc/security/pwquality.conf  # pwquality.conf 파일 경로 변수화
+      system_auth_file: /etc/pam.d/system-auth  # system-auth 파일 경로 변수화
+    
+    tasks:
+  
+      # 1. pwquality.conf 파일에서 minlen과 minclass 확인
+      - name: Check minlen and minclass in pwquality.conf
+        shell: grep -E "minlen|minclass" {{ pwquality_conf_file }}
+        register: pw_quality_conf_check
+        failed_when: false
+        changed_when: false
+  
+      # 2. system-auth 파일에서 enforce_for_root 설정 확인
+      - name: Check enforce_for_root in system-auth
+        shell: grep enforce_for_root {{ system_auth_file }}
+        register: enforce_root_check
+        failed_when: false
+        changed_when: false
+  
+      # 4. pwquality.conf에서 추출한 minlen과 minclass 값을 변수로 저장 (정수로 변환)
+      - name: Extract minlen and minclass from pwquality.conf
+        set_fact:
+          minlen_value: "{{ (pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
+          minclass_value: "{{ (pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
 
-    # 1. pwquality.conf 파일에서 minlen과 minclass 확인
-    - name: Check minlen and minclass in pwquality.conf
-      shell: grep -E "minlen|minclass" /etc/security/pwquality.conf
-      register: pw_quality_conf_check
-      failed_when: false
-      changed_when: false
-
-    # 2. system-auth 파일에서 enforce_for_root 설정 확인
-    - name: Check enforce_for_root in system-auth
-      shell: grep enforce_for_root /etc/pam.d/system-auth
-      register: enforce_root_check
-      failed_when: false
-      changed_when: false
-
-    # 3. pwquality.conf에서 추출한 minlen과 minclass 값을 문자열로 출력
-    # - name: Extract minlen and minclass as string (before conversion)
-    #  debug:
-    #    msg:
-    #      - "Extracted minlen_value (before conversion): {{ pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') }}"
-    #      - "Extracted minclass_value (before conversion): {{ pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') }}"
-
-    # 4. pwquality.conf에서 추출한 minlen과 minclass 값을 변수로 저장 (정수로 변환)
-    - name: Extract minlen and minclass from pwquality.conf
-      set_fact:
-        minlen_value: "{{ (pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
-        minclass_value: "{{ (pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
-
-    # 5. 추출된 값을 정수로 변환 후 출력하여 확인
-    #  - name: Print extracted minlen and minclass values (after conversion)
-    #  debug:
-    #    msg:
-    #      - "Extracted minlen_value: {{ minlen_value }}"
-    #      - "Extracted minclass_value: {{ minclass_value }}"
-
-    # 6. enforce_for_root 설정 및 패스워드 복잡도 설정 결과 확인 및 출력
-    - name: 결과 확인 및 출력
-      debug:
-        msg: "{{ '양호' if (minlen_value | int >= 8 and minclass_value | int >= 3) and ('enforce_for_root' in enforce_root_check.stdout) else '취약' }}"
+      # 6. enforce_for_root 설정 및 패스워드 복잡도 설정 결과 확인 및 출력
+      - name: 결과 확인 및 출력
+        debug:
+          msg: "{{ '양호' if (minlen_value | int >= 8 and minclass_value | int >= 3) and ('enforce_for_root' in enforce_root_check.stdout) else '취약' }}"
 
