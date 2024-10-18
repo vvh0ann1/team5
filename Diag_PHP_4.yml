@@ -1,28 +1,26 @@
 # 불필요한 명령어 사용 제한
 ---
-- name: Check 
+- name: Check PHP display_functions setting
   hosts: localhost
+  vars_files: 
+    - ./php_path.yml
   tasks:
     - name: Check disable_functions in php.ini
-      command: grep disable_functions /etc/php/8.3/cli/php.ini # 추후 변경
+      command: grep disable_functions {{ custom_path }}
       register: disable_functions_check
       ignore_errors: yes
 
     - name: Set disable_functions result
       set_fact:
-        disable_functions_result: "{{ disable_functions_check.stdout | trim}}"  # 결과만 저장하고 공백 제거
-    - name:
-      debug:
-        msg: "{{ disable_functions_result}}"
-
+        disable_functions_result: "{{ disable_functions_check.stdout | trim}}"
 
     - name: fail if disable_functions is set 
       debug:
-        msg: "Warning - Vulnerability detected: disable_functions is empty."
+        msg: "Vulnerability detected: disable_functions is empty."
       when: disable_functions_check.stdout is search('disable_functions =\\s*$')
 
     - name: Skip if disable_functions is set to Off
       debug:
-        msg: "disable_functions is not empty. No action needed."
+        msg: "ok. disable_functions is not empty. No action needed."
       when: disable_functions_check.stdout is not search('disable_functions =\\s*$')
 

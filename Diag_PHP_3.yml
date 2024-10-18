@@ -1,26 +1,24 @@
 ---
 - name: Check PHP Disable external URL file inclusion.
-  hosts: localhost #변경
+  hosts: localhost
+  vars_files: ./php_path.yml
   tasks:
     - name: Check allow_url_fopen in php.ini
-      command: grep allow_url_fopen /etc/php/8.3/cli/php.ini
+      command: grep allow_url_fopen {{ custom_path }}
       register: allow_url_check
       ignore_errors: yes
 
     - name: Set allow_url_fopen result
       set_fact:
         allow_url_result: "{{ allow_url_check.stdout | trim }}" 
-    - name:
-      debug:
-        msg: "{{ allow_url_result}}"
 
     - name: fail if allow_url_fopen is set to On
       debug:
-        msg: "Warning - Vulnerability detected: allow_url_fopen is set to 'On'."
+        msg: "Vulnerability detected: allow_url_fopen is set to 'On'."
       when: allow_url_check.stdout is search('allow_url_fopen\s*=\s*On')
 
     - name: Skip if allow_url_fopne is set to Off
       debug:
-        msg: "allow_url_fopen is set to 'Off'. No action needed."
+        msg: "ok. allow_url_fopen is set to 'Off'. No action needed."
       when: allow_url_check.stdout is search('allow_url_fopen\s*=\s*Off')
 
