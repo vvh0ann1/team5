@@ -1,0 +1,21 @@
+#Linux(server): 파일 및 디렉터리 소유자 설정 점검
+---
+- name: 파일 및 디렉터리 소유자 설정 점검
+  hosts: all
+  become: yes
+  tasks:
+    - name: Find files and directories without valid owner or group
+      shell: "find /etc /tmp /bin /sbin \\( -nouser -o -nogroup \\) -xdev -exec ls -l {} \\; 2>/dev/null"
+      register: invalid_files
+      changed_when: false
+
+    - name: Display '취약' if invalid files or directories are found
+      debug:
+        msg: "취약: 소유자나 그룹이 존재하지 않는 파일 및 디렉터리가 있습니다."
+      when: invalid_files.stdout != ""
+
+    - name: Display '양호' if no invalid files or directories are found
+      debug:
+        msg: "양호: 소유자나 그룹이 존재하지 않는 파일 및 디렉터리가 없습니다."
+      when: invalid_files.stdout == ""
+

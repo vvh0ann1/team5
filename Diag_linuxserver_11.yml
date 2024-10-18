@@ -1,0 +1,54 @@
+# Sendmail 및 Postfix 버전 점검 플레이북
+---
+- name: Sendmail 및 Postfix 버전 점검
+  hosts: all
+  become: yes
+  tasks:
+
+    # 1. Sendmail 버전 확인 (실행 중이지 않더라도)
+    - name: Check Sendmail version
+      shell: "cat /etc/mail/sendmail.cf | grep DZ | awk '{print $1}' | sed 's/DZ//g'"
+      register: sendmail_version
+      failed_when: false
+      changed_when: false
+
+    # 2. Postfix 버전 확인 (실행 중이지 않더라도)
+    - name: Check Postfix version
+      shell: "postconf -d | grep '^mail_version' | awk '{print $3}'"
+      register: postfix_version
+      failed_when: false
+      changed_when: false
+
+    # 3. Postfix 최신 버전 가져오기
+    - name: Get latest Postfix version from official repository
+      shell: "yum info postfix | grep Version | awk '{print $3}'"
+      register: postfix_latest_version
+      failed_when: false
+      changed_when: false
+
+    # 4. Sendmail 최신 버전 가져오기
+    - name: Get latest Sendmail version from official repository
+      shell: "yum info sendmail | grep Version | awk '{print $3}'"
+      register: sendmail_latest_version
+      failed_when: false
+      changed_when: false
+
+    # 5. 두 서비스의 버전 상태 확인 및 출력
+    - name: Display Sendmail version and compare with latest
+      debug:
+        msg: "현재 Sendmail 버전: {{ sendmail_version.stdout }} 최신 버전: {{ sendmail_latest_version.stdout }}  결과: {% if sendmail_version.stdout == sendmail_latest_version.stdout %} Sendmail은 최신 버전입니다. {% else %} Sendmail은 최신 버전이 아닙니다. {% endif %}"
+
+    - name: Display Postfix version and compare with latest
+      debug:
+        msg: "현재 Postfix 버전: {{ postfix_version.stdout }} 최신 버전: {{ postfix_latest_version.stdout }}  결과: {% if postfix_version.stdout == postfix_latest_version.stdout %} Postfix는 최신 버전입니다. {% else %} Postfix는 최신 버전이 아닙니다. {% endif %}"
+
+    # 최종 결과 출력
+    - name: Final result
+      debug:
+        msg: >
+          {% if sendmail_version.stdout == sendmail_latest_version.stdout and postfix_version.stdout == postfix_latest_version.stdout %}
+            양호: Sendmail과 Postfix 모두 최신 버전을 사용 중입니다.
+          {% else %}
+            취약: Sendmail 또는 Postfix가 최신 버전이 아닙니다.
+          {% endif %}
+
