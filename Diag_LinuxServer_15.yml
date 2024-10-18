@@ -1,0 +1,32 @@
+# Linux Server: 패스워드 최대 사용 기간 설정
+---
+- name: Check password maximum age settings
+  hosts: localhost  # 변경할 호스트 그룹
+  become: yes  # sudo 권한 사용
+  vars:
+    login_defs_path: '/etc/login.defs'  # 로그인 설정 파일 경로
+    max_days: 90  # 최대 사용 기간 기준일
+
+  tasks:
+    - name: Check PASS_MAX_DAYS in /etc/login.defs
+      command: "grep '^PASS_MAX_DAYS' {{ login_defs_path }}"
+      register: max_days_info
+      changed_when: false
+
+    - name: Set fact for PASS_MAX_DAYS value
+      set_fact:
+        pass_max_days: "{{ max_days_info.stdout.split()[1] | int }}"
+
+    - name: Check if PASS_MAX_DAYS is within the acceptable range
+      debug:
+        msg: "Secure: The maximum password age is set to {{ pass_max_days }} days, which is within the acceptable limit."
+      when: pass_max_days | int <= max_days
+
+    - name: Check if PASS_MAX_DAYS is vulnerable
+      debug:
+        msg: "Vulnerable: The maximum password age is either not set or exceeds {{ max_days }} days."
+      when: pass_max_days | int > max_days
+
+
+
+
