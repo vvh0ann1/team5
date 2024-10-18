@@ -1,4 +1,4 @@
-# Apache : 최신 보안 패치 적용
+# Apache: 최신 보안 패치 적용
 ---
 - name: Check Apache version for security patches
   hosts: localhost
