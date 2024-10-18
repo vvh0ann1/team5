@@ -3,14 +3,19 @@
 - name: Check for symbolic links and alias restrictions in Apache
   hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
+  vars:
+    apache_config_path: '/etc/apache2/apache2.conf'  # Apache 설정 파일 경로
+    alias_config_path: '/etc/apache2/mods-enabled/alias.conf'  # Alias 설정 파일 경로
+
+
   tasks:
     - name: Check if FollowSymLinks is enabled
-      command: "grep FollowSymLinks /etc/apache2/apache2.conf"
+      command: "grep FollowSymLinks {{ apache_config_path }}"
       register: follow_symlinks_check
       ignore_errors: yes
 
     - name: Check for aliases in Apache configuration
-      command: "grep '^Alias' /etc/apache2/mods-enabled/alias.conf"
+      command: "grep '^Alias' {{ alias_config_path }}"
       register: alias_check
       ignore_errors: yes
 

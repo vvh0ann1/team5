@@ -3,14 +3,17 @@
 - name: Check and remove unnecessary Apache manual files
   hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
+  vars:
+    apache_config_path: '/etc/apache2'  # Apache 설정 디렉토리 경로
+
   tasks:
     - name: Check if the manual directory exists
-      command: "find /etc/apache2 -name manual"
+      command: "find {{ apache_config_path }} -name manual"
       register: manual_dir_check
       ignore_errors: yes
 
     - name: Check for manual settings in httpd.conf
-      command: "grep -i 'manual' /etc/apache2/apache2.conf"
+      command: "grep -i 'manual' {{ apache_config_path }}/apache2.conf"
       register: manual_setting_check
       ignore_errors: yes
 
