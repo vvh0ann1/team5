@@ -1,0 +1,50 @@
+# Mysql: "안전한 암호화 알고리즘 사용"
+---
+- name: Mysql_7
+  hosts: internetweb
+  vars:
+    login_user: 'test'
+    login_password: '1234'
+    login_db: 'mysql'
+    login_host: localhost
+    query: "SELECT host, user, plugin, authentication_string FROM user;"
+    regi_pass_algo: ['ed25519','caching_sha2_password']
+    plugin: 'plugin'
+
+  tasks:
+  - name: Run Query
+    mysql_query:
+      login_user: "{{ login_user }}"
+      login_password: "{{ login_password }}"
+      login_host: "{{ login_host }}"
+      login_db: "{{ login_db }}"
+      query: "{{ query }}"
+    register: query_result
+
+  - name: Print query_result
+    debug:
+      var: query_result
+
+  - name: Filter plugin
+    set_fact:
+      user_pass_algo: "{{ query_result.query_result[0] | map(attribute=plugin) | list }}"
+
+  - name: Print user_pass_algo
+    debug:
+      var: user_pass_algo
+
+  - name: Print regi_pass_algo
+    debug:
+      var: regi_pass_algo
+
+  - name: Check unsafe_algo
+    set_fact:
+      unsafe_algo: "{{ user_pass_algo | difference(regi_pass_algo) }}"
+
+  - name: Print unsafe_algo
+    debug:
+      var: unsafe_algo
+
+  - name: Check
+    debug:
+      msg: "{{ 'good' if (unsafe_algo | length == 0) else 'bad' }}"

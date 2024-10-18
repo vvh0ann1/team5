@@ -1,0 +1,48 @@
+---
+- name: Compare MariaDB version with RPM package version
+  hosts: internetweb
+  
+  tasks:
+  - name: Get MariaDB version
+    command: mysql -e "SELECT @@version;" -u test -p'1234' mysql
+    register: mariadb_version_output
+    changed_when: false
+  
+  - name: Print version
+    debug:
+      var: mariadb_version_output
+
+  - name: Parse MariaDB version
+    set_fact:
+      mariadb_version: "{{ mariadb_version_output.stdout_lines[1].split()[0].split('-')[0] }}"
+  
+  - name: Print db_version
+    debug:
+      var: mariadb_version
+
+  - name: Get installed mariadb-server package version
+    command: rpm -qa mariadb-server
+    register: rpm_version_output
+    changed_when: false
+
+  - name: Print version
+    debug:
+      var: rpm_version_output
+
+  - name: Parse RPM version
+    set_fact:
+      rpm_version: "{{ rpm_version_output.stdout_lines[0].split('-')[2] }}"
+
+  - name: Print rpm_version
+    debug:
+      var: rpm_version
+
+  - name: Check bad
+    debug:
+      msg: "bad"
+    when: mariadb_version is version(rpm_version, '<')
+
+  - name: Check good
+    debug:
+      msg: "good"
+    when: mariadb_version is not version(rpm_version, '<')

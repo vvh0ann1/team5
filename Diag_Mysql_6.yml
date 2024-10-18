@@ -2,11 +2,13 @@
 ---
 - name: Mysql_6
   hosts: internetweb
+  vars:
+    path: /etc/my.cnf.d/mariadb-server.cnf
 
   tasks:
   - name: get file perm
     stat:
-      path: /etc/my.cnf.d/mariadb-server.cnf
+      path: "{{ path }}"
     register: file_stat
   - name: print stat
     debug:
