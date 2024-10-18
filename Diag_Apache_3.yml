@@ -4,8 +4,8 @@
   hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
   vars:
-    apache_config_path: '/etc/apache2/apache2.conf'  # Apache 설정 파일 경로
-    alias_config_path: '/etc/apache2/mods-enabled/alias.conf'  # Alias 설정 파일 경로
+    apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
+    alias_config_path: '/etc/httpd/conf/httpd.conf'  # Alias 설정 파일 경로
 
 
   tasks:

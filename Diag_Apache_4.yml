@@ -4,10 +4,10 @@
   hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
   vars:
-    apache_config_path: '/etc/apache2/apache2.conf'  # Apache 설정 파일 경로
+    apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
 
   tasks:
-    - name: Check if LimitRequestBody is set in apache2.conf
+    - name: Check if LimitRequestBody is set in httpd.conf
       command: "grep LimitRequestBody {{ apache_config_path }}"
       register: limit_request_body
       ignore_errors: true

@@ -5,12 +5,12 @@
   become: yes  # sudo 권한 사용
   vars:
     document_root_path: '/var/www/html'  # 기본 DocumentRoot 경로 설정
-    apache_config_path: '/etc/apache2/sites-available/000-default.conf'  # Apache 설정 파일
+    apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일
 
   tasks:
     - name: Ensure Apache is installed
-      apt:
-        name: apache2
+      yum:
+        name: httpd
         state: present
 
     - name: Check current DocumentRoot
