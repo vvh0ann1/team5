@@ -1,0 +1,32 @@
+# Linux Server: 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
+---
+- name: Check user and environment file ownership and permissions
+  hosts: localhost  # 변경할 호스트 그룹
+  become: yes  # sudo 권한 사용
+  vars:
+    home_dirs_path: '/home'  # 홈 디렉터리 경로
+    passwd_file_path: '/etc/passwd'  # 사용자 정보 파일 경로
+    secure_permissions: 644  # 허용할 최대 권한
+
+  tasks:
+    - name: Get a list of user home directories
+      shell: "cat {{ passwd_file_path }} | grep /home | cut -d: -f6"
+      register: home_dirs
+
+    - name: Check ownership and permissions for each home directory
+      stat:
+        path: "{{ item }}"
+      register: dir_info
+      loop: "{{ home_dirs.stdout_lines }}"
+
+    - name: Check permissions and display vulnerable status
+      debug:
+        msg: "Vulnerable: {{ item.item }} is either not owned by root or permissions exceed 644"
+      when: item.stat.pw_name != 'root' or item.stat.mode | int > secure_permissions
+      loop: "{{ dir_info.results }}"
+
+    - name: Check permissions and display secure status
+      debug:
+        msg: "Secure: {{ item.item }} is owned by root and permissions are within acceptable limits."
+      when: item.stat.pw_name == 'root' and item.stat.mode | int <= secure_permissions
+      loop: "{{ dir_info.results }}"
