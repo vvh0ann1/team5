@@ -3,10 +3,12 @@
 - name: Check and set file upload/download limit in Apache
   hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
-  tasks:
+  vars:
+    apache_config_path: '/etc/apache2/apache2.conf'  # Apache 설정 파일 경로
 
+  tasks:
     - name: Check if LimitRequestBody is set in apache2.conf
-      command: grep LimitRequestBody /etc/apache2/apache2.conf
+      command: "grep LimitRequestBody {{ apache_config_path }}"
       register: limit_request_body
       ignore_errors: true
 

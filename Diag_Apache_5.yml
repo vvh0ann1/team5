@@ -3,10 +3,13 @@
 - name: Check directory listing settings in Apache
   hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
+  vars:
+    apache_config_path: '/etc/apache2/'  # Apache 설정 디렉토리 경로
+
   tasks:
 
     - name: Check if Indexes option is set in Apache configuration
-      command: grep -r 'Indexes' /etc/apache2/
+      command: "grep -r 'Indexes' {{ apache_config_path }}"
       register: index_option
       ignore_errors: true
 

@@ -3,6 +3,10 @@
 - name: Check and update Apache DocumentRoot
   hosts: localhost  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
+  vars:
+    document_root_path: '/var/www/html'  # 기본 DocumentRoot 경로 설정
+    apache_config_path: '/etc/apache2/sites-available/000-default.conf'  # Apache 설정 파일
+
   tasks:
     - name: Ensure Apache is installed
       apt:
@@ -10,7 +14,7 @@
         state: present
 
     - name: Check current DocumentRoot
-      command: "grep DocumentRoot /etc/apache2/sites-available/000-default.conf"
+      command: "grep DocumentRoot {{ apache_config_path }}"
       register: document_root_check
       ignore_errors: yes
 
@@ -21,9 +25,9 @@
     - name: Check if DocumentRoot is vulnerable
       debug:
         msg: "Vulnerable: Default DocumentRoot is being used."
-      when: document_root_check.stdout is search('htdocs') or document_root_check.stdout is search('/var/www/html')
+      when: document_root_check.stdout is search(document_root_path) or document_root_check.stdout is search('htdocs')
 
     - name: Check if DocumentRoot is secure
       debug:
         msg: "Secure: Default DocumentRoot is not being used."
-      when: not (document_root_check.stdout is search('htdocs') or document_root_check.stdout is search('/var/www/html'))
+      when: not (document_root_check.stdout is search(document_root_path) or document_root_check.stdout is search('htdocs'))
