@@ -4,7 +4,7 @@
   hosts: localhost
   tasks:
     - name: Check current Apache version
-      command: apache2 -v
+      command: httpd -v
       register: current_apache_version
       changed_when: false
 
@@ -13,7 +13,7 @@
         msg: "Current Apache version: {{ current_apache_version.stdout }}"
 
     - name: Check latest available Apache version
-      command: apt show apache2 | grep Version
+      command: yum info httpd | grep Version
       register: latest_apache_version
       changed_when: false
 
