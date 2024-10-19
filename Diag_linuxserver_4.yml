@@ -1,0 +1,43 @@
+# #Linux(server): root 홈, 디렉터리 소유자 설정
+---
+- name: Linux(server) 4
+  hosts: internetweb
+
+  tasks:
+  - name: Get PATH
+    shell: echo $PATH
+    register: path
+    changed_when: false
+
+  - name: Print path
+    debug:
+      msg: "{{ path }}"
+
+  - name: Split path
+    set_fact:
+      path_list: "{{ path.stdout.split(':') }}"
+
+  - name: Print path_list
+    debug:
+      msg: "{{ path_list | join('   ') }}"
+
+  - name: Filter path_list
+    set_fact:
+      filter_path_list: "{{ path_list[:-1] }}"
+
+  - name: Print filter_path_list
+    debug:
+      msg: "{{ filter_path_list | join('   ') }}"
+  
+  - name: Check .
+    set_fact:
+      has_dot: "{{ '.' in filter_path_list }}"
+
+  - name: Print
+    debug:
+      msg: >
+        {% if has_dot %}
+          bad
+        {% else %}
+          good
+        {% endif %}
