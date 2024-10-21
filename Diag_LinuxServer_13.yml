@@ -5,6 +5,8 @@
   become: yes
   vars:
     hosts_file_path: '/etc/hosts'  # 검사할 파일 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 13  # 진단 항목 번호
 
   tasks:
     - name: Check ownership and permissions of /etc/hosts
@@ -17,11 +19,17 @@
         msg: "Current permissions for /etc/hosts: {{ hosts_file_info.stat.mode | int }}"
 
     - name: Check if /etc/hosts is secure
-      debug:
-        msg: "Secure: /etc/hosts is owned by root and permissions are 644 or lower."
+      set_fact:
+        diag_result: "S"
       when: hosts_file_info.stat.pw_name == 'root' and hosts_file_info.stat.mode | int <= 644
 
     - name: Check if /etc/hosts is vulnerable
-      debug:
-        msg: "Vulnerable: /etc/hosts is either not owned by root or permissions are greater than 644."
+      set_fact:
+        diag_result: "V"
       when: hosts_file_info.stat.pw_name != 'root' or hosts_file_info.stat.mode | int > 644
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정, {{ diag_result }}"
+        create: yes

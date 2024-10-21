@@ -5,6 +5,8 @@
   become: yes
   vars:
     passwd_file_path: '/etc/passwd'  # 검사할 파일 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 6  # 진단 항목 번호
 
   tasks:
     - name: Check ownership and permissions of /etc/passwd
@@ -17,11 +19,17 @@
         msg: "Current permissions for /etc/passwd: {{ passwd_file_info.stat.mode | int }}"
 
     - name: Check if /etc/passwd is secure
-      debug:
-        msg: "Secure: /etc/passwd is owned by root and permissions are 644 or lower."
+      set_fact:
+        diag_result: "S"
       when: passwd_file_info.stat.pw_name == 'root' and passwd_file_info.stat.mode | int <= 644
 
     - name: Check if /etc/passwd is vulnerable
-      debug:
-        msg: "Vulnerable: /etc/passwd is either not owned by root or permissions are greater than 644."
+      set_fact:
+        diag_result: "V"
       when: passwd_file_info.stat.pw_name != 'root' or passwd_file_info.stat.mode | int > 644
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, /etc/passwd 파일 소유자 및 권한 설정, {{ diag_result }}"
+        create: yes

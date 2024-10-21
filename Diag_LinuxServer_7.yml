@@ -5,6 +5,8 @@
   become: yes
   vars:
     shadow_file_path: '/etc/shadow'  # 검사할 파일 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 7  # 진단 항목 번호
 
   tasks:
     - name: Check ownership and permissions of /etc/shadow
@@ -17,11 +19,17 @@
         msg: "Current permissions for /etc/shadow: {{ shadow_file_info.stat.mode | int }}"
 
     - name: Check if /etc/shadow is secure
-      debug:
-        msg: "Secure: /etc/shadow is owned by root and permissions are 400 or lower."
+      set_fact:
+        diag_result: "S"
       when: shadow_file_info.stat.pw_name == 'root' and shadow_file_info.stat.mode | int <= 400
 
     - name: Check if /etc/shadow is vulnerable
-      debug:
-        msg: "Vulnerable: /etc/shadow is either not owned by root or permissions are greater than 400."
+      set_fact:
+        diag_result: "V"
       when: shadow_file_info.stat.pw_name != 'root' or shadow_file_info.stat.mode | int > 400
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, /etc/shadow 파일 소유자 및 권한 설정, {{ diag_result }}"
+        create: yes

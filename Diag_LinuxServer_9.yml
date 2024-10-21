@@ -7,6 +7,8 @@
     home_dirs_path: '/home'  # 홈 디렉터리 경로
     passwd_file_path: '/etc/passwd'  # 사용자 정보 파일 경로
     secure_permissions: 644  # 허용할 최대 권한
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 9  # 진단 항목 번호
 
   tasks:
     - name: Get a list of user home directories
@@ -20,13 +22,19 @@
       loop: "{{ home_dirs.stdout_lines }}"
 
     - name: Check permissions and display vulnerable status
-      debug:
-        msg: "Vulnerable: {{ item.item }} is either not owned by root or permissions exceed 644"
+      set_fact:
+        diag_result: "V"
       when: item.stat.pw_name is not defined or item.stat.pw_name != 'root' or item.stat.mode | int > secure_permissions
       loop: "{{ dir_info.results }}"
 
     - name: Check permissions and display secure status
-      debug:
-        msg: "Secure: {{ item.item }} is owned by root and permissions are within acceptable limits."
+      set_fact:
+        diag_result: "S"
       when: item.stat.pw_name is defined and item.stat.pw_name == 'root' and item.stat.mode | int <= secure_permissions
       loop: "{{ dir_info.results }}"
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정, {{ diag_result }}"
+        create: yes
