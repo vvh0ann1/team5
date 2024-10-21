@@ -3,7 +3,7 @@
 - name: Linux(server) 4
   hosts: aws_web
   vars:
-    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diag_file_path: '/home/ec2-user/Diag_File.csv'  # 진단 결과 파일 경로
     LAMP_type: 'Server(Linux)'  # LAMP
 
   tasks:

@@ -4,5 +4,5 @@
   hosts: aws_web
   tasks:
     - name: Create diagnostic result file
-      command: touch /home/ec2-user/Diag_File.txt
+      command: touch /home/ec2-user/Diag_File.csv
 

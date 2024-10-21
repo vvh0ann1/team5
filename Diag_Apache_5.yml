@@ -5,7 +5,7 @@
   become: yes 
   vars:
     apache_config_path: '/etc/httpd/'  # Apache 설정 디렉토리 경로
-    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diag_file_path: '/home/ec2-user/Diag_File.csv'  # 진단 결과 파일 경로
     LAMP_type: 'Apache'  # LAMP
 
   tasks:
