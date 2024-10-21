@@ -7,7 +7,7 @@
     document_root_path: '/var/www/html'  # 기본 DocumentRoot 경로 설정
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 1  # 진단 항목 번호
+    LAMP_type: 'Apache'  # LAMP
 
   tasks:
     - name: Ensure Apache is installed
@@ -37,5 +37,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 웹 서비스 영역의 분리, {{ diag_result }}"
+        line: "{{ LAMP_type }}, 웹 서비스 영역의 분리, {{ diag_result }}, DocumentRoot를 별도의 경로로 변경"
         create: yes
