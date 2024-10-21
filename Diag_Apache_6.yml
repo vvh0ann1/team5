@@ -1,0 +1,35 @@
+# Apache: 웹 프로세스 권한 제한
+---
+- name: Check Apache process owner and permissions
+  hosts: aws_web
+  gather_facts: no
+
+  tasks:
+    - name: Check if Apache is running
+      shell: ps -ef | grep apache2
+      register: apache_process
+      changed_when: false
+
+    - name: Set fact for Apache process status
+      set_fact:
+        apache_owner: "{{ item.split()[0] }}"
+        apache_status: "secure"
+      loop: "{{ apache_process.stdout_lines }}"
+      when: item.split()[0] != "root"
+
+    - name: Output secure status
+      debug:
+        msg: "Apache is running with non-root user: {{ apache_owner }}"
+      when: apache_status == "secure"
+
+    - name: Set fact for vulnerable status
+      set_fact:
+        apache_owner: "{{ item.split()[0] }}"
+        apache_status: "vulnerable"
+      loop: "{{ apache_process.stdout_lines }}"
+      when: item.split()[0] == "root"
+
+    - name: Output vulnerable status
+      debug:
+        msg: "Apache is running with root user: {{ apache_owner }}"
+      when: apache_status == "vulnerable"
