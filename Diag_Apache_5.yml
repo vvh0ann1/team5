@@ -6,7 +6,7 @@
   vars:
     apache_config_path: '/etc/httpd/'  # Apache 설정 디렉토리 경로
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 5  # 진단 항목 번호
+    LAMP_type: 'Apache'  # LAMP
 
   tasks:
 
@@ -28,5 +28,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 디렉터리 리스팅 제거, {{ diag_result }}"
+        line: "{{ LAMP_type }}, 디렉터리 리스팅 제거, {{ diag_result }}, 디렉터리 검색 기능 제거"
         create: yes

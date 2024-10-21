@@ -7,7 +7,7 @@
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
     alias_config_path: '/etc/httpd/conf/httpd.conf'  # Alias 설정 파일 경로
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 3  # 진단 항목 번호
+    LAMP_type: 'Apache'  # LAMP
 
   tasks:
     - name: Check if FollowSymLinks is enabled
@@ -53,5 +53,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 링크 사용 금지, {{ diag_result }}"
+        line: "{{ LAMP_type }}, 링크 사용 금지, {{ diag_result }}, 심볼릭과 Alias 링크 사용 제한"
         create: yes

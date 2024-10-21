@@ -6,7 +6,7 @@
   vars:
     apache_config_path: '/etc/httpd'  # Apache 설정 디렉토리 경로
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 2  # 진단 항목 번호
+    LAMP_type: 'Apache'  # LAMP
 
   tasks:
     - name: Check if the manual directory exists
@@ -32,5 +32,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 불필요한 파일 제거, {{ diag_result }}"
+        line: "{{ LAMP_type }}, 불필요한 파일 제거, {{ diag_result }}, 매뉴얼 디렉터리 삭제"
         create: yes

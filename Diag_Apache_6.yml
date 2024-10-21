@@ -5,7 +5,7 @@
   gather_facts: no
   vars:
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 6  # 진단 항목 번호
+    LAMP_type: 'Apache'  # LAMP
 
   tasks:
     - name: Check if Apache is running
@@ -40,5 +40,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 웹 프로세스 권한 제한, {{ diag_result }}"
+        line: "{{ LAMP_type }}, 웹 프로세스 권한 제한, {{ diag_result }}, apache 데몬 user/group 변경"
         create: yes

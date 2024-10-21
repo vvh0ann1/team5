@@ -6,7 +6,7 @@
   vars:
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 4  # 진단 항목 번호
+    LAMP_type: 'Apache'  # LAMP
 
   tasks:
     - name: Check if LimitRequestBody is set in httpd.conf
@@ -27,5 +27,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 파일 업로드 및 다운로드 제한, {{ diag_result }}"
+        line: "{{ LAMP_type }}, 파일 업로드 및 다운로드 제한, {{ diag_result }}, 파일 업로드 및 다운로드 용량 제한 설정"
         create: yes

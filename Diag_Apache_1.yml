@@ -37,5 +37,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ LAMP_type }}, 웹 서비스 영역의 분리, {{ diag_result }}, DocumentRoot를 별도의 경로로 변경"
+        line: "{{ LAMP_type }}, 웹 서비스 영역의 분리, {{ diag_result }}, 기본 디렉터리 변경"
         create: yes

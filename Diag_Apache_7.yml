@@ -4,7 +4,7 @@
   hosts: aws_web
   vars:
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 7  # 진단 항목 번호
+    LAMP_type: 'Apache'  # LAMP
 
   tasks:
     - name: Check current Apache version
@@ -56,7 +56,7 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 최신 보안 패치 적용, {{ diag_result }}"
+        line: "{{ LAMP_type }}, 최신 보안 패치 적용, {{ diag_result }}, 보안 패치 적용"
         create: yes
 
 
