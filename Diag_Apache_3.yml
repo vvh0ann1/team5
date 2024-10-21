@@ -6,7 +6,8 @@
   vars:
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
     alias_config_path: '/etc/httpd/conf/httpd.conf'  # Alias 설정 파일 경로
-
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 3  # 진단 항목 번호
 
   tasks:
     - name: Check if FollowSymLinks is enabled
@@ -19,20 +20,38 @@
       register: alias_check
       ignore_errors: yes
 
-    - name: Display status for FollowSymLinks
-      debug:
-        msg: >
-          {% if follow_symlinks_check.stdout is search('Indexes') %}
-          Vulnerable: FollowSymLinks is enabled.
-          {% else %}
-          Secure: FollowSymLinks is not enabled.
-          {% endif %}
+    - name: Determine FollowSymLinks status
+      set_fact:
+        symlink_result: "S"
+      when: follow_symlinks_check.stdout is not search('Indexes')
 
-    - name: Display status for aliases
-      debug:
-        msg: >
-          {% if alias_check.stdout | length > 0 %}
-          Vulnerable: Aliases are configured and not commented out.
-          {% else %}
-          Secure: No aliases are configured or they are commented out.
-          {% endif %}
+    - name: Update symlink_result if vulnerabilities exist
+      set_fact:
+        symlink_result: "V"
+      when: follow_symlinks_check.stdout is search('Indexes')
+
+    - name: Determine alias status
+      set_fact:
+        alias_result: "S"
+      when: alias_check.stdout | length == 0
+
+    - name: Update alias_result if vulnerabilities exist
+      set_fact:
+        alias_result: "V"
+      when: alias_check.stdout | length > 0
+
+    - name: Determine overall diagnostic result
+      set_fact:
+        diag_result: "S" 
+      when: symlink_result == "S" and alias_result == "S"
+
+    - name: Update overall diagnostic result if vulnerabilities exist
+      set_fact:
+        diag_result: "V"
+      when: symlink_result == "V" or alias_result == "V"
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, 링크 사용 금지, {{ diag_result }}"
+        create: yes
