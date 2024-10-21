@@ -1,0 +1,8 @@
+# 진단 결과 파일 생성
+---
+- name: Create a file using touch command
+  hosts: aws_web
+  tasks:
+    - name: Create diagnostic result file
+      command: touch /home/ec2-user/Diag_File.txt
+

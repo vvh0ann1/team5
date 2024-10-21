@@ -5,6 +5,8 @@
   become: yes
   vars:
     apache_config_path: '/etc/httpd'  # Apache 설정 디렉토리 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 2  # 진단 항목 번호
 
   tasks:
     - name: Check if the manual directory exists
@@ -17,11 +19,18 @@
       register: manual_setting_check
       ignore_errors: yes
 
-    - name: Display status for unnecessary manual files and directories
-      debug:
-        msg: >
-          {% if manual_dir_check.stdout | length == 0 and manual_setting_check.stdout | length == 0 %}
-          Secure: Manual files and directories have been removed.
-          {% else %}
-          Vulnerable: Manual files and/or directories exist.
-          {% endif %}
+    - name: Diag_result is secure
+      set_fact:
+        diag_result: "S" 
+      when: manual_dir_check.stdout | length == 0 and manual_setting_check.stdout | length == 0
+
+    - name: Diag_result is vulnerable
+      set_fact:
+        diag_result: "V"
+      when: not (manual_dir_check.stdout | length == 0 and manual_setting_check.stdout | length == 0)
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, 불필요한 파일 제거, {{ diag_result }}"
+        create: yes

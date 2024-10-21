@@ -6,6 +6,8 @@
   vars:
     document_root_path: '/var/www/html'  # 기본 DocumentRoot 경로 설정
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 1  # 진단 항목 번호
 
   tasks:
     - name: Ensure Apache is installed
@@ -23,11 +25,17 @@
         msg: "Current DocumentRoot is: {{ document_root_check.stdout }}"
 
     - name: Check if DocumentRoot is vulnerable
-      debug:
-        msg: "Vulnerable: Default DocumentRoot is being used."
+      set_fact:
+        diag_result: "V"
       when: document_root_check.stdout is search(document_root_path) or document_root_check.stdout is search('htdocs')
 
     - name: Check if DocumentRoot is secure
-      debug:
-        msg: "Secure: Default DocumentRoot is not being used."
+      set_fact:
+        diag_result: "S"
       when: not (document_root_check.stdout is search(document_root_path) or document_root_check.stdout is search('htdocs'))
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }} / 웹 서비스 영역의 분리 / {{ diag_result }}"
+        create: yes
