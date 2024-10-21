@@ -1,15 +1,15 @@
 # Mysql: "사용자 계정 정보 테이블 접근 권한"
 ---
 - name: Mysql_4
-  hosts: internetweb
+  hosts: aws_db
   vars:
-    login_user: 'test'
-    login_password: '1234'
+    login_user: 'root'
+    login_password: 'guseodhxhdpqj2@'
     login_db: 'mysql'
     login_host: localhost
     query: "SELECT host, user, select_priv FROM mysql.user;"
     regi_users_4: ['root', 'mysql']
-    Select_priv: 'Select_priv'
+    Select_priv: 'select_priv'
 
   tasks:
   - name: Run Query
@@ -26,7 +26,7 @@
   
   - name: Filter 'Y' User
     set_fact:
-      priv_users: "{{ query_result.query_result[0] | selectattr(Select_priv, 'equalto', 'Y') | map(attribute='User') | list }}"
+      priv_users: "{{ query_result.query_result[0] | selectattr(Select_priv, 'equalto', 'Y') | map(attribute='user') | list }}"
 
   - name: Print priv_users
     debug:

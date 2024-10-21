@@ -1,0 +1,40 @@
+# Mysql: "취약한 패스워드 사용 제한"
+---
+- name: Mysql_2
+  hosts: aws_db
+  vars:
+    login_user: 'root'
+    login_password: 'guseodhxhdpqj2@'
+    login_db: 'mysql'
+    login_host: localhost
+    query: "SHOW VARIABLES LIKE 'validate_password%';"
+
+  tasks:
+  - name: Run Query
+    mysql_query:
+      login_user: "{{ login_user }}"
+      login_password: "{{ login_password }}"
+      login_host: "{{ login_host }}"
+      login_db: "{{ login_db }}"
+      query: "{{ query }}"
+    register: query_result
+
+  - name: Print query_result
+    debug:
+      var: query_result
+
+  - name: Filter policy
+    set_fact:
+      policy: "{{ (query_result.query_result[0] | selectattr('Variable_name', 'equalto', 'validate_password.policy') | first).Value }}"
+
+  - name: Print policy
+    debug:
+      var: policy
+
+  - name: Check
+    set_fact:
+      status: "{{ 'good' if policy in ['MEDIUM', 'STRONG'] else 'bad' }}"
+
+  - name: Print status
+    debug:
+      var: status

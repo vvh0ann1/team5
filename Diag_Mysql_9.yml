@@ -1,27 +1,37 @@
 ---
-- name: Compare MariaDB version with RPM package version
-  hosts: internetweb
+- name: Compare Mysql version with RPM package version
+  hosts: aws_db
+  vars:
+    login_user: 'root'
+    login_password: 'guseodhxhdpqj2@'
+    login_db: 'mysql'
+    login_host: localhost
+    query: "SELECT @@version;"
   
   tasks:
-  - name: Get MariaDB version
-    command: mysql -e "SELECT @@version;" -u test -p'1234' mysql
-    register: mariadb_version_output
-    changed_when: false
-  
-  - name: Print version
-    debug:
-      var: mariadb_version_output
+  - name: Run Query
+    mysql_query:
+      login_user: "{{ login_user }}"
+      login_password: "{{ login_password }}"
+      login_db: "{{ login_db }}"
+      login_host: "{{ login_host }}"
+      query: "{{ query }}"
+    register: query_result
 
-  - name: Parse MariaDB version
+  - name: Print query_result
+    debug:
+      var: query_result
+
+  - name: Parse Mysql version
     set_fact:
-      mariadb_version: "{{ mariadb_version_output.stdout_lines[1].split()[0].split('-')[0] }}"
+      mysql_version: "{{ query_result.query_result[0][0]['@@version'] }}"
   
   - name: Print db_version
     debug:
-      var: mariadb_version
+      var: mysql_version
 
-  - name: Get installed mariadb-server package version
-    command: rpm -qa mariadb-server
+  - name: Get installed mysql-server package version
+    shell: docker exec -it mysql-server rpm -qa | grep mysql
     register: rpm_version_output
     changed_when: false
 
@@ -31,7 +41,7 @@
 
   - name: Parse RPM version
     set_fact:
-      rpm_version: "{{ rpm_version_output.stdout_lines[0].split('-')[2] }}"
+      rpm_version: "{{ rpm_version_output.stdout_lines[0].split('-')[4] }}"
 
   - name: Print rpm_version
     debug:
@@ -40,9 +50,9 @@
   - name: Check bad
     debug:
       msg: "bad"
-    when: mariadb_version is version(rpm_version, '<')
+    when: mysql_version is version(rpm_version, '<')
 
   - name: Check good
     debug:
       msg: "good"
-    when: mariadb_version is not version(rpm_version, '<')
+    when: mysql_version is not version(rpm_version, '<')

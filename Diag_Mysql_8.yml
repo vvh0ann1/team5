@@ -1,10 +1,10 @@
 # Mysql: "로그 활성화"
 ---
 - name: Mysql_8
-  hosts: internetweb
+  hosts: aws_db
   vars:
-    login_user: 'test'
-    login_password: '1234'
+    login_user: 'root'
+    login_password: 'guseodhxhdpqj2@'
     login_db: 'mysql'
     login_host: localhost
     query_general: "SHOW VARIABLES LIKE 'general_log%';"

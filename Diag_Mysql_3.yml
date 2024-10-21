@@ -1,10 +1,10 @@
 # Mysql: "타 사용자에 권한 부여 옵션 제한"
 ---
 - name: Mysql_3
-  hosts: internetweb
+  hosts: aws_db
   vars:
-    login_user: 'test'
-    login_password: '1234'
+    login_user: 'root'
+    login_password: 'guseodhxhdpqj2@'
     login_db: 'mysql'
     login_host: localhost
     query: "SELECT host, user, Grant_priv FROM user WHERE Grant_priv='Y';"
@@ -27,7 +27,7 @@
 
   - name: Filter 'Y' User
     set_fact:
-      priv_users: "{{ query_result.query_result[0] | selectattr(Grant_priv, 'equalto', 'Y') | map(attribute='User') | list }}"
+      priv_users: "{{ query_result.query_result[0] | selectattr(Grant_priv, 'equalto', 'Y') | map(attribute='user') | list }}"
 
   - name: Print priv_users
     debug:

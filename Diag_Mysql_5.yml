@@ -1,11 +1,11 @@
 # Mysql: "root 권한으로 서버 구동 제한"
 ---
 - name: Mysql_5
-  hosts: internetweb
+  hosts: aws_db
 
   tasks:
   - name: Get mysqld process
-    shell: ps -ef | grep maria | grep -v grep
+    shell: ps -ef | grep mysql | grep -v grep
     register: mysqld_process
     changed_when: false
 

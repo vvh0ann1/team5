@@ -1,10 +1,10 @@
 # Mysql: "안전한 암호화 알고리즘 사용"
 ---
 - name: Mysql_7
-  hosts: internetweb
+  hosts: aws_db
   vars:
-    login_user: 'test'
-    login_password: '1234'
+    login_user: 'root'
+    login_password: 'guseodhxhdpqj2@'
     login_db: 'mysql'
     login_host: localhost
     query: "SELECT host, user, plugin, authentication_string FROM user;"

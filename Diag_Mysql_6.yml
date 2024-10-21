@@ -1,31 +1,55 @@
 # Mysql: "환경설정 파일 접근 권한"
 ---
 - name: Mysql_6
-  hosts: internetweb
+  hosts: aws_db
   vars:
     path: /etc/my.cnf.d/mariadb-server.cnf
 
   tasks:
-  - name: get file perm
-    stat:
-      path: "{{ path }}"
-    register: file_stat
-  - name: print stat
-    debug:
-      msg: "{{ file_stat.stat.mode }}"
+  - name: Get perm
+    shell: docker exec -it mysql-server ls -alL /etc/my.cnf
+    register: perm
+    changed_when: false
 
-  - name: check perm
+  - name: Print perm
     debug:
-      msg: ( perm = 0644 )
-    when: file_stat.stat.mode == '0644'
+      var: perm
 
-  - name: check less perm
-    debug:
-      msg: good( <= 0640)
-    when: file_stat.stat.mode | int <= 640
-  
-  - name: check more perm
-    debug:
-      msg: bad ( > 0640)
-    when: file_stat.stat.mode | int > 640
+  - name: Parsing perm
+    set_fact:
+      file_perm: "{{ perm.stdout_lines[0].split()[0] }}"
 
+  - name: Print file_perm
+    debug:
+      var: file_perm
+
+  - name: Convert file_perm
+    set_fact:
+      num_perm: >-
+          {{
+            (((4 * (file_perm[1] == 'r') | int) +
+             (2 * (file_perm[2] == 'w') | int) +
+             (1 * (file_perm[3] == 'x') | int)) * 64) +
+            (((4 * (file_perm[4] == 'r') | int) +
+             (2 * (file_perm[5] == 'w') | int) +
+             (1 * (file_perm[6] == 'x') | int)) * 8) +
+            ((4 * (file_perm[7] == 'r') | int) +
+             (2 * (file_perm[8] == 'w') | int) +
+             (1 * (file_perm[9] == 'x') | int))
+          }}
+
+  - name: octal_perm
+    set_fact:
+      octal_perm: "{{ '%o' | format(num_perm | int) }}"
+
+  - name: Print octal_perm
+    debug:
+      var: octal_perm
+
+  - name: Determine
+    set_fact:
+      status: "{{ 'good' if octal_perm | int <= 640 else 'bad' }}"
+
+  - name: Print status
+    debug:
+      var: status

@@ -1,7 +1,7 @@
 # #Linux(server): root 홈, 디렉터리 소유자 설정
 ---
 - name: Linux(server) 4
-  hosts: internetweb
+  hosts: aws_web
 
   tasks:
   - name: Get PATH
