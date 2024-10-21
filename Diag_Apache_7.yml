@@ -2,6 +2,10 @@
 ---
 - name: Check Apache version for security patches
   hosts: aws_web
+  vars:
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 7  # 진단 항목 번호
+
   tasks:
     - name: Check current Apache version
       command: httpd -v
@@ -40,15 +44,19 @@
         msg: "Current version: {{ current_version_str }}, Latest version: {{ latest_version_str }}"
 
     - name: Compare versions and determine vulnerability status
-      debug:
-        msg: "Vulnerable: The installed version of Apache is outdated. Please update."
+      set_fact:
+        diag_result: "V"
       when: current_version_str is version(latest_version_str, '<')
 
     - name: Display secure status
-      debug:
-        msg: "Secure: The installed version of Apache is up to date."
+      set_fact:
+        diag_result: "S"
       when: current_version_str is not version(latest_version_str, '<')
 
-
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, 최신 보안 패치 적용, {{ diag_result }}"
+        create: yes
 
 

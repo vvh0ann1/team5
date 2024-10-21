@@ -5,6 +5,8 @@
   become: yes
   vars:
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 4  # 진단 항목 번호
 
   tasks:
     - name: Check if LimitRequestBody is set in httpd.conf
@@ -13,11 +15,17 @@
       ignore_errors: true
 
     - name: Display vulnerability status
-      debug:
-        msg: "Vulnerable: No file upload and download size limit is set."
+      set_fact:
+        diag_result: "V" 
       when: limit_request_body.rc != 0
 
     - name: Display secure status
-      debug:
-        msg: "Secure: File upload and download size limits are set."
+      set_fact:
+        diag_result: "S" 
       when: limit_request_body.rc == 0
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, 파일 업로드 및 다운로드 제한, {{ diag_result }}"
+        create: yes

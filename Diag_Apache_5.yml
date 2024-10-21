@@ -5,6 +5,8 @@
   become: yes 
   vars:
     apache_config_path: '/etc/httpd/'  # Apache 설정 디렉토리 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    diagnostic_number: 5  # 진단 항목 번호
 
   tasks:
 
@@ -14,11 +16,17 @@
       ignore_errors: true
 
     - name: Display vulnerability status
-      debug:
-        msg: "Vulnerable: Directory listing is enabled (Indexes option is set)."
+      set_fact:
+        diag_result: "V"
       when: index_option.rc == 0
 
     - name: Display secure status
-      debug:
-        msg: "Secure: Directory listing is disabled (Indexes option is not set)."
+      set_fact:
+        diag_result: "S"
       when: index_option.rc != 0
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ diagnostic_number }}, 디렉터리 리스팅 제거, {{ diag_result }}"
+        create: yes
