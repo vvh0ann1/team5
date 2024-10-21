@@ -1,0 +1,46 @@
+# NIS, NIS+ 서비스 설치 및 실행 여부 점검 플레이북
+---
+- name: NIS, NIS+ 설치 및 실행 여부 점검
+  hosts: aws_web
+  become: yes
+  tasks:
+
+    # 1. NIS 관련 파일들이 존재하는지 확인
+    - name: Check if NIS related files exist
+      shell: |
+        if [ -f /usr/sbin/ypserv ] && [ -f /usr/sbin/ypbind ] && [ -f /usr/sbin/ypxfrd ] && [ -f /usr/sbin/rpc.yppasswdd ] && [ -f /usr/sbin/rpc.yupdated ]; then
+          echo "installed"
+        fi
+      register: nis_installed
+      failed_when: false
+      changed_when: false
+
+    # 2. NIS 서비스 실행 여부 확인
+    - name: Check if NIS service is running
+      shell: ps -ef | grep -E "ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.yupdated" | grep -v grep
+      register: nis_running
+      failed_when: false
+      changed_when: false
+
+    # 3. NIS 설치 및 실행 여부 출력
+    - name: Display NIS installation and running status
+      debug:
+        msg: >
+          NIS 설치 상태: {{
+            '설치되어 있음' if nis_installed.stdout != '' else '설치되어 있지 않음'
+          }} - NIS 실행 상태: {{
+            '실행 중' if nis_running.stdout != '' else '실행 중이지 않음'
+          }}
+
+    # 4. NIS 설치 및 실행 여부에 따른 상태 출력
+    - name: Final NIS, NIS+ status check
+      debug:
+        msg: >
+          {% if nis_installed.stdout == '' %}
+            양 호: NIS가 설치되지 않았습니다.
+          {% elif nis_running.stdout == '' %}
+            양호: NIS가 설치되어 있지만 실행 중이지 않습니다.
+          {% else %}
+            취약: NIS가 설치되어 있고 실행 중입니다.
+          {% endif %}
+
