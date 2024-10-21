@@ -1,7 +1,7 @@
 # 계정 잠금 임계값 설정
 ---
     - name: Check pam_faillock.so existence and deny value
-      hosts: all
+      hosts: aws_web
       become: yes
       vars:
         pam_files:

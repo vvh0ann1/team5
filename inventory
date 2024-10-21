@@ -1,2 +1,4 @@
-[myself]
-localhost ansible_connection=local
+[aws_web]
+web_instance ansible_host=15.164.228.136
+[aws_db]
+db_instance ansible_host=43.201.146.14

@@ -1,7 +1,7 @@
 #Linux(server): root 계정 원격 접속 제한
 ---
 - name: root 계정 원격 접속 제한 점검
-  hosts: all
+  hosts: aws_web
   become: yes
   vars:
     ssh_config_file: /etc/ssh/sshd_config  # SSH 설정 파일 경로 변수화

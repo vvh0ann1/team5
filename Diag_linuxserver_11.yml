@@ -1,7 +1,7 @@
 # Sendmail 및 Postfix 버전 점검 플레이북
 ---
 - name: Sendmail 및 Postfix 버전 점검
-  hosts: all
+  hosts: aws_web
   become: yes
   tasks:
 
