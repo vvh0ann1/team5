@@ -1,7 +1,7 @@
 # Apache: 웹 서비스 영역의 분리
 ---
 - name: Check and update Apache DocumentRoot
-  hosts: intranetweb  # 변경할 호스트 그룹
+  hosts: aws_web  # 변경할 호스트 그룹
   become: yes  # sudo 권한 사용
   vars:
     apache_config_path: '/etc/apache2/sites-available/000-default.conf'  # Apache 설정 파일 경로

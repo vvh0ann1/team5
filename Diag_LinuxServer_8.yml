@@ -1,7 +1,7 @@
 # Linux Server: /etc/services 파일 소유자 및 권한 설정
 ---
 - name: Check /etc/services file ownership and permissions
-  hosts: aws
+  hosts: aws_web
   become: yes
   vars:
     services_file_path: '/etc/services'  # 검사할 파일 경로

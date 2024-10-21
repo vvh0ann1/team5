@@ -1,7 +1,7 @@
 # Linux Server: 패스워드 최대 사용 기간 설정
 ---
 - name: Check password maximum age settings
-  hosts: aws
+  hosts: aws_web
   become: yes
   vars:
     login_defs_path: '/etc/login.defs'  # 로그인 설정 파일 경로

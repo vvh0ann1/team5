@@ -1,7 +1,7 @@
 # Apache: 파일 업로드 및 다운로드 제한
 ---
 - name: Check and set file upload/download limit in Apache
-  hosts: aws
+  hosts: aws_web
   become: yes
   vars:
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로

@@ -1,7 +1,7 @@
 # Apache: 링크 사용 금지
 ---
 - name: Check for symbolic links and alias restrictions in Apache
-  hosts: aws
+  hosts: aws_web
   become: yes
   vars:
     apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로

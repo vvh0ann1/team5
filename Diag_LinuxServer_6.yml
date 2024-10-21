@@ -1,7 +1,7 @@
 # Linux Server: /etc/passwd 파일 소유자 및 권한 설정
 ---
 - name: Check /etc/passwd file ownership and permissions
-  hosts: aws
+  hosts: aws_web
   become: yes
   vars:
     passwd_file_path: '/etc/passwd'  # 검사할 파일 경로

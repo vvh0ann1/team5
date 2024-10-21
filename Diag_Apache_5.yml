@@ -1,7 +1,7 @@
 # Apache: 디렉터리 리스팅 제거
 ---
 - name: Check directory listing settings in Apache
-  hosts: aws
+  hosts: aws_web
   become: yes 
   vars:
     apache_config_path: '/etc/httpd/'  # Apache 설정 디렉토리 경로

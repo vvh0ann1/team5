@@ -1,7 +1,7 @@
 # Linux Server: /etc/shadow 파일 소유자 및 권한 설정
 ---
 - name: Check /etc/shadow file ownership and permissions
-  hosts: aws
+  hosts: aws_web
   become: yes
   vars:
     shadow_file_path: '/etc/shadow'  # 검사할 파일 경로
