@@ -1,0 +1,49 @@
+#Server(Linux): 계정 잠금 임계값 설정
+---
+    - name: Check pam_faillock.so existence and deny value
+      hosts: aws_web
+      become: yes
+      vars:
+        pam_files:
+          - /etc/pam.d/system-auth
+          - /etc/pam.d/password-auth
+        diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+        LAMP_type: 'Server(Linux)'  # LAMP
+
+      tasks:
+        # pam_faillock.so 존재 여부 및 deny 값 확인
+        - name: Check pam_faillock.so existence and deny value in system-auth and password-auth
+          shell: "grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}"
+          with_items: "{{ pam_files }}"
+          register: pam_check
+          failed_when: false
+          changed_when: false
+    
+        # deny 값 추출 및 리스트 평탄화 후 출력
+        - name: Extract and flatten deny values from pam_check
+          set_fact:
+            deny_values: "{{ pam_check.results | selectattr('stdout', 'search', 'deny=(\\d+)') | map('regex_search', 'deny=(\\d+)', '\\1') | flatten }}"
+    
+        # deny 값을 정수로 변환 후 출력
+        - name: Convert deny values to integers
+          set_fact:
+            deny_values_int: "{{ deny_values | map('int') | list }}"
+    
+        # pam_faillock.so 모듈이 두 파일에 모두 존재하고, deny 값이 모두 5 이하일 때 양호 출력
+        - name: Write secure diagnostic result to file
+          set_fact:
+            diag_result: "S"
+          when: pam_check.results | selectattr('stdout', 'search', 'pam_faillock.so') | list | length == 2 and deny_values_int | length == 2 and deny_values_int[0] <= 5 and deny_values_int[1] <= 5
+
+        # 취약일 때 작업
+        - name: Write vulnerable diagnostic result to file
+          set_fact:
+            diag_result: "V"
+            create: yes
+          when: not (pam_check.results | selectattr('stdout', 'search', 'pam_faillock.so') | list | length == 2 and deny_values_int | length == 2 and deny_values_int[0] <= 5 and deny_values_int[1] <= 5)
+    
+        - name: Write diagnostic result to file
+          lineinfile:
+            path: "{{ diag_file_path }}"
+            line: "{{ LAMP_type }}, 계정 잠금 임계값 설정, {{ diag_result }}, 계정 임계값 5회 이하로 설정"
+            create: yes

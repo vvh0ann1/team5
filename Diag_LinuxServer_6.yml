@@ -1,4 +1,4 @@
-# Linux Server: /etc/passwd 파일 소유자 및 권한 설정
+#Server(Linux): /etc/passwd 파일 소유자 및 권한 설정
 ---
 - name: Check /etc/passwd file ownership and permissions
   hosts: aws_web
@@ -6,7 +6,7 @@
   vars:
     passwd_file_path: '/etc/passwd'  # 검사할 파일 경로
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 6  # 진단 항목 번호
+    LAMP_type: 'Server(Linux)'  # LAMP
 
   tasks:
     - name: Check ownership and permissions of /etc/passwd
@@ -31,5 +31,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, /etc/passwd 파일 소유자 및 권한 설정, {{ diag_result }}"
+        line: "{{ LAMP_type }}, /etc/passwd 파일 소유자 및 권한 설정, {{ diag_result }}, /etc/passwd 파일 소유자 및 권한 변경"
         create: yes

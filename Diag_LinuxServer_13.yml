@@ -1,4 +1,4 @@
-# Linux Server: /etc/hosts 파일 소유자 및 권한 설정
+#Server(Linux): /etc/hosts 파일 소유자 및 권한 설정
 ---
 - name: Check /etc/hosts file ownership and permissions
   hosts: aws_web
@@ -6,7 +6,7 @@
   vars:
     hosts_file_path: '/etc/hosts'  # 검사할 파일 경로
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 13  # 진단 항목 번호
+    LAMP_type: 'Server(Linux)'  # LAMP
 
   tasks:
     - name: Check ownership and permissions of /etc/hosts
@@ -31,5 +31,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정, {{ diag_result }}"
+        line: "{{ LAMP_type }}, /etc/hosts 파일 소유자 및 권한 설정, {{ diag_result }}, '/etc/hosts 파일 접근 권한 644, 소유자 root로 변경'"
         create: yes

@@ -1,4 +1,4 @@
-# Linux Server: 패스워드 최대 사용 기간 설정
+#Server(Linux): 패스워드 최대 사용 기간 설정
 ---
 - name: Check password maximum age settings
   hosts: aws_web
@@ -7,7 +7,7 @@
     login_defs_path: '/etc/login.defs'  # 로그인 설정 파일 경로
     max_days: 90  # 최대 사용 기간 기준일
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 15  # 진단 항목 번호
+    LAMP_type: 'Server(Linux)'  # LAMP
 
   tasks:
     - name: Check PASS_MAX_DAYS in /etc/login.defs
@@ -32,7 +32,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 패스워드 최대 사용 기간 설정, {{ diag_result }}"
+        line: "{{ LAMP_type }}, 패스워드 최대 사용 기간 설정, {{ diag_result }}, 패스워드 최대 사용 기간 90일 이하로 설정"
         create: yes
-
-

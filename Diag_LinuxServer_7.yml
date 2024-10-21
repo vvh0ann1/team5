@@ -1,4 +1,4 @@
-# Linux Server: /etc/shadow 파일 소유자 및 권한 설정
+#Server(Linux): /etc/shadow 파일 소유자 및 권한 설정
 ---
 - name: Check /etc/shadow file ownership and permissions
   hosts: aws_web
@@ -6,7 +6,7 @@
   vars:
     shadow_file_path: '/etc/shadow'  # 검사할 파일 경로
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 7  # 진단 항목 번호
+    LAMP_type: 'Server(Linux)'  # LAMP
 
   tasks:
     - name: Check ownership and permissions of /etc/shadow
@@ -31,5 +31,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, /etc/shadow 파일 소유자 및 권한 설정, {{ diag_result }}"
+        line: "{{ LAMP_type }}, /etc/shadow 파일 소유자 및 권한 설정, {{ diag_result }}, /etc/shadow 파일 소유자 및 권한 변경"
         create: yes

@@ -1,4 +1,4 @@
-# Linux Server: 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
+#Server(Linux): 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
 ---
 - name: Check user and environment file ownership and permissions
   hosts: aws_web
@@ -8,7 +8,7 @@
     passwd_file_path: '/etc/passwd'  # 사용자 정보 파일 경로
     secure_permissions: 644  # 허용할 최대 권한
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
-    diagnostic_number: 9  # 진단 항목 번호
+    LAMP_type: 'Server(Linux)'  # LAMP
 
   tasks:
     - name: Get a list of user home directories
@@ -36,5 +36,5 @@
     - name: Write diagnostic result to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ diagnostic_number }}, 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정, {{ diag_result }}"
+        line: "{{ LAMP_type }}, '사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정', {{ diag_result }}, 소유자 변경 및 일반 사용자 쓰기 권한 제거"
         create: yes
