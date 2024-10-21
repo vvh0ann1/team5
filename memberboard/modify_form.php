@@ -45,7 +45,7 @@
 		<span style="margin-left: 50px;"></span>
 		회원 게시판 > 글 수정하기
 	</h2>
-	<form name="board" method="post" action="modify.php?num=<?=$num?>&page=<?=$page?>">
+	<form name="board" method="post" action="/project/memberboard/modify.php?num=<?=$num?>&page=<?=$page?>">
 	    <ul class="board_form">
 			<li>
 				<span class="col1">이름 : </span>

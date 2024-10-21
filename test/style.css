@@ -1,0 +1,116 @@
+/* 진단 결과 페이지의 스타일 */
+body {
+    background-color: #f4f7fa; /* 페이지 배경 색상 */
+    font-family: 'Noto Sans', 'Pretendard', sans-serif; /* 현대적인 글씨체 */
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #0f0072; /* 진한 파란색 제목 */
+    margin-top: 20px;
+    font-size: 36px;
+    font-weight: bold;
+    margin-top: 50px;
+}
+
+/* h2 {
+    text-align: center;
+    margin-top: 40px;
+    color: #0f0072;
+    padding-bottom: 10px;
+    font-size: 28px;
+    font-weight: bold;
+} */
+
+table {
+    margin: 0 auto;
+    width: 80%;
+    background-color: white;
+    border-collapse: collapse;
+}
+
+tr th {
+    background-color: #0f0072 !important; /* 강제로 파란색 배경 적용 */
+    color: white !important; /* 강제로 흰색 글씨 적용 */
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+td {
+    color: #333;
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+}
+
+tbody tr:hover {
+    background-color: #f9f9f9; /* 테이블 항목 hover 효과 */
+}
+
+div p {
+    font-size: 18px;
+    color: #555;
+    text-align: center;
+    margin: 10px 0;
+    border-bottom: 2px solid #0f0072;
+    margin-bottom: 20px;
+}
+
+.canvas-container {
+    width: 50%;
+    margin: 30px auto;
+}
+
+canvas {
+    display: block;
+    width: 100%; /* 캔버스의 크기를 부모에 맞춤 */
+}
+
+/* 부트스트랩 버튼에 대한 커스텀 스타일 */
+button {
+    background-color: #0f0072;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #333;
+    color: white;
+}
+
+/* 버튼 스타일 */
+.custom-btn {
+    background-color: #0f0072; /* 파란색 배경 */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-family: 'Noto Sans', 'Pretendard', sans-serif; /* 현대적인 글씨체 적용 */
+}
+
+.custom-btn:hover {
+    background-color: white; /* 흰색 배경 */
+    color: #0f0072; /* 파란색 글씨 */
+    border: 1px solid #0f0072;
+}
+
+.custom-btn:focus {
+    outline: none;
+    box-shadow: 0 0 5px #0f0072;
+}
+
+table th, table td {
+    font-weight: bold; /* 글씨를 굵게 만듦 */
+}
