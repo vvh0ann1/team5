@@ -1,17 +1,16 @@
 ---
 - name: Check PHP display_errors setting
   hosts: aws_web
-  vars_files:
-    - ./php_path.yml
   vars:
+    custom_path: /etc/php.ini
     diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
     LAMP_type: 'PHP' # LAMP
-    get_value1: "display_errors"
-    get_value2: "expose_php"
-    get_value3: "allow_url_fopen"
-    get_value4: "disable_functions"
-    get_value5: "open_basedir"
-    #get_value6: ""
+    get_value1: "grep -E display_errors {{ custom_path }}"
+    get_value2: "grep -E expose_php {{ custom_path }}"
+    get_value3: "grep -E allow_url_fopen {{ custom_path }}"
+    get_value4: "grep -E disable_functions {{ custom_path }}"
+    get_value5: "grep -E open_basedir {{ custom_path }}"
+    get_value6: "curl -s https://www.php.net/downloads.php"
     diag_file_value:
         - [1,'오류 메시지 노출','php.ini파일에서 display_errors = off로 변경']
         - [2,'불필요한 헤더 정보 노출','php.ini파일에서 expose_php = off로 변경']
@@ -23,7 +22,7 @@
   tasks:
     #PHP1. 오류 메시지 노출
     - name: Check display_errors in php.ini
-      shell: "grep -E '{{ get_value1 }}' {{ custom_path }}"
+      shell: "{{ get_value1 }}"
       register: display_errors_check
       ignore_errors: yes
 
@@ -33,11 +32,11 @@
 
     - name: Check Status
       set_fact:
-        status_1: "{{ 'S' if display_errors_check.stdout is search('display_errors\\s*=\\s*Off') else 'V' }}"
+        status_1: "{{ 'V' if display_errors_check.stdout is not search('display_errors\\s*=\\s*Off') else 'S' }}"
 
     # PHP2: 불필요한 헤더 정보 노출
     - name: Check expose_php in php.ini
-      shell: "grep -E '{{ get_value2 }}' {{ custom_path }}"
+      shell: "{{ get_value2 }}"
       register: expose_php_check
       ignore_errors: yes
 
@@ -47,12 +46,12 @@
 
     - name: fail if expose_php is set to On
       set_fact:
-        status_2: "{{ 'S' if display_errors_check.stdout is search('display_errors\\s*=\\s*Off') else 'V' }}"
+        status_2: "{{ 'V' if display_errors_check.stdout is not search('display_errors\\s*=\\s*Off') else 'S' }}"
 
 
     # PHP3: 외부 URL 파일 인클루드 비활성화
     - name: Check allow_url_fopen in php.ini
-      shell: "grep -E '{{ get_value3 }}' {{ custom_path }}"
+      shell: "{{ get_value3 }}"
       register: allow_url_check
       ignore_errors: yes
 
@@ -63,11 +62,11 @@
 
     - name: fail if allow_url_fopen is set to On
       set_fact:
-        status_3: "{{ 'S' if display_errors_check.stdout is match('display_errors\\s*=\\s*Off') else 'V' }}"
+        status_3: "{{ 'V' if display_errors_check.stdout is not match('display_errors\\s*=\\s*Off') else 'S' }}"
 
     # PHP4: 
     - name: Check disable_functions in php.ini
-      shell: "grep -E '{{ get_value4 }}' {{ custom_path }}"
+      shell: "{{ get_value4 }}"
       register: disable_functions_check
       ignore_errors: yes
 
@@ -77,13 +76,13 @@
 
     - name: fail if disable_functions is set
       set_fact:
-        status_4: "{{ 'S' if disable_functions_check.stdout is not search('disable_functions =\\s*$') else 'V' }}"
+        status_4: "{{ 'V' if disable_functions_check.stdout is search('disable_functions =\\s*$') else 'S' }}"
 
 
 
     # PHP5: 실행 경로 제한
     - name: Check open_basedir in php.ini
-      shell: "grep -E '{{ get_value5 }}' {{ custom_path }}"
+      shell: "{{ get_value5 }}"
       register: open_basedir_check
 
     - name: Set open_basedir result if available
@@ -98,11 +97,11 @@
 
     - name: Fail if open_basedir is empty
       set_fact:
-        status_5: "{{ 'S' if value_after_equals | default('') != '' else 'V' }}"
+        status_5: "{{ 'V' if value_after_equals | default('') == '' else 'S' }}"
 
     # PHP6: 최신 보안 패치 적용
     - name: Fetch PHP download page
-      shell: curl -s https://www.php.net/downloads.php
+      shell: "{{ get_value6 }}"
       register: php_download_page
 
     - name: Extract the latest PHP version
@@ -119,7 +118,7 @@
 
     - name: Display secure status
       set_fact:
-        status_6: "{{ 'S' if current_version is defined and latest_php_version is defined and current_version == latest_php_version else 'V' }}"
+        status_6: "{{ 'V' if current_version is defined and latest_php_version is defined and current_version != latest_php_version else 'S' }}"
 
 
     - name: Gather status
