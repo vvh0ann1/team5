@@ -50,5 +50,5 @@
   - name: Write diagnostic result to file
     lineinfile:
       path: "{{ diag_file_path }}"
-      line: "{{ LAMP_type }}, 'root 홈, 디렉터리 소유자 설정', {{ diag_result }},  root 계정의 설정 파일에서 PATH=$PATH:$HOME/bin으로 수정"
+      line: "{{ LAMP_type }}, 'root 홈, 디렉터리 소유자 설정', {{ diag_result }}, root 계정의 설정 파일에서 PATH=$PATH:$HOME/bin으로 수정"
       create: yes
