@@ -8,3 +8,5 @@
   hosts: aws_web
   roles:
     - apache_security_checks
+    - php_security_checks
+    - linux_security_checks
