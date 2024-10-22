@@ -92,8 +92,9 @@
 - name: Check Status
   set_fact:
     apache_owner: "{{ item.split()[0] }}"
-    status_6: "{{ 'V' if item.split()[0] == 'root' else 'S' }}"
+    status_6: "{{ 'V' if item.split()[0] == 'root' and item.split()[2] != '1' and 'grep' not in item else 'S' }}"
   loop: "{{ apache_process.stdout_lines }}"
+  when: item.split()[2] != '1' and 'grep' not in item
 
 
 # Apache: 최신 보안 패치 적용
