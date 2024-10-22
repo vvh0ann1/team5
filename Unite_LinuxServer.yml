@@ -19,6 +19,27 @@
     secure_permissions: 644
     LAMP_type: 'Server(Linux)'
     diag_file_path: '/home/ec2-user/Diag_File.txt'
+    get_path_1: grep PermitRootLogin {{ ssh_config_file }}
+    get_path_2_1: grep -E "minlen|minclass" {{ pwquality_conf_file }}
+    get_path_2_2: grep enforce_for_root {{ system_auth_file }}
+    get_path_3: grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}
+    get_path_4: echo $PATH
+    get_path_5: find /etc /tmp /bin /sbin \\( -nouser -o -nogroup \\) -xdev -exec ls -l {} \\; 2>/dev/null
+    get_path_9: 'cat {{ passwd_file_path }} | grep /home | cut -d: -f6'
+    get_path_10_1:  '|
+        if [ -f /usr/sbin/ypserv ] && [ -f /usr/sbin/ypbind ] && [ -f /usr/sbin/ypxfrd ] && [ -f /usr/sbin/rpc.yppasswdd ] && [ -f /usr/sbin/rpc.yupdated ]; then
+          echo "installed"
+        fi'
+    get_path_10_2: ps -ef | grep -E "ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.yupdated" | grep -v grep
+    get_path_11_1: cat /etc/mail/sendmail.cf | grep DZ | awk '{print $1}' | sed 's/DZ//g'
+    get_path_11_2: postconf -d | grep '^mail_version' | awk '{print $3}'
+    get_path_11_3: yum info postfix | grep Version | awk '{print $3}'
+    get_path_11_4: yum info sendmail | grep Version | awk '{print $3}'
+    get_path_12_1: ps -ef | grep named | grep -v grep
+    get_path_12_2: named -V
+    get_path_12_3: yum info bind | grep Version
+    get_path_15: grep '^PASS_MAX_DAYS' {{ login_defs_path }}
+
     diag_file_value:
       - [1,'root 계정 원격 접속 제한','root 계정 telnet과 ssh 접속 제한 설정']
       - [2,'패스워드 복잡도 설정','패스워드 복잡도 설정 및 enforce_for_root 적용']
@@ -41,7 +62,7 @@
 
     # Server(Linux): root 계정 원격 접속 제한
     - name: Check SSH root login setting
-      command: grep PermitRootLogin {{ ssh_config_file }}
+      shell: "{{ get_path_1 }}"
       register: ssh_check
       changed_when: false
 
@@ -52,13 +73,13 @@
 
     # Server(Linux): 패스워드 복잡도 설정
     - name: Check minlen and minclass in pwquality.conf
-      shell: grep -E "minlen|minclass" {{ pwquality_conf_file }}
+      shell: "{{ get_path_2_1 }}"
       register: pw_quality_conf_check
       failed_when: false
       changed_when: false
 
     - name: Check enforce_for_root in system-auth
-      shell: grep enforce_for_root {{ system_auth_file }}
+      shell: "{{ get_path_2_2 }}"
       register: enforce_root_check
       failed_when: false
       changed_when: false
@@ -75,7 +96,7 @@
 
 # Server(Linux): 계정 잠금 임계값 설정
     - name: Check pam_faillock.so existence and deny value in system-auth and password-auth
-      shell: "grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}"
+      shell: "{{ get_path_3 }}"
       with_items: "{{ pam_files }}"
       register: pam_check
       failed_when: false
@@ -96,7 +117,7 @@
 
 # Server(Linux): root 홈, 디렉터리 소유자 설정
     - name: Get PATH
-      shell: echo $PATH
+      shell: "{{ get_path_4 }}"
       register: path
       changed_when: false
 
@@ -119,7 +140,7 @@
 
 # Server(Linux): 파일 및 디렉터리 소유자 설정
     - name: Find files and directories without valid owner or group
-      shell: "find /etc /tmp /bin /sbin \\( -nouser -o -nogroup \\) -xdev -exec ls -l {} \\; 2>/dev/null"
+      shell: "{{ get_path_5 }}"
       register: invalid_files
       changed_when: false
 
@@ -163,7 +184,7 @@
 
 # Server(Linux): 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
     - name: Get a list of user home directories
-      shell: "cat {{ passwd_file_path }} | grep /home | cut -d: -f6"
+      shell: "{{ get_path_9 }}"
       register: home_dirs
 
     - name: Check ownership and permissions for each home directory
@@ -180,16 +201,13 @@
 
 # Server(Linux): NIS, NIS+ 점검
     - name: Check if NIS related files exist
-      shell: |
-        if [ -f /usr/sbin/ypserv ] && [ -f /usr/sbin/ypbind ] && [ -f /usr/sbin/ypxfrd ] && [ -f /usr/sbin/rpc.yppasswdd ] && [ -f /usr/sbin/rpc.yupdated ]; then
-          echo "installed"
-        fi
+      shell: "{{ get_path_10_1 }}"
       register: nis_installed
       failed_when: false
       changed_when: false
 
     - name: Check if NIS service is running
-      shell: ps -ef | grep -E "ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.yupdated" | grep -v grep
+      shell: "{{ get_path_10_2 }}"
       register: nis_running
       failed_when: false
       changed_when: false
@@ -201,25 +219,25 @@
 
 # Server(Linux): Sendmail 버전 점검
     - name: Check Sendmail version
-      shell: "cat /etc/mail/sendmail.cf | grep DZ | awk '{print $1}' | sed 's/DZ//g'"
+      shell: "{{ get_path_11_1 }}"
       register: sendmail_version
       failed_when: false
       changed_when: false
 
     - name: Check Postfix version
-      shell: "postconf -d | grep '^mail_version' | awk '{print $3}'"
+      shell: "{{ get_path_11_2 }}"
       register: postfix_version
       failed_when: false
       changed_when: false
 
     - name: Get latest Postfix version from official repository
-      shell: "yum info postfix | grep Version | awk '{print $3}'"
+      shell: "{{ get_path_11_3 }}"
       register: postfix_latest_version
       failed_when: false
       changed_when: false
 
     - name: Get latest Sendmail version from official repository
-      shell: "yum info sendmail | grep Version | awk '{print $3}'"
+      shell: "{{ get_path_11_4 }}"
       register: sendmail_latest_version
       failed_when: false
       changed_when: false
@@ -231,20 +249,20 @@
 
 # Server(Linux): DNS 보안 버전 패치
     - name: Check if DNS service is running
-      shell: ps -ef | grep named | grep -v grep
+      shell: "{{ get_path_12_1 }}"
       register: named_process
       failed_when: false
       changed_when: false
 
     - name: Check BIND version if DNS service is running
-      shell: named -V
+      shell: "{{ get_path_12_2 }}"
       when: named_process.stdout != ''
       register: bind_version
       failed_when: false
       changed_when: false
 
     - name: Get latest BIND version from yum
-      shell: yum info bind | grep Version
+      shell: "{{ get_path_12_3 }}"
       register: yum_bind_version
       failed_when: false
       changed_when: false
@@ -340,7 +358,7 @@
 
 # Server(Linux): 패스워드 최대 사용 기간 설정
     - name: Check PASS_MAX_DAYS in /etc/login.defs
-      command: "grep '^PASS_MAX_DAYS' {{ login_defs_path }}"
+      shell: "{{ get_path_15 }}"
       register: max_days_info
       changed_when: false
 
