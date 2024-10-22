@@ -24,7 +24,7 @@
     get_path_2_2: grep enforce_for_root {{ system_auth_file }}
     get_path_3: grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}
     get_path_4: echo $PATH
-    get_path_5: find /etc /tmp /bin /sbin \\( -nouser -o -nogroup \\) -xdev -exec ls -l {} \\; 2>/dev/null
+    get_path_5: 'find /etc /tmp /bin /sbin \( -nouser -o -nogroup \) -xdev -exec ls -l {} \\; 2>/dev/null'
     get_path_9: 'cat {{ passwd_file_path }} | grep /home | cut -d: -f6'
     get_path_10_1:  '|
         if [ -f /usr/sbin/ypserv ] && [ -f /usr/sbin/ypbind ] && [ -f /usr/sbin/ypxfrd ] && [ -f /usr/sbin/rpc.yppasswdd ] && [ -f /usr/sbin/rpc.yupdated ]; then
