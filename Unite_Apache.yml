@@ -149,6 +149,7 @@
       set_fact:
         status_7: "{{ 'V' if current_version_str is version(latest_version_str, '<') else 'S' }}"
 
+
     # Gather status
     - name: Gather status
       set_fact:
