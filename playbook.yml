@@ -1,0 +1,5 @@
+---
+- name: Mysql Security Checks
+  hosts: aws_db
+  roles:
+    - mysql_security_checks

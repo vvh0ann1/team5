@@ -1,0 +1,44 @@
+login_user: 'root'
+login_password: 'guseodhxhdpqj2@'
+login_db: 'mysql'
+login_host: localhost
+queries:
+  query_1: "SELECT host, user, authentication_string FROM user;"
+  query_2: "SHOW VARIABLES LIKE 'validate_password%';"
+  query_3: "SELECT host, user, Grant_priv FROM user WHERE Grant_priv='Y';"
+  query_4: "SELECT host, user, select_priv FROM mysql.user;"
+  query_7: "SELECT host, user, plugin, authentication_string FROM user;"
+  query_8_1: "SHOW VARIABLES LIKE 'general_log%';"
+  query_8_2: "SHOW VARIABLES LIKE 'slow%';"
+  query_9: "SELECT @@version;"
+query_list:
+  - { query: "{{ queries.query_1 }}", result_var: "query_result_1" }
+  - { query: "{{ queries.query_2 }}", result_var: "query_result_2" }
+  - { query: "{{ queries.query_3 }}", result_var: "query_result_3" }
+  - { query: "{{ queries.query_4 }}", result_var: "query_result_4" }
+  - { query: "{{ queries.query_7 }}", result_var: "query_result_7" }
+  - { query: "{{ queries.query_8_1 }}", result_var: "query_result_8_1" }
+  - { query: "{{ queries.query_8_2 }}", result_var: "query_result_8_2" }
+  - { query: "{{ queries.query_9 }}", result_var: "query_result_9" }
+regi_users_1: ['test']
+regi_users_3: ['mysql', 'root']
+regi_users_4: ['root', 'mysql']
+regi_pass_algo_7: ['ed25519','caching_sha2_password']
+Grant_priv: 'Grant_priv'
+Select_priv: 'select_priv'
+get_path_5: ps -ef | grep mysql | grep -v grep
+get_path_6: docker exec -it mysql-server ls -alL /etc/my.cnf
+get_path_9: docker exec -it mysql-server rpm -qa | grep mysql
+plugin: 'plugin'
+LAMP_type: 'Mysql'
+diag_file_path: 'home/ec2-user/result.txt'
+diag_file_value:
+  - [1,'불필요한 계정 제거','불필요한 계정 삭제']
+  - [2,'취약한 패스워드 사용 제한','validate_password 패스워드 정책 설정']
+  - [3,'타 사용자에 권한 부여 옵션 제한','불필요한 grant_priv 권한 제거']
+  - [4,'DB 사용자 계정 정보 테이블 접근 권한','일반 사용자 계정으로부터 mysql.user 테이블의 모든 권한 제거']
+  - [5,'root 권한으로 서버 구동 제한','설정 파일 user 지시자 설정']
+  - [6,'환경설정 파일 접근 권한','설정파일 접근 권한 변경']
+  - [7,'안전한 패스워드 암호화 알고리즘 사용','안전한 패스워드 암호화 알고리즘 사용']
+  - [8,'로그 활성화','로그 기능 활성화']
+  - [9,'최신 보안 패치 적용','최신 보안 패치 버전으로 업그레이드']
