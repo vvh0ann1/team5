@@ -1,0 +1,292 @@
+# Apache: 웹 서비스 영역의 분리
+---
+- name: Check and update Apache DocumentRoot
+  hosts: aws_web
+  become: yes
+  vars:
+    document_root_path: '/var/www/html'  # 기본 DocumentRoot 경로 설정
+    apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    LAMP_type: 'Apache'  # LAMP
+    diag_item: '웹 서비스 영역의 분리'  # 진단 항목
+    take_action: '기본 디렉터리 변경'  # 조치 방법
+    
+  tasks:
+    - name: Ensure Apache is installed
+      yum:
+        name: httpd
+        state: present
+
+    - name: Check current DocumentRoot
+      command: "grep DocumentRoot {{ apache_config_path }}"
+      register: document_root_check
+      ignore_errors: yes
+
+    - name: Check if vulnerable
+      set_fact:
+        diag_result: "V"
+      when: document_root_check.stdout is search(document_root_path) or document_root_check.stdout is search('htdocs')
+
+    - name: Check if secure
+      set_fact:
+        diag_result: "S"
+      when: not (document_root_check.stdout is search(document_root_path) or document_root_check.stdout is search('htdocs'))
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ diag_item }}, {{ diag_result }}, {{ take_action }}"
+        create: yes
+
+
+# Apache: 불필요한 파일 제거
+- name: Check and remove unnecessary Apache manual files
+  hosts: aws_web
+  become: yes
+  vars:
+    apache_config_path: '/etc/httpd'  # Apache 설정 디렉토리 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    LAMP_type: 'Apache'  # LAMP
+    diag_item: '불필요한 파일 제거'  # 진단 항목
+    take_action: '매뉴얼 디렉터리 삭제'  # 조치 방법
+
+  tasks:
+    - name: Check if the manual directory exists
+      command: "find {{ apache_config_path }} -name manual"
+      register: manual_dir_check
+      ignore_errors: yes
+
+    - name: Check for manual settings in httpd.conf
+      command: "grep -i 'manual' {{ apache_config_path }}/conf/httpd.conf"
+      register: manual_setting_check
+      ignore_errors: yes
+
+    - name: Check if secure
+      set_fact:
+        diag_result: "S" 
+      when: manual_dir_check.stdout | length == 0 and manual_setting_check.stdout | length == 0
+
+    - name: Check if vulnerable
+      set_fact:
+        diag_result: "V"
+      when: not (manual_dir_check.stdout | length == 0 and manual_setting_check.stdout | length == 0)
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ diag_item }}, {{ diag_result }}, {{ take_action }}"
+        create: yes
+
+
+# Apache: 링크 사용 금지
+- name: Check for symbolic links and alias restrictions in Apache
+  hosts: aws_web
+  become: yes
+  vars:
+    apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
+    alias_config_path: '/etc/httpd/conf/httpd.conf'  # Alias 설정 파일 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    LAMP_type: 'Apache'  # LAMP
+    diag_item: '링크 사용 금지'  # 진단 항목
+    take_action: '심볼릭과 Alias 링크 사용 제한'  # 조치 방법
+
+  tasks:
+    - name: Check if FollowSymLinks is enabled
+      command: "grep FollowSymLinks {{ apache_config_path }}"
+      register: follow_symlinks_check
+      ignore_errors: yes
+
+    - name: Check for aliases in Apache configuration
+      command: "grep '^Alias' {{ alias_config_path }}"
+      register: alias_check
+      ignore_errors: yes
+
+    - name: Determine FollowSymLinks status
+      set_fact:
+        symlink_result: "S"
+      when: follow_symlinks_check.stdout is not search('Indexes')
+
+    - name: Update symlink_result if vulnerabilities exist
+      set_fact:
+        symlink_result: "V"
+      when: follow_symlinks_check.stdout is search('Indexes')
+
+    - name: Determine alias status
+      set_fact:
+        alias_result: "S"
+      when: alias_check.stdout | length == 0
+
+    - name: Update alias_result if vulnerabilities exist
+      set_fact:
+        alias_result: "V"
+      when: alias_check.stdout | length > 0
+
+    - name: Check if secure
+      set_fact:
+        diag_result: "S" 
+      when: symlink_result == "S" and alias_result == "S"
+
+    - name: Check if vulnerable
+      set_fact:
+        diag_result: "V"
+      when: symlink_result == "V" or alias_result == "V"
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ diag_item }}, {{ diag_result }}, {{ take_action }}"
+        create: yes
+
+
+# Apache: 파일 업로드 및 다운로드 제한
+- name: Check and set file upload/download limit in Apache
+  hosts: aws_web
+  become: yes
+  vars:
+    apache_config_path: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    LAMP_type: 'Apache'  # LAMP
+    diag_item: '파일 업로드 및 다운로드 제한'  # 진단 항목
+    take_action: '파일 업로드 및 다운로드 용량 제한 설정'  # 조치 방법
+
+  tasks:
+    - name: Check if LimitRequestBody is set in httpd.conf
+      command: "grep LimitRequestBody {{ apache_config_path }}"
+      register: limit_request_body
+      ignore_errors: true
+
+    - name: Check if vulnerable
+      set_fact:
+        diag_result: "V" 
+      when: limit_request_body.rc != 0
+
+    - name: Check if secure
+      set_fact:
+        diag_result: "S" 
+      when: limit_request_body.rc == 0
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ diag_item }}, {{ diag_result }}, {{ take_action }}"
+        create: yes
+
+
+# Apache: 디렉터리 리스팅 제거
+- name: Check directory listing settings in Apache
+  hosts: aws_web
+  become: yes 
+  vars:
+    apache_config_path: '/etc/httpd/'  # Apache 설정 디렉토리 경로
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    LAMP_type: 'Apache'  # LAMP
+    diag_item: '디렉터리 리스팅 제거'  # 진단 항목
+    take_action: '디렉터리 검색 기능 제거'  # 조치 방법
+
+  tasks:
+    - name: Check if Indexes option is set in Apache configuration
+      command: "grep -r 'Indexes' {{ apache_config_path }}conf/httpd.conf"
+      register: index_option
+      ignore_errors: true
+
+    - name: Check if vulnerable
+      set_fact:
+        diag_result: "V"
+      when: index_option.rc == 0
+
+    - name: Check if secure
+      set_fact:
+        diag_result: "S"
+      when: index_option.rc != 0
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ diag_item }}, {{ diag_result }}, {{ take_action }}"
+        create: yes
+
+
+# Apache: 웹 프로세스 권한 제한
+- name: Check Apache process owner and permissions
+  hosts: aws_web
+  gather_facts: no
+  vars:
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    LAMP_type: 'Apache'  # LAMP
+    diag_item: '웹 프로세스 권한 제한'  # 진단 항목
+    take_action: 'apache 데몬 user/group 변경'  # 조치 방법
+
+  tasks:
+    - name: Check if Apache is running
+      shell: ps -ef | grep apache2
+      register: apache_process
+      changed_when: false
+
+    - name: Check if secure
+      set_fact:
+        apache_owner: "{{ item.split()[0] }}"
+        diag_result: "S"
+      loop: "{{ apache_process.stdout_lines }}"
+      when: item.split()[0] != "root"
+
+    - name: Check if vulnerable
+      set_fact:
+        apache_owner: "{{ item.split()[0] }}"
+        diag_result: "V"
+      loop: "{{ apache_process.stdout_lines }}"
+      when: item.split()[0] == "root"
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ diag_item }}, {{ diag_result }}, {{ take_action }}"
+        create: yes
+
+
+# Apache: 최신 보안 패치 적용
+- name: Check Apache version for security patches
+  hosts: aws_web
+  vars:
+    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    LAMP_type: 'Apache'  # LAMP
+    diag_item: '최신 보안 패치 적용'  # 진단 항목
+    take_action: '보안 패치 적용'  # 조치 방법
+
+  tasks:
+    - name: Check current Apache version
+      command: httpd -v
+      register: current_apache_version
+      changed_when: false
+
+    - name: Check latest available Apache version
+      command: yum info httpd | Version
+      register: latest_apache_info
+
+    - name: Extract the latest Apache version
+      set_fact:
+        latest_version: "{{ latest_apache_info.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+
+    - name: Extract the current Apache version
+      set_fact:
+        current_version: "{{ current_apache_version.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+
+    - name: Convert versions to strings
+      set_fact:
+        current_version_str: "{{ current_version | string }}"
+        latest_version_str: "{{ latest_version | string }}"
+
+    - name: Check if vulnerable
+      set_fact:
+        diag_result: "V"
+      when: current_version_str is version(latest_version_str, '<')
+
+    - name: Check if secure
+      set_fact:
+        diag_result: "S"
+      when: current_version_str is not version(latest_version_str, '<')
+
+    - name: Write diagnostic result to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ diag_item }}, {{ diag_result }}, {{ take_action }}"
+        create: yes
