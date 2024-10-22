@@ -3,11 +3,11 @@
   hosts: aws_web
   become: yes
   vars:
-    document_root_path: '/var/www/html'  # 기본 DocumentRoot 경로 설정
-    apache_config_path_1: '/etc/httpd'  # Apache 설정 디렉토리 경로
-    apache_config_path_2: '/etc/httpd/conf/httpd.conf'  # Apache 설정 파일 경로
-    LAMP_type: 'Apache'  # LAMP
-    diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+    document_root_path: '/var/www/html'
+    apache_config_path_1: '/etc/httpd'
+    apache_config_path_2: '/etc/httpd/conf/httpd.conf'
+    LAMP_type: 'Apache'
+    diag_file_path: '/home/ec2-user/Diag_File.txt'
     diag_file_value:
       - [1,'웹 서비스 영역의 분리','기본 디렉터리 변경']
       - [2,'불필요한 파일 제거','매뉴얼 디렉터리 삭제']
