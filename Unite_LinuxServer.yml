@@ -91,8 +91,7 @@
 
     - name: Check Status
       set_fact:
-        status_2: "{{ 'V' if not (pam_check.results | selectattr('stdout', 'search', 'pam_faillock.so') | list | length == 2 and deny_values_int | length == 2 and deny_values_int[0] <= 5 and deny_values_int[1] <= 5) else 'S' }}"
-
+        status_3: "{{ 'V' if not (pam_check.results | selectattr('stdout', 'search', 'pam_faillock.so') | list | length == 2 and deny_values_int | length == 2 and deny_values_int[0] <= 5 and deny_values_int[1] <= 5) else 'S' }}"
 
 
 # Server(Linux): root 홈, 디렉터리 소유자 설정
@@ -328,11 +327,11 @@
 
           {% set cleaned_messages = messages | map('trim') | list %}
           {% set vulnerabilities = cleaned_messages | select('search', 'vulnerability') | list %}
-          {{ cleaned_messages | join(' ') }}  # 메시지를 문자열로 결합
+          {{ cleaned_messages | join(' ') }} 
 
     - name: Check if there are vulnerabilities
       set_fact:
-        vulnerabilities: "{{ cleaned_messages | select('search', 'vulnerability') | list }}"
+        vulnerabilities: "{{ cron_combined_status | select('search', 'vulnerability') | list }}"
 
     - name: Check Status
       set_fact:
@@ -357,7 +356,7 @@
     # Gather status
     - name: Gather status
       set_fact:
-       Server(Linux)_status:
+       ServerLinux_status:
         status1: "{{ status_1 }}"
         status2: "{{ status_2 }}"
         status3: "{{ status_3 }}"
@@ -376,12 +375,12 @@
 
     - name: Print status
       debug:
-        var: Server(Linux)_status
+        var: ServerLinux_status
 
     - name: Status to file
       lineinfile:
-        path: "{{ diat_file_path }}"
-        line: "{{ LAMP_type }}, {{ item[1] }}, {{ Server(Linux)_status['status' ~ item[0]] }}, {{ item[2] }}"
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ item[1] }}, {{ ServerLinux_status['status' ~ item[0]] }}, {{ item[2] }}"
         create: yes
       loop: "{{ diag_file_value }}"
         
