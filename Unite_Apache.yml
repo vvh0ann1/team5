@@ -31,11 +31,6 @@
   tasks:
 
     # Apache: 웹 서비스 영역의 분리
-    - name: Ensure Apache is installed
-      yum:
-        name: httpd
-        state: present
-
     - name: Check current DocumentRoot
       shell: "{{ get_path_1 }}"
       register: document_root_check
