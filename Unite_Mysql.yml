@@ -1,0 +1,279 @@
+---
+  - name: Mysql Security Checks
+    hosts: aws_db
+    vars:
+      login_user: 'root'
+      login_password: 'guseodhxhdpqj2@'
+      login_db: 'mysql'
+      login_host: localhost
+      query_1: "SELECT host, user, authentication_string FROM user"
+      query_2: "SHOW VARIABLES LIKE 'validate_password%';"
+      query_3: "SELECT host, user, Grant_priv FROM user WHERE Grant_priv='Y';"
+      query_4: "SELECT host, user, select_priv FROM mysql.user;"
+      query_7: "SELECT host, user, plugin, authentication_string FROM user;"
+      query_general_8: "SHOW VARIABLES LIKE 'general_log%';"
+      query_slow_8: "SHOW VARIABLES LIKE 'slow%';"
+      query_9: "SELECT @@version;"
+      regi_users_1: ['test']
+      regi_users_3: ['mysql', 'root']
+      regi_users_4: ['root', 'mysql']
+      regi_pass_algo_7: ['ed25519','caching_sha2_password']
+      Grant_priv: 'Grant_priv'
+      Select_priv: 'select_priv'
+      get_path_5: ps -ef | grep mysql | grep -v grep
+      get_path_6: docker exec -it mysql-server ls -alL /etc/my.cnf
+      get_path_9: docker exec -it mysql-server rpm -qa | grep mysql
+      plugin: 'plugin'
+      LAMP_type: 'Mysql'
+      diag_file_path: 'home/ec2-user/result.txt'
+      diag_file_value:
+        - [1,'불필요한 계정 제거','불필요한 계정 삭제']
+        - [2,'취약한 패스워드 사용 제한','validate_password 패스워드 정책 설정']
+        - [3,'타 사용자에 권한 부여 옵션 제한','불필요한 grant_priv 권한 제거']
+        - [4,'DB 사용자 계정 정보 테이블 접근 권한','일반 사용자 계정으로부터 mysql.user 테이블의 모든 권한 제거']
+        - [5,'root 권한으로 서버 구동 제한','설정 파일 user 지시자 설정']
+        - [6,'환경설정 파일 접근 권한','설정파일 접근 권한 변경']
+        - [7,'안전한 패스워드 암호화 알고리즘 사용','안전한 패스워드 암호화 알고리즘 사용']
+        - [8,'로그 활성화','로그 기능 활성화']
+        - [9,'최신 보안 패치 적용','최신 보안 패치 버전으로 업그레이드']
+
+  
+    tasks:
+    - name: Init status dict
+      set_fact:
+        status_dict_mysql: {}
+
+    # Mysql: "불필요한 계정 제거"
+    - name: Run Query
+      mysql_query:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        login_db: "{{ login_db }}"
+        query: "{{ query_1 }}"
+      register: query_result_1
+  
+    - name: Filter User
+      set_fact:
+        users_1: "{{ query_result_1.query_result[0] | map(attribute='user') | list }}"
+  
+    - name: Check unregi users
+      set_fact:
+        unregi_users_1: "{{ users_1 | difference(regi_users_1) }}"
+  
+    - name: Check Status
+      set_fact:
+        status_1: "{{ 'S' if (unregi_users_1 | length == 0) else 'V' }}"
+
+    # Mysql: "취약한 패스워드 사용 제한"
+    - name: Run Query
+      mysql_query:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        login_db: "{{ login_db }}"
+        query: "{{ query_2 }}"
+      register: query_result_2
+  
+    - name: Filter policy
+      set_fact:
+        policy_2: "{{ (query_result_2.query_result[0] | selectattr('Variable_name', 'equalto', 'validate_password.policy') | first).Value }}"
+  
+    - name: Check Status
+      set_fact:
+        status_2: "{{ 'S' if policy_2 in ['MEDIUM', 'STRONG'] else 'V' }}"
+
+    # Mysql: "타 사용자에 권한 부여 옵션 제한"
+    - name: Run Query
+      mysql_query:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        login_db: "{{ login_db }}"
+        query: "{{ query_3 }}"
+      register: query_result_3
+  
+    - name: Filter 'Y' User
+      set_fact:
+        priv_users_3: "{{ query_result_3.query_result[0] | selectattr(Grant_priv, 'equalto', 'Y') | map(attribute='user') | list }}"
+  
+    - name: Check unregi users
+      set_fact:
+        unregi_users_3: "{{ priv_users_3 | difference(regi_users_3) }}"
+  
+    - name: Check Status
+      set_fact:
+        status_3: "{{ 'S' if (unregi_users_3 | length == 0) else 'V' }}"
+
+    # Mysql: "사용자 계정 정보 테이블 접근 권한"
+    - name: Run Query
+      mysql_query:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        query: "{{ query_4 }}"
+      register: query_result_4
+    
+    - name: Filter 'Y' User
+      set_fact:
+        priv_users_4: "{{ query_result_4.query_result[0] | selectattr(Select_priv, 'equalto', 'Y') | map(attribute='user') | list }}"
+  
+    - name: Check unregi users
+      set_fact:
+        unregi_users_4: "{{ priv_users_4 | difference(regi_users_4) }}"
+
+    - name: Check Status
+      set_fact:
+        status_4: "{{ 'S' if (unregi_users_4 | length == 0) else 'V' }}"
+
+    # Mysql: "root 권한으로 서버 구동 제한"
+    - name: Get mysqld process
+      shell: "{{ get_path_5 }}"
+      register: mysqld_process_5
+      changed_when: false
+  
+    - name: Extract user running mysqld
+      set_fact:
+        mysqld_user_5: "{{ mysqld_process_5.stdout_lines[0].split()[0] }}"
+  
+    - name: Check Status
+      set_fact:
+        status_5: "{{ 'V' if mysqld_user_5 == 'root' else 'S' }}"
+
+    # Mysql: "환경설정 파일 접근 권한"
+    - name: Get perm
+      shell: "{{ get_path_6 }}"
+      register: perm
+      changed_when: false
+  
+    - name: Parsing perm
+      set_fact:
+        file_perm_6: "{{ perm.stdout_lines[0].split()[0] }}"
+  
+    - name: Convert file_perm
+      set_fact:
+        num_perm_6: >-
+            {{
+              (((4 * (file_perm_6[1] == 'r') | int) +
+               (2 * (file_perm_6[2] == 'w') | int) +
+               (1 * (file_perm_6[3] == 'x') | int)) * 64) +
+              (((4 * (file_perm_6[4] == 'r') | int) +
+               (2 * (file_perm_6[5] == 'w') | int) +
+               (1 * (file_perm_6[6] == 'x') | int)) * 8) +
+              ((4 * (file_perm_6[7] == 'r') | int) +
+               (2 * (file_perm_6[8] == 'w') | int) +
+               (1 * (file_perm_6[9] == 'x') | int))
+            }}
+  
+    - name: octal_perm_6
+      set_fact:
+        octal_perm_6: "{{ '%o' | format(num_perm_6 | int) }}"
+  
+    - name: Check Status
+      set_fact:
+        status_6: "{{ 'S' if octal_perm_6 | int <= 640 else 'V' }}"
+
+    # Mysql: "안전한 암호화 알고리즘 사용"
+    - name: Run Query
+      mysql_query:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        login_db: "{{ login_db }}"
+        query: "{{ query_7 }}"
+      register: query_result_7
+  
+    - name: Filter plugin
+      set_fact:
+        user_pass_algo_7: "{{ query_result_7.query_result[0] | map(attribute=plugin) | list }}"
+  
+    - name: Check unsafe_algo
+      set_fact:
+        unsafe_algo_7: "{{ user_pass_algo_7 | difference(regi_pass_algo_7) }}"
+
+    - name: Check Status
+      set_fact:
+        status_7: "{{ 'S' if (unsafe_algo_7 | length == 0) else 'V' }}"
+
+    # Mysql: "로그 활성화"
+    - name: Run Query_general
+      mysql_query:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        login_db: "{{ login_db }}"
+        query: "{{ query_general_8 }}"
+      register: query_general_result_8
+  
+    - name: Run slow Query
+      mysql_query:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        login_db: "{{ login_db }}"
+        query: "{{ query_slow_8 }}"
+      register: query_slow_result_8
+  
+    - name: Filter general log value
+      set_fact:
+        general_log_value_8: "{{ query_general_result_8.query_result[0] | selectattr('Variable_name', 'equalto', 'general_log') | map(attribute='Value') | first }}"
+    
+    - name: Filter slow query log value
+      set_fact:
+        slow_log_value_8: "{{ query_slow_result_8.query_result[0] | selectattr('Variable_name', 'equalto', 'slow_query_log') | map(attribute='Value') | first }}"
+  
+    - name: Check Status
+      set_fact:
+        status_8: "{{ 'S' if (slow_log_value_8 == 'ON') else 'V' }}"
+
+    # Mysql: "최신 보안 패치 적용"
+    - name: Run Query
+      mysql_query:
+        login_user: "{{ login_user }}"
+        login_password: "{{ login_password }}"
+        login_db: "{{ login_db }}"
+        login_host: "{{ login_host }}"
+        query: "{{ query_9 }}"
+      register: query_result_9
+  
+    - name: Parse Mysql version
+      set_fact:
+        mysql_version_9: "{{ query_result_9.query_result[0][0]['@@version'] }}"
+  
+    - name: Get installed mysql-server package version
+      shell: "{{ get_path_9 }}"
+      register: rpm_version_output_9
+      changed_when: false
+  
+    - name: Parse RPM version
+      set_fact:
+        rpm_version_9: "{{ rpm_version_output_9.stdout_lines[0].split('-')[4] }}"
+  
+    - name: Check Status
+      set_fact:
+        status_9: "{{ 'S' if (mysql_version_9 is not version(rpm_version_9, '<')) else 'V' }}" 
+
+        
+    - name: Gather status
+      set_fact:
+        Mysql_status:
+          status1: "{{ status_1 }}"
+          status2: "{{ status_2 }}"
+          status3: "{{ status_3 }}"
+          status4: "{{ status_4 }}"
+          status5: "{{ status_5 }}"
+          status6: "{{ status_6 }}"
+          status7: "{{ status_7 }}"
+          status8: "{{ status_8 }}"
+          status9: "{{ status_9 }}"
+
+    - name: Print status
+      debug:
+        var: Mysql_status
+    
+    - name: Status to file
+      lineinfile:
+        path: "{{ diag_file_path }}"
+        line: "{{ LAMP_type }}, {{ item[1] }}, {{ Mysql_status['status' ~ item[0]] }}, {{ item[2] }}"
+        create: yes
+      loop: "{{ diag_file_value }}"

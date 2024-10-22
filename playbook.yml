@@ -1,0 +1,10 @@
+---
+- name: Security Checks_DB
+  hosts: aws_db
+  roles:
+    - mysql_security_checks
+
+- name: Security Checks_Web
+  hosts: aws_web
+  roles:
+    - apache_security_checks

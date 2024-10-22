@@ -1,0 +1,13 @@
+---
+- name: Execute Mysql Query
+  mysql_query:
+    login_user: "{{ login_user }}"
+    login_password: "{{ login_password }}"
+    login_host: "{{ login_host }}"
+    login_db: "{{ login_db }}"
+    query: "{{ query_to_run }}"
+  register: query_result
+
+- name: Set dynamic result variable
+  set_fact: 
+    "{{ result_variable }}": "{{ query_result }}"
