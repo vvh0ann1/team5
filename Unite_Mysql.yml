@@ -27,15 +27,15 @@
       LAMP_type: 'Mysql'
       diag_file_path: 'home/ec2-user/result.txt'
       diag_file_value:
-        - ['불필요한 계정 제거','불필요한 계정 삭제']
-        - ['취약한 패스워드 사용 제한','validate_password 패스워드 정책 설정']
-        - ['타 사용자에 권한 부여 옵션 제한','불필요한 grant_priv 권한 제거']
-        - ['DB 사용자 계정 정보 테이블 접근 권한','일반 사용자 계정으로부터 mysql.user 테이블의 모든 권한 제거']
-        - ['root 권한으로 서버 구동 제한','설정 파일 user 지시자 설정']
-        - ['환경설정 파일 접근 권한','설정파일 접근 권한 변경']
-        - ['안전한 패스워드 암호화 알고리즘 사용','안전한 패스워드 암호화 알고리즘 사용']
-        - ['로그 활성화','로그 기능 활성화']
-        - ['최신 보안 패치 적용','최신 보안 패치 버전으로 업그레이드']
+        - [1,'불필요한 계정 제거','불필요한 계정 삭제']
+        - [2,'취약한 패스워드 사용 제한','validate_password 패스워드 정책 설정']
+        - [3,'타 사용자에 권한 부여 옵션 제한','불필요한 grant_priv 권한 제거']
+        - [4,'DB 사용자 계정 정보 테이블 접근 권한','일반 사용자 계정으로부터 mysql.user 테이블의 모든 권한 제거']
+        - [5,'root 권한으로 서버 구동 제한','설정 파일 user 지시자 설정']
+        - [6,'환경설정 파일 접근 권한','설정파일 접근 권한 변경']
+        - [7,'안전한 패스워드 암호화 알고리즘 사용','안전한 패스워드 암호화 알고리즘 사용']
+        - [8,'로그 활성화','로그 기능 활성화']
+        - [9,'최신 보안 패치 적용','최신 보안 패치 버전으로 업그레이드']
 
   
     tasks:
@@ -63,7 +63,7 @@
   
     - name: Check Status
       set_fact:
-        status_1: "{{ 'good' if (unregi_users_1 | length == 0) else 'bad' }}"
+        status_1: "{{ 'S' if (unregi_users_1 | length == 0) else 'V' }}"
 
     # Mysql: "취약한 패스워드 사용 제한"
     - name: Run Query
@@ -81,7 +81,7 @@
   
     - name: Check Status
       set_fact:
-        status_2: "{{ 'good' if policy_2 in ['MEDIUM', 'STRONG'] else 'bad' }}"
+        status_2: "{{ 'S' if policy_2 in ['MEDIUM', 'STRONG'] else 'V' }}"
 
     # Mysql: "타 사용자에 권한 부여 옵션 제한"
     - name: Run Query
@@ -103,7 +103,7 @@
   
     - name: Check Status
       set_fact:
-        status_3: "{{ 'good' if (unregi_users_3 | length == 0) else 'bad' }}"
+        status_3: "{{ 'S' if (unregi_users_3 | length == 0) else 'V' }}"
 
     # Mysql: "사용자 계정 정보 테이블 접근 권한"
     - name: Run Query
@@ -124,7 +124,7 @@
 
     - name: Check Status
       set_fact:
-        status_4: "{{ 'good' if (unregi_users_4 | length == 0) else 'bad' }}"
+        status_4: "{{ 'S' if (unregi_users_4 | length == 0) else 'V' }}"
 
     # Mysql: "root 권한으로 서버 구동 제한"
     - name: Get mysqld process
@@ -138,7 +138,7 @@
   
     - name: Check Status
       set_fact:
-        status_5: "{{ 'bad' if mysqld_user_5 == 'root' else 'good' }}"
+        status_5: "{{ 'V' if mysqld_user_5 == 'root' else 'S' }}"
 
     # Mysql: "환경설정 파일 접근 권한"
     - name: Get perm
@@ -171,7 +171,7 @@
   
     - name: Check Status
       set_fact:
-        status_6: "{{ 'good' if octal_perm_6 | int <= 640 else 'bad' }}"
+        status_6: "{{ 'S' if octal_perm_6 | int <= 640 else 'V' }}"
 
     # Mysql: "안전한 암호화 알고리즘 사용"
     - name: Run Query
@@ -193,7 +193,7 @@
 
     - name: Check Status
       set_fact:
-        status_7: "{{ 'good' if (unsafe_algo_7 | length == 0) else 'bad' }}"
+        status_7: "{{ 'S' if (unsafe_algo_7 | length == 0) else 'V' }}"
 
     # Mysql: "로그 활성화"
     - name: Run Query_general
@@ -224,7 +224,7 @@
   
     - name: Check Status
       set_fact:
-        status_8: "{{ 'good' if (slow_log_value_8 == 'ON') else 'bad' }}"
+        status_8: "{{ 'S' if (slow_log_value_8 == 'ON') else 'V' }}"
 
     # Mysql: "최신 보안 패치 적용"
     - name: Run Query
@@ -251,7 +251,7 @@
   
     - name: Check Status
       set_fact:
-        status_9: "{{ 'good' if (mysql_version_9 is not version(rpm_version_9, '<')) else 'bad' }}" 
+        status_9: "{{ 'S' if (mysql_version_9 is not version(rpm_version_9, '<')) else 'V' }}" 
 
         
     - name: Gather status
@@ -274,6 +274,6 @@
     - name: Status to file
       lineinfile:
         path: "{{ diag_file_path }}"
-        line: "{{ LAMP_type }}, {{ item[0] }}, {{ Mysql_status[item[0]] }}, {{ item[1] }}"
+        line: "{{ LAMP_type }}, {{ item[1] }}, {{ Mysql_status['status' ~ item[0]] }}, {{ item[2] }}"
         create: yes
-      with_items: "{{ diag_file_value }}"
+      loop: "{{ diag_file_value }}"
