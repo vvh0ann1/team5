@@ -1,0 +1,25 @@
+document_root_path: '/var/www/html'
+apache_config_path_1: '/etc/httpd'
+apache_config_path_2: '/etc/httpd/conf/httpd.conf'
+LAMP_type: 'Apache'
+diag_file_path: '/home/ec2-user/Diag_File.txt'
+get_path_1: grep DocumentRoot {{ apache_config_path_2 }}
+get_path_2_1: find {{ apache_config_path_1 }} -name manual
+get_path_2_2: grep -i 'manual' {{ apache_config_path_2 }}
+get_path_3_1: grep FollowSymLinks {{ apache_config_path_2 }}
+get_path_3_2: grep '^Alias' {{ apache_config_path_2 }}
+get_path_4: grep LimitRequestBody {{ apache_config_path_2 }}
+get_path_5: grep -r 'Indexes' {{ apache_config_path_2 }}
+get_path_6: ps -ef | grep apache2
+get_path_7_1: httpd -v
+get_path_7_2: yum info httpd | grep Version
+
+diag_file_value:
+  - [1,'웹 서비스 영역의 분리','기본 디렉터리 변경']
+  - [2,'불필요한 파일 제거','매뉴얼 디렉터리 삭제']
+  - [3,'링크 사용 금지','심볼릭과 Alias 링크 사용 제한']
+  - [4,'파일 업로드 및 다운로드 제한','파일 업로드 및 다운로드 용량 제한 설정']
+  - [5,'디렉터리 리스팅 제거','디렉터리 검색 기능 제거']
+  - [6,'웹 프로세스 권한 제한','apache 데몬 user/group 변경']
+  - [7,'최신 보안 패치 적용','보안 패치 적용']
+
