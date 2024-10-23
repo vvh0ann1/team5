@@ -100,7 +100,7 @@
   set_fact:
     status_6: "{{ 'V' if 'V' in temp_status_list else 'S' }}"
   vars:
-    temp_status_list: "{{ temp_status_list }}"
+    temp_status_list: "{{ status_results.results | map(attribute='ansible_facts.temp_status') | list }}"
 
 
 # Apache: 최신 보안 패치 적용
