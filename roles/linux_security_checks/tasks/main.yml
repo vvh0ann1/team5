@@ -1,13 +1,13 @@
 # Server(Linux): root 계정 원격 접속 제한
 - name: Check SSH root login setting
+  become: yes
   shell: "{{ get_path_1 }}"
   register: ssh_check
   changed_when: false
-  become: yes
-
+  
 - name: Check Status
   set_fact:
-    status_1: "{{ 'V' if 'PermitRootLogin no' not in ssh_check.stdout else 'S' }}"
+    status_1: "{{ 'V' if (ssh_check.stdout is defined and 'PermitRootLogin no' not in ssh_check.stdout) else 'S' }}"
 
 
 # Server(Linux): 패스워드 복잡도 설정
@@ -314,21 +314,21 @@
 - name: Gather status
   set_fact:
     ServerLinux_status:
-    status1: "{{ status_1 }}"
-    status2: "{{ status_2 }}"
-    status3: "{{ status_3 }}"
-    status4: "{{ status_4 }}"
-    status5: "{{ status_5 }}"
-    status6: "{{ status_6 }}"
-    status7: "{{ status_7 }}"
-    status8: "{{ status_8 }}"
-    status9: "{{ status_9 }}"
-    status10: "{{ status_10 }}"
-    status11: "{{ status_11 }}"
-    status12: "{{ status_12 }}"
-    status13: "{{ status_13 }}"
-    status14: "{{ status_14 }}"
-    status15: "{{ status_15 }}"
+      status1: "{{ status_1 }}"
+      status2: "{{ status_2 }}"
+      status3: "{{ status_3 }}"
+      status4: "{{ status_4 }}"
+      status5: "{{ status_5 }}"
+      status6: "{{ status_6 }}"
+      status7: "{{ status_7 }}"
+      status8: "{{ status_8 }}"
+      status9: "{{ status_9 }}"
+      status10: "{{ status_10 }}"
+      status11: "{{ status_11 }}"
+      status12: "{{ status_12 }}"
+      status13: "{{ status_13 }}"
+      status14: "{{ status_14 }}"
+      status15: "{{ status_15 }}"
 
 - name: Print status
   debug:
