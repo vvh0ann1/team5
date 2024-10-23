@@ -92,9 +92,9 @@
 - name: Determine Status
   set_fact:
     apache_owner: "{{ item.split()[0] }}"
-    status_6: "{{ 'V' if item.split()[0] == 'root' and item.split()[2] != '1' and 'grep' not in item else 'S' }}"
+    temp_status: "{{ 'V' if item.split()[0] == 'root' and item.split()[2] != '1' and 'grep' not in item else 'S' }}"
   loop: "{{ apache_process.stdout_lines }}"
-  register: status_results
+  register: status_results  # 결과를 저장
 
 - name: Check Status
   set_fact:
