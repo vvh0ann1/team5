@@ -1,7 +1,6 @@
 ---
 - name: Apache Security Checks
   hosts: aws_web
-  become: yes
   vars:
     document_root_path: '/var/www/html'
     apache_config_path_1: '/etc/httpd'
@@ -121,12 +120,18 @@
       register: apache_process
       changed_when: false
 
-    - name: Check Status
+    - name: Determine Status
       set_fact:
         apache_owner: "{{ item.split()[0] }}"
-        status_6: "{{ 'V' if item.split()[0] == 'root' and item.split()[2] != '1' and 'grep' not in item else 'S' }}"
+        temp_status: "{{ 'V' if item.split()[0] == 'root' and item.split()[2] != '1' and 'grep' not in item else 'S' }}"
       loop: "{{ apache_process.stdout_lines }}"
-      when: item.split()[2] != '1' and 'grep' not in item 
+      register: status_results  # 결과를 저장
+
+    - name: Check Status
+      set_fact:
+        status_6: "{{ 'V' if 'V' in temp_status_list else 'S' }}"
+      vars:
+        temp_status_list: "{{ status_results.results | map(attribute='ansible_facts.temp_status') | list }}"
 
 
     # Apache: 최신 보안 패치 적용
