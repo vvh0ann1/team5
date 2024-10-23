@@ -89,12 +89,18 @@
   register: apache_process
   changed_when: false
 
-- name: Check Status
+- name: Determine Status
   set_fact:
     apache_owner: "{{ item.split()[0] }}"
     status_6: "{{ 'V' if item.split()[0] == 'root' and item.split()[2] != '1' and 'grep' not in item else 'S' }}"
   loop: "{{ apache_process.stdout_lines }}"
-  when: item.split()[2] != '1' and 'grep' not in item
+  register: status_results
+
+- name: Check Status
+  set_fact:
+    status_6: "{{ 'V' if 'V' in temp_status_list else 'S' }}"
+  vars:
+    temp_status_list: "{{ temp_status_list }}"
 
 
 # Apache: 최신 보안 패치 적용
