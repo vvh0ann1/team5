@@ -1,0 +1,42 @@
+# testing_task
+---
+- name: Get mysqld process
+  shell: "{{ get_path_5 }}"
+  register: mysqld_process_5
+  changed_when: false
+
+- name: Testing 5
+  assert:
+    that:
+      - mysqld_process_5.stdout != ''
+    fail_msg: "Failed to Get mysqld process"
+
+- name: Set Mysql path_6
+  set_fact:
+    get_path_6: "{{ docker_path_6 if is_docker_running else normal_path_6 }}"
+
+- name: Get perm
+  shell: "{{ get_path_6 }}"
+  register: perm
+  changed_when: false
+
+- name: Testing 6
+  assert:
+    that:
+      - perm.stdout != ''
+    fail_msg: "Failed to Get perm"
+
+- name: Set Mysql path_9
+  set_fact:
+    get_path_9: "{{ docker_path_9 if is_docker_running else normal_path_9 }}"
+
+- name: Get installed mysql-server package version
+  shell: "{{ get_path_9 }}"
+  register: rpm_version_output_9
+  changed_when: false
+
+- name: Testing 9
+  assert:
+    that:
+      - rpm_version_output_9.stdout != ''
+    fail_msg: "Failed to Get installed mysql-server package version"
