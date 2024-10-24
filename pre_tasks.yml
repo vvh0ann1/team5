@@ -1,0 +1,28 @@
+- name: Check docker installed
+  shell: "which docker"
+  register: docker_installed
+  ignore_errors: yes
+
+- name: Get Docker ps
+  shell: "docker ps --filter 'name=mysql' --format '{{ '{{' }}.ID{{ '}}'}}'"
+  register: mysql_docker_status
+  changed_when: false
+  ignore_errors: yes
+  when: docker_installed.rc == 0
+
+- name: Get container name
+  shell: "docker ps --filter 'name=mysql' --format '{{ '{{' }}.Names{{ '}}' }}'"
+  register: mysql_container_name
+  changed_when: false
+  ignore_errors: yes
+  when: mysql_docker_status.stdout | length > 0
+
+- name: Set container name
+  set_fact:
+    docker_container_name: "{{ mysql_container_name.stdout }}"
+  ignore_errors: yes
+  when: mysql_docker_status.stdout | length > 0
+
+- name: Set Docker status variable
+  set_fact:
+    is_docker_running: "{{ mysql_docker_status.stdout is defined and mysql_docker_status.stdout | length > 0 }}"

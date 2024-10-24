@@ -1,6 +1,9 @@
 ---
 - name: Security Checks_DB
-  hosts: aws_db
+  #hosts: aws_db
+  hosts: aws_server2
+  pre_tasks:
+    - include_tasks: pre_tasks.yml
   roles:
     - mysql_security_checks
 
