@@ -102,11 +102,11 @@
   register: latest_apache_info
   changed_when: false
 
-- name: Extract the latest Apache version
+- name: Parsing the latest Apache version
   set_fact:
     latest_version: "{{ latest_apache_info.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
 
-- name: Extract the current Apache version
+- name: Parsing the current Apache version
   set_fact:
     current_version: "{{ current_apache_version.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
 
