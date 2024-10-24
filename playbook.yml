@@ -1,7 +1,7 @@
 ---
 - name: Security Checks_DB
-  #hosts: aws_db, aws_server2
-  hosts: ubuntu
+  hosts: aws_db, aws_server2, ubuntu
+  #hosts: ubuntu
   pre_tasks:
     - include_tasks: pre_tasks.yml
   roles:
