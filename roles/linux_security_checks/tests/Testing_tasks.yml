@@ -1,0 +1,640 @@
+# Server(Linux) 1: root 계정 원격 접속 제한
+- name: Get root setting
+  become: yes
+  shell: "{{ get_path_1 }}"
+  register: ssh_check
+  changed_when: false
+
+- name: Check Status
+  set_fact:
+    status_1: "{{ 'V' if (ssh_check.stdout is defined and 'PermitRootLogin no' not in ssh_check.stdout) else 'S' }}"
+
+
+# Server(Linux) 2: 패스워드 복잡도 설정
+- name: Get pwquality.conf
+  shell: "{{ get_path_2_1 }}"
+  register: pw_quality_conf_check
+  failed_when: false
+  changed_when: false
+
+- name: Get enforce_for_root in system-auth
+  shell: "{{ get_path_2_2 }}"
+  register: enforce_root_check
+  failed_when: false
+  changed_when: false
+
+- name: Parsing minlen and minclass from pwquality.conf
+  set_fact:
+    minlen_value: "{{ (pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
+    minclass_value: "{{ (pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
+
+- name: Check Status
+  set_fact:
+    status_2: "{{ 'V' if not ((minlen_value | int >= 8 and minclass_value | int >= 3) and ('enforce_for_root' in enforce_root_check.stdout)) else 'S' }}"
+
+
+# Server(Linux) 3: 계정 잠금 임계값 설정
+- name: Get pam_faillock.so existence and deny
+  shell: "{{ get_path_3 }}"
+  with_items: "{{ linuxserver_conf_path_3 }}"
+  register: pam_check
+  failed_when: false
+  changed_when: false
+
+- name: Parsing deny values from pam_check
+  set_fact:
+    deny_values: "{{ pam_check.results | selectattr('stdout', 'search', 'deny=(\\d+)') | map('regex_search', 'deny=(\\d+)', '\\1') | flatten }}"
+
+- name: Convert deny values to integers
+  set_fact:
+    deny_values_int: "{{ deny_values | map('int') | list }}"
+
+- name: Check Status
+  set_fact:
+    status_3: "{{ 'V' if not (pam_check.results | selectattr('stdout', 'search', 'pam_faillock.so') | list | length == 2 and deny_values_int | length == 2 and deny_values_int[0] <= 5 and deny_values_int[1] <= 5) else 'S' }}"
+
+
+# Server(Linux) 4: root 홈, 디렉터리 소유자 설정
+- name: Get PATH
+  shell: "{{ get_path_4 }}"
+  register: path
+  changed_when: false
+
+- name: Split path
+  set_fact:
+    path_list: "{{ path.stdout.split(':') }}"
+
+- name: Filter path_list
+  set_fact:
+    filter_path_list: "{{ path_list[:-1] }}"
+
+- name: Check .
+  set_fact:
+    has_dot: "{{ '.' in filter_path_list }}"
+
+- name: Check Status
+  set_fact:
+    status_4: "{{ 'V' if has_dot else 'S' }}"
+
+
+# Server(Linux) 5: 파일 및 디렉터리 소유자 설정
+- name: Get files and directories without valid owner or group
+  shell: "{{ get_path_5 }}"
+  register: invalid_files
+  changed_when: false
+
+- name: Check Status
+  set_fact:
+    status_5: "{{ 'V' if invalid_files.stdout != '' else 'S' }}"
+
+
+# Server(Linux) 6: /etc/passwd 파일 소유자 및 권한 설정
+- name: Check ownership and permissions of /etc/passwd
+  stat:
+    path: "{{ linuxserver_conf_path_6_9 }}"
+  register: passwd_file_info
+
+- name: Check Status
+  set_fact:
+    status_6: "{{ 'V' if passwd_file_info.stat.pw_name != 'root' or passwd_file_info.stat.mode | int > 644 else 'S' }}"
+
+
+# Server(Linux) 7: /etc/shadow 파일 소유자 및 권한 설정
+- name: Check ownership and permissions of /etc/shadow
+  stat:
+    path: "{{ linuxserver_conf_path_7_16 }}"
+  register: shadow_file_info
+
+- name: Check Status
+  set_fact:
+    status_7: "{{ 'V' if shadow_file_info.stat.pw_name != 'root' or shadow_file_info.stat.mode | int > 400 else 'S' }}"
+
+
+# Server(Linux) 8: /etc/services 파일 소유자 및 권한 설정
+- name: Check ownership and permissions of /etc/services
+  stat:
+    path: "{{ linuxserver_conf_path_8 }}"
+  register: services_file_info
+
+- name: Check Status
+  set_fact:
+    status_8: "{{ 'V' if services_file_info.stat.pw_name != 'root' or services_file_info.stat.mode | int > 644 else 'S' }}"
+
+
+# Server(Linux) 9: 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
+- name: Get a list of user home directories
+  shell: "{{ get_path_9 }}"
+  register: home
+
+- name: Check ownership and permissions for each home directory
+  stat:
+    path: "{{ item }}"
+  register: dir_info
+  loop: "{{ home.stdout_lines }}"
+
+- name: Check Status
+  set_fact:
+    status_9: "{{ 'V' if item.stat.pw_name is not defined or item.stat.pw_name != 'root' or item.stat.mode | int > secure_permissions else 'S' }}"
+  loop: "{{ dir_info.results }}"
+
+
+# Server(Linux) 10: NIS, NIS+ 점검
+- name: Get files exist
+  shell: "{{ get_path_10_1 }}"
+  register: nis_installed
+  failed_when: false
+  changed_when: false
+
+- name: Get running
+  shell: "{{ get_path_10_2 }}"
+  register: nis_running
+  failed_when: false
+  changed_when: false
+
+- name: Check Status
+  set_fact:
+    status_10: "{{ 'V' if nis_installed.stdout != '' and nis_running.stdout != '' else 'S' }}"
+
+
+# Server(Linux) 11: Sendmail 버전 점검
+- name: Get Sendmail version
+  shell: "{{ get_path_11_1 }}"
+  register: sendmail_version
+  failed_when: false
+  changed_when: false
+
+- name: Get Postfix version
+  shell: "{{ get_path_11_2 }}"
+  register: postfix_version
+  failed_when: false
+  changed_when: false
+
+- name: Get lastest Postfix version
+  shell: "{{ get_path_11_3 }}"
+  register: postfix_latest_version
+  failed_when: false
+  changed_when: false
+
+- name: Get latest Sendmail version
+  shell: "{{ get_path_11_4 }}"
+  register: sendmail_latest_version
+  failed_when: false
+  changed_when: false
+
+- name: Check Status
+  set_fact:
+    status_11: "{{ 'V' if sendmail_version.stdout != sendmail_latest_version.stdout or postfix_version.stdout != postfix_latest_version.stdout else 'S' }}"
+
+
+# Server(Linux) 12: DNS 보안 버전 패치
+- name: Get DNS service status
+  shell: "{{ get_path_12_1 }}"
+  register: named_process
+  failed_when: false
+  changed_when: false
+
+- name: Get BIND version
+  shell: "{{ get_path_12_2 }}"
+  when: named_process.stdout != ''
+  register: bind_version
+  failed_when: false
+  changed_when: false
+
+- name: Get latest BIND version
+  shell: "{{ get_path_12_3 }}"
+  register: yum_bind_version
+  failed_when: false
+  changed_when: false
+
+- name: Filter BIND version
+  set_fact:
+    bind_up_to_date: "{{ (bind_version.stdout | regex_search('BIND ([\\d\\.]+)', '\\1')) == (yum_bind_version.stdout | regex_search('Version\\s+:\\s+(\\S+)', '\\1')) if named_process.stdout != '' else true }}"
+
+- name: Check Status
+  set_fact:
+    status_12: "{{ 'V' if named_process.stdout != '' and not bind_up_to_date else 'S' }}"
+
+
+# Server(Linux) 13: /etc/hosts 파일 소유자 및 권한 설정
+- name: Check /etc/hosts
+  stat:
+    path: "{{ linuxserver_conf_path_13 }}"
+  register: hosts_file_info
+
+- name: Check Status
+  set_fact:
+    status_13: "{{ 'V' if hosts_file_info.stat.pw_name != 'root' or hosts_file_info.stat.mode | int > 644 else 'S' }}"
+
+
+# Server(Linux) 14: cron 파일 소유자 및 권한 설정
+- name: Check /etc/crontab
+  stat:
+    path: /etc/crontab
+  register: crontab_stat
+
+- name: Check /etc/cron.allow
+  stat:
+    path: /etc/cron.allow
+  register: cron_allow_stat
+  ignore_errors: yes
+
+- name: Check /etc/cron.deny
+  stat:
+    path: /etc/cron.deny
+  register: cron_deny_stat
+
+- name: Determine crontab status
+  set_fact:
+    crontab_status: >
+      {% if crontab_stat.stat.mode | string | regex_search('^0o640$') %}
+        The permissions of /etc/crontab are secure (640 or lower).
+      {% elif crontab_stat.stat.pw_name != 'root' %}
+        The owner of /etc/crontab is not root, which is a vulnerability.
+      {% elif crontab_stat.stat.mode > '0640' %}
+        The permissions of /etc/crontab are above 640, which is a vulnerability.
+      {% else %}
+        The /etc/crontab is secure.
+      {% endif %}
+
+- name: Determine cron.allow and cron.deny status
+  set_fact:
+    cron_status: >
+      {% if cron_allow_stat is defined and cron_allow_stat.stat.exists %}
+        {% if cron_allow_stat.stat.mode | string | regex_search('^0o640$') and cron_allow_stat.stat.pw_name == 'root' %}
+          /etc/cron.allow is secure (640 or lower and owned by root).
+        {% else %}
+          /etc/cron.allow is a vulnerability.
+        {% endif %}
+      {% elif cron_deny_stat is defined and cron_deny_stat.stat.exists %}
+        {% if cron_deny_stat.stat.mode | string | regex_search('^0o640$') and cron_deny_stat.stat.pw_name == 'root' %}
+          /etc/cron.deny is secure (640 or lower and owned by root).
+        {% else %}
+          /etc/cron.deny is a vulnerability.
+        {% endif %}
+      {% else %}
+        Neither /etc/cron.allow nor /etc/cron.deny exists.
+      {% endif %}
+
+- name: Combined cron status
+  set_fact:
+    cron_combined_status: >
+      {% set messages = [] %}
+      {% set messages = messages + [crontab_status] %}
+      {% set messages = messages + [cron_status] %}
+
+      {% set cleaned_messages = messages | map('trim') | list %}
+      {% set vulnerabilities = cleaned_messages | select('search', 'vulnerability') | list %}
+      {{ cleaned_messages | join(' ') }} 
+
+- name: Check if there are vulnerabilities
+  set_fact:
+    vulnerabilities: "{{ cron_combined_status | select('search', 'vulnerability') | list }}"
+
+- name: Check Status
+  set_fact:
+    status_14: "{{ 'V' if vulnerabilities | length > 0 else 'S' }}"
+
+
+# Server(Linux) 15: 패스워드 최대 사용 기간 설정
+- name: Get /etc/login.defs
+  shell: "{{ get_path_15 }}"
+  register: max_days_info
+  changed_when: false
+
+- name: Parsing PASS_MAX_DAYS value
+  set_fact:
+    pass_max_days: "{{ max_days_info.stdout.split()[1] | int }}"
+
+- name: Check Status
+  set_fact:
+    status_15: "{{ 'V' if pass_max_days | int > max_days else 'S' }}"
+
+# Sever(Linux) 16: 패스워드 파일 보호
+- name: Check /etc/shadow exists
+  stat:
+    path: "{{ linuxserver_conf_path_7_16 }}"
+  register: shadow_file
+
+# 2. /etc/passwd 파일의 두 번째 필드가 "x"인지 확인
+- name: Get /etc/passwd
+  shell: "{{ get_path_16 }}"
+  register: passwd_check
+  changed_when: false
+
+# 3. Set diag_result as "S" (양호) or "V" (취약) based on checks
+- name: Check Status
+  set_fact:
+    status_16: "{{ 'S' if shadow_file.stat.exists and passwd_check.stdout == '' else 'V' }}"
+
+# Sever(Linux) 17: /etc/(x)inetd.conf 파일 소유자 및 권한 설정
+- name: Check file exists
+  stat:
+    path: "{{ item }}"
+  with_items: "{{ linuxserver_conf_path_17 }}"
+  register: inetd_conf_info
+
+- name: Filter inetd.conf existence
+  set_fact:
+    file_exists: "{{ inetd_conf_info.results | selectattr('stat.exists', 'equalto', True) | list | length > 0 }}"
+
+- name: Check Status
+  set_fact:
+    status_17: "{{ 'S' if not file_exists else 'S' if inetd_conf_info.results[0].stat.pw_name == 'root' and inetd_conf_info.results[0].stat.mode | int <= 644 else 'V' }}"
+
+# Sever(Linux) 18: /etc/syslog.conf 파일 소유자 및 권한 설정
+- name: Check syslog files
+  stat:
+    path: "{{ item }}"
+  register: syslog_file_info
+  with_items: "{{ linuxserver_conf_path_18 }}"
+  ignore_errors: yes
+  changed_when: false
+
+- name: Check Status
+  set_fact:
+    status_18: "{{ 'S' if syslog_file_info.results | selectattr('stat.exists', 'equalto', True) | selectattr('stat.pw_name', 'equalto', 'root') | selectattr('stat.mode', 'le', 644) | list | length == syslog_file_info.results | length else 'V' }}"
+
+#Server(Linux) 19: SUID, SGID, Sticky bit 설정 파일 점검
+# 1. SUID, SGID가 설정된 파일 검색
+- name: Get permissions
+  become: yes
+  shell: "{{ get_path_19 }}"
+  register: suid_sgid_files
+  ignore_errors: yes
+
+# 2. SUID, SGID가 부여된 파일이 있는지 여부 확인
+- name: Filter files exist
+  set_fact:
+    suid_sgid_found: "{{ suid_sgid_files.stdout != '' }}"
+
+# 3. SUID, SGID 파일이 존재하지 않으면 양호(S), 존재하면 취약(V)
+- name: Check Status
+  set_fact:
+    status_19: "{{ 'S' if not suid_sgid_found else 'V' }}"
+
+
+#Sever(Linux) 20: world writable 파일 점검
+
+- name: Get world writable files
+  shell: "{{ get_path_20 }}"
+  register: world_writable_files
+  ignore_errors: yes
+
+# 2. world writable 파일이 있는지 확인
+- name: Filter file existence
+  set_fact:
+    writable_files_found: "{{ world_writable_files.stdout != '' }}"
+
+# 3. 양호/취약 판단 - world writable 파일이 없거나, 있더라도 설정 이유를 확인하는 경우 양호
+- name: Check Status
+  set_fact:
+    status_20: "{{ 'S' if not writable_files_found else 'V' }}"
+
+#Serve(Linux) 21: $HOME/.rhosts, hosts.equiv 사용 금지
+# 1. /etc/hosts.equiv 파일 확인
+- name: Check perm
+  stat:
+    path: /etc/hosts.equiv
+  register: hosts_equiv_info
+  ignore_errors: yes
+
+# 2. $HOME/.rhosts 파일 확인
+- name: Check perm
+  stat:
+    path: "{{ item }}/.rhosts"
+  with_items: "{{ linuxserver_conf_path_21 }}"
+  register: rhosts_info
+  ignore_errors: yes
+
+- name: Check Status
+  set_fact:
+    status_21: "{{ 'S' if (hosts_equiv_info.stat.exists == False or (hosts_equiv_info.stat.pw_name == 'root' and hosts_equiv_info.stat.mode | int == 600)) and (rhosts_info.results | selectattr('stat.exists', 'eq', False) | list | length == linuxserver_conf_path_21 | length) else 'V' }}"
+
+#Server(Linux) 22: 접속 IP 및 포트 제한
+# 1. /etc/hosts.deny 파일 확인
+- name: Check exists
+  become: yes
+  stat:
+    path: linuxserver_conf_path_22_1
+  register: hosts_deny_file
+  changed_when: false
+
+# 2. /etc/hosts.allow 파일 확인
+- name: Check exists
+  become: yes
+  stat:
+    path: linuxserver_conf_path_22_2
+  register: hosts_allow_file
+  changed_when: false
+
+# 3. iptables 설치 여부 확인
+- name: Get iptables installation
+  shell: "{{ get_path_22_1 }}"
+  register: iptables_installed
+  ignore_errors: yes
+  changed_when: false
+
+# 4. iptables 규칙 확인 (iptables가 설치되어 있을 경우)
+- name: Get iptables rules
+  shell: "{{ get_path_22_2 }}"
+  register: iptables_rules
+  when: iptables_installed.rc == 0
+  ignore_errors: yes
+  changed_when: false
+
+# 5. firewall-cmd 설정 확인
+- name: Check firewall-cmd rules
+  shell: "{{ get_path_22_3 }}"
+  register: firewall_rules
+  ignore_errors: yes
+  changed_when: false
+
+# 6. Set diag_result based on the existence of access restrictions
+- name: Check Status
+  set_fact:
+    status_22: "{{ ('S' if (hosts_deny_file.stat.exists or hosts_allow_file.stat.exists or (iptables_installed.rc == 0 and iptables_rules.stdout != '') or firewall_rules.stdout != '') else 'V') | trim }}"
+
+
+
+#Server(Linux) 23: Finger 서비스 비활성화
+# 1. Check if /etc/xinetd.d/finger file exists
+- name: Check exists
+  stat:
+    path: linuxserver_conf_path_23_1
+  register: xinetd_finger_file
+  ignore_errors: yes
+
+# 2. Check if /etc/inetd.conf file exists
+- name: Check exists
+  stat:
+    path: linuxserver_conf_path_23_2
+  register: inetd_conf_file
+  ignore_errors: yes
+
+# 3. Determine if Finger service is disabled (assuming it's disabled if both files don't exist)
+- name: Check Status
+  set_fact:
+    status_23: "{{ 'S' if (xinetd_finger_file.stat.exists == False and inetd_conf_file.stat.exists == False) else 'V' }}"
+
+
+#Server(Linux) 24: Anonymous FTP 서비스 비활성화
+# 1. Check if FTP account exists in /etc/passwd
+- name: Get ftp account statu
+  shell: "{{ get_path_24 }}"
+  register: ftp_account
+  ignore_errors: yes
+
+# 2. Check if ProFTPD configuration file exists
+- name: Check exists
+  stat:
+    path: linuxserver_conf_path_24_1
+  register: proftpd_conf_file
+  ignore_errors: yes
+
+# 3. Check if vsftpd configuration file exists
+- name: Check exists
+  stat:
+    path: linuxserver_conf_path_24_2
+  register: vsftpd_conf_file
+  ignore_errors: yes
+
+# 4. Determine if Anonymous FTP is disabled based on file existence and FTP account
+- name: Check Status
+  set_fact:
+    status_24: "{{ 'S' if (ftp_account.stdout == '' and proftpd_conf_file.stat.exists == False and vsftpd_conf_file.stat.exists == False) else 'V' }}"
+
+#Server(Linux) 25: r 계열 서비스 비활성화
+# 1. Check if /etc/xinetd.d/rsh file exists
+- name: Check exists
+  stat:
+    path: linuxserver_conf_path_25_1
+  register: rsh_file
+  ignore_errors: yes
+
+# 2. Check if /etc/xinetd.d/rlogin file exists
+- name: Check exists
+  stat:
+    path: linuxserver_conf_path_25_2
+  register: rlogin_file
+  ignore_errors: yes
+
+# 3. Check if /etc/xinetd.d/rexec file exists
+- name: Check exists
+  stat:
+    path: linuxserver_conf_path_25_3
+  register: rexec_file
+  ignore_errors: yes
+
+# 4. Determine if r services (rsh, rlogin, rexec) are disabled or if xinetd is not installed
+- name: Check Status
+  set_fact:
+    status_25: "{{ 'S' if (rsh_file.stat.exists == False and rlogin_file.stat.exists == False and rexec_file.stat.exists == False) else 'V' }}"
+
+#Server(Linux) 26: DoS 공격에 취약한 서비스 비활성화
+# 1. xinetd가 설치되어 있는지 확인
+- name: Get installation status
+  shell: "{{ get_path_26_1 }}"
+  register: xinetd_installed
+  ignore_errors: yes
+  changed_when: false
+
+# 2. xinetd가 설치되지 않았다면 바로 양호 처리
+- name: Set result
+  set_fact:
+    status_26: "S"
+  when: xinetd_installed.rc != 0
+
+# 3. 각 서비스에 대해 설정 파일 존재 여부 및 비활성화 상태 확인 (xinetd가 설치된 경우에만 실행)
+- name: Check status
+  stat:
+    path: "/etc/xinetd.d/{{ item }}"
+  register: service_status
+  when: xinetd_installed.rc == 0
+  with_items: "{{ services }}"
+  ignore_errors: yes
+  changed_when: false
+
+# 4. 서비스가 비활성화되었는지 확인
+- name: Check disabled in xinetd
+  shell: "{{ get_path_26_2 }}"
+  register: disable_check
+  when: service_status.stat.exists and xinetd_installed.rc == 0
+  with_items: "{{ services }}"
+  ignore_errors: yes
+  changed_when: false
+
+# 5. 서비스가 비활성화되었는지 확인하여 결과 설정
+- name: Check Status
+  set_fact:
+    status_26: "{{ 'S' if disable_check.results | selectattr('rc', 'eq', 0) | list | length == services | length else 'V' }}"
+  when: xinetd_installed.rc == 0
+
+#Server(Linux) 27: NFS 서비스 비활성화
+# 1. NFS 데몬 구동 여부 확인
+- name: Get NFS daemon status
+  shell: "{{ get_path_27 }}"
+  register: nfsd_process
+  changed_when: false
+  ignore_errors: yes
+
+# 2. NFS 서비스 구동 상태에 따라 양호/취약 판단
+- name: Check Status
+  set_fact:
+    status_27: "{{ 'V' if nfsd_process.stdout != '' else 'S' }}"
+
+#Server(Linux) 28: automountd 제거
+# 1. Check if automountd daemon is running
+- name: Get automountd daemon status
+  shell: "{{ get_path_28 }}"
+  register: automountd_status
+  changed_when: false
+  ignore_errors: yes
+
+# 2. Set diag_result based on whether automountd is running
+- name: Check Status
+  set_fact:
+    status_28: "{{ 'V' if automountd_status.stdout != '' else 'S' }}"
+
+# Gather status
+- name: Gather status
+  set_fact:
+    ServerLinux_status:
+      status1: "{{ status_1 }}"
+      status2: "{{ status_2 }}"
+      status3: "{{ status_3 }}"
+      status4: "{{ status_4 }}"
+      status5: "{{ status_5 }}"
+      status6: "{{ status_6 }}"
+      status7: "{{ status_7 }}"
+      status8: "{{ status_8 }}"
+      status9: "{{ status_9 }}"
+      status10: "{{ status_10 }}"
+      status11: "{{ status_11 }}"
+      status12: "{{ status_12 }}"
+      status13: "{{ status_13 }}"
+      status14: "{{ status_14 }}"
+      status15: "{{ status_15 }}"
+      status16: "{{ status_16 }}"
+      status17: "{{ status_17 }}"
+      status18: "{{ status_18 }}"
+      status19: "{{ status_19 }}"
+      status20: "{{ status_20 }}"
+      status21: "{{ status_21 }}"
+      status22: "{{ status_22 }}"
+      status23: "{{ status_23 }}"
+      status24: "{{ status_24 }}"
+      status25: "{{ status_25 }}"
+      status26: "{{ status_26 }}"
+      status27: "{{ status_27 }}"
+      status28: "{{ status_28 }}"
+
+- name: Print status
+  debug:
+    var: ServerLinux_status
+
+- name: Status to file
+  lineinfile:
+    path: "{{ diag_file_path }}"
+    line: "{{ LAMP_type }}, {{ item[1] }}, {{ ServerLinux_status['status' ~ item[0]] }}, {{ item[2] }}"
+    create: yes
+  loop: "{{ diag_file_value }}"
