@@ -2,7 +2,7 @@
 - name: Security Checks_DB
   hosts: aws_db, aws_server2, ubuntu
   pre_tasks:
-    - include_tasks: pre_tasks_db.yml
+    - include_tasks: roles/mysql_security_checks/pre_tasks.yml
   roles:
     - mysql_security_checks
   tasks:
@@ -12,7 +12,8 @@
 - name: Security Checks_Web
   hosts: aws_web, aws_server2, ubuntu
   pre_tasks:
-    - include_tasks: pre_tasks_web.yml
+    - include_tasks: roles/apache_security_checks/pre_tasks.yml
+    - include_tasks: roles/php_security_checks/pre_tasks.yml
   roles:
     - apache_security_checks
     - php_security_checks

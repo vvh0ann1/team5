@@ -19,8 +19,7 @@ debian_php_get_path_4: grep -E disable_functions {{ debian_php_ini_path }}
 rhel_php_get_path_5: grep -E open_basedir {{ rhel_php_ini_path }}
 debian_php_get_path_5: grep -E open_basedir {{ debian_php_ini_path }}
 
-rhel_php_get_path_6: "curl -s https://www.php.net/downloads.php"
-debian_php_get_path_6: "curl -s https://www.php.net/downloads.php"
+get_path_6: "curl -s https://www.php.net/downloads.php"
 
 diag_file_value:
     - [1,'오류 메시지 노출','php.ini파일에서 display_errors = off로 변경']
