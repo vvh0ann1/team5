@@ -5,4 +5,4 @@ db_instance ansible_host=43.201.146.14
 [aws_server2]
 aws_instance ansible_host=15.165.75.4
 [ubuntu]
-localhost
+ubuntu ansible_host=192.168.171.130
