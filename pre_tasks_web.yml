@@ -1,0 +1,134 @@
+- name: Determine apache_config_path_1 for RedHat
+  set_fact:
+    apache_config_path_1: "{{ rhel_apache_config_path_1 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine apache_config_path_1 for Debian
+  set_fact:
+    apache_config_path_1: "{{ debian_apache_config_path_1 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine apache_config_path_2 for RedHat
+  set_fact:
+    apache_config_path_2: "{{ rhel_apache_config_path_2 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine apache_config_path_2 for Debian
+  set_fact:
+    apache_config_path_2: "{{ debian_apache_config_path_2 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine diag_file_path for RedHat
+  set_fact:
+    diag_file_path: "{{ rhel_diag_file_path }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine diag_file_path for Debian
+  set_fact:
+    diag_file_path: "{{ debian_diag_file_path }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_1 for RedHat
+  set_fact:
+    get_path_1: "{{ rhel_get_path_1 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_1 for Debian
+  set_fact:
+    get_path_1: "{{ debian_get_path_1 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_2_1 for RedHat
+  set_fact:
+    get_path_2_1: "{{ rhel_get_path_2_1 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_2_1 for Debian
+  set_fact:
+    get_path_2_1: "{{ debian_get_path_2_1 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_2_2 for RedHat
+  set_fact:
+    get_path_2_2: "{{ rhel_get_path_2_2 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_2_2 for Debian
+  set_fact:
+    get_path_2_2: "{{ debian_get_path_2_2 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_3_1 for RedHat
+  set_fact:
+    get_path_3_1: "{{ rhel_get_path_3_1 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_3_1 for Debian
+  set_fact:
+    get_path_3_1: "{{ debian_get_path_3_1 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_3_2 for RedHat
+  set_fact:
+    get_path_3_2: "{{ rhel_get_path_3_2 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_3_2 for Debian
+  set_fact:
+    get_path_3_2: "{{ debian_get_path_3_2 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_4 for RedHat
+  set_fact:
+    get_path_4: "{{ rhel_get_path_4 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_4 for Debian
+  set_fact:
+    get_path_4: "{{ debian_get_path_4 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_5 for RedHat
+  set_fact:
+    get_path_5: "{{ rhel_get_path_5 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_5 for Debian
+  set_fact:
+    get_path_5: "{{ debian_get_path_5 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_6 for RedHat
+  set_fact:
+    get_path_6: "{{ rhel_get_path_6 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_6 for Debian
+  set_fact:
+    get_path_6: "{{ debian_get_path_6 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_7_1 for RedHat (AmazonLinux 2023)
+  set_fact:
+    get_path_7_1: "{{ rhel_get_path_7_1 }}"
+  when: ansible_os_family == "RedHat" and ansible_distribution_version is defined and ansible_distribution_version == "2023"
+
+- name: Determine get_path_7_1 for RedHat (AmazonLinux 2)
+  set_fact:
+    get_path_7_1: "{{ aws2_get_path_7_1 }}"
+  when: ansible_os_family == "RedHat" and ansible_distribution_version is defined and ansible_distribution_version == "2"
+
+- name: Determine get_path_7_1 for Debian
+  set_fact:
+    get_path_7_1: "{{ debian_get_path_7_1 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine get_path_7_2 for RedHat
+  set_fact:
+    get_path_7_2: "{{ rhel_get_path_7_2 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine get_path_7_2 for Debian
+  set_fact:
+    get_path_7_2: "{{ debian_get_path_7_2 }}"
+  when: ansible_os_family == "Debian"
