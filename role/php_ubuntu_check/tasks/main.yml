@@ -1,0 +1,110 @@
+#PHP1. 오류 메시지 노출
+- name: Get display_errors in php.ini
+  shell: "{{ get_path1 }}"
+  register: display_errors_check
+  ignore_errors: yes
+
+- name: Check status
+  set_fact:
+    status_1: "{{ 'V' if display_errors_check.stdout is not search('display_errors\\s*=\\s*Off') else 'S' }}"
+
+
+# PHP2: 불필요한 헤더 정보 노출
+- name: Get expose_php in php.ini
+  shell: "{{ get_path2 }}"
+  register: expose_php_check
+  ignore_errors: yes
+
+
+- name: fail if expose_php is set to On
+  set_fact:
+    status_2: "{{ 'V' if expose_php_check.stdout is not search('expose_php\\s*=\\s*Off') else 'S' }}"
+
+
+# PHP3: 외부 URL 파일 인클루드 비활성화
+- name: Check allow_url_fopen in php.ini
+  shell: "{{ get_value3 }}"
+  register: allow_url_check
+  ignore_errors: yes
+
+- name: Set allow_url_fopen result
+  set_fact:
+    allow_url_result: "{{ allow_url_check.stdout | trim }}"
+
+- name: fail if allow_url_fopen is set to On
+  set_fact:
+    status_3: "{{ 'V' if allow_url_check.stdout is not match('allow_url_fopen\\s*=\\s*Off') else 'S' }}"
+
+# PHP4:
+- name: Check disable_functions in php.ini
+  shell: "{{ get_value4 }}"
+  register: disable_functions_check
+  ignore_errors: yes
+
+- name: fail if disable_functions is set
+  set_fact:
+    status_4: "{{ 'V' if disable_functions_check.stdout is search('disable_functions =\\s*$') else 'S' }}"
+
+
+# PHP5: 실행 경로 제한
+- name: Check open_basedir in php.ini
+  shell: "{{ get_value5 }}"
+  register: open_basedir_check
+
+- name: Set open_basedir result if available
+  set_fact:
+    open_basedir_result: "{{ open_basedir_check.stdout_lines[1] | default('') }}"
+  when: open_basedir_check.stdout_lines | length > 1
+
+- name: Set value after equals if open_basedir_result is set
+  set_fact:
+    value_after_equals: "{{ open_basedir_result.split('=')[1] | trim }}"
+  when: open_basedir_result | length > 0
+
+- name: Fail if open_basedir is empty
+  set_fact:
+    status_5: "{{ 'V' if value_after_equals | default('') == '' else 'S' }}"
+
+# PHP6: 최신 보안 패치 적용
+- name: Fetch PHP download page
+  shell: "{{ get_value6 }}"
+  register: php_download_page
+
+- name: Extract the latest PHP version
+  set_fact:
+    latest_php_version: "{{ php_download_page.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+
+- name: Check current PHP version
+  shell: php -v
+  register: current_php_version
+
+- name: Extract the current version number
+  set_fact:
+    current_version: "{{ current_php_version.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+
+
+- name: Display secure status
+  set_fact:
+    status_6: "{{ 'V' if current_version is defined and latest_php_version is defined and current_version != latest_php_version and current_version < latest_php_version else 'S' }}"
+
+
+- name: Gather status
+  set_fact:
+    PHP_status:
+      status1: "{{ status_1 }}"
+      status2: "{{ status_2 }}"
+      status3: "{{ status_3 }}"
+      status4: "{{ status_4 }}"
+      status5: "{{ status_5 }}"
+      status6: "{{ status_6 }}"
+- name: Print status
+  debug:
+    var: PHP_status
+
+- name: Status to file
+  lineinfile:
+    path: "{{ diag_file_path }}"
+    line: "{{ LAMP_type }}, {{ item[1] }}, {{ PHP_status['status' ~ item[0]] }}, {{ item[2] }}"
+    create: yes
+  loop: "{{ diag_file_value }}"
+                                       
