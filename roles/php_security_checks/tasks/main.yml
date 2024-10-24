@@ -1,7 +1,7 @@
 #PHP1. 오류 메시지 노출
 ---
 - name: Get display_errors in php.ini
-  shell: "{{ get_path_1 }}"
+  shell: "{{ p_get_path_1 }}"
   register: display_errors_check
   ignore_errors: yes
 
@@ -12,7 +12,7 @@
 
 # PHP2: 불필요한 헤더 정보 노출
 - name: Get expose_php in php.ini
-  shell: "{{ get_path_2 }}"
+  shell: "{{ p_get_path_2 }}"
   register: expose_php_check
   ignore_errors: yes
 
@@ -24,7 +24,7 @@
 
 # PHP3: 외부 URL 파일 인클루드 비활성화
 - name: Get allow_url_fopen in php.ini
-  shell: "{{ get_path_3 }}"
+  shell: "{{ p_get_path_3 }}"
   register: allow_url_check
   ignore_errors: yes
 
@@ -36,7 +36,7 @@
 
 # PHP4:
 - name: Get disable_functions in php.ini
-  shell: "{{ get_path_4 }}"
+  shell: "{{ p_get_path_4 }}"
   register: disable_functions_check
   ignore_errors: yes
 
@@ -47,7 +47,7 @@
 
 # PHP5: 실행 경로 제한
 - name: Get open_basedir in php.ini
-  shell: "{{ get_path_5 }}"
+  shell: "{{ p_get_path_5 }}"
   register: open_basedir_check
 
 - name: Set open_basedir result if available
@@ -67,7 +67,7 @@
 
 # PHP6: 최신 보안 패치 적용
 - name: Fetch PHP download page
-  shell: "{{ get_path_6 }}"
+  shell: "{{ p_get_path_6 }}"
   register: php_download_page
 
 - name: Extract the latest PHP version

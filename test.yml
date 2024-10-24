@@ -1,0 +1,16 @@
+- name: Request Diagnostic Result from Web Server
+  hosts: aws_server2  # 또는 웹 서버 호스트
+  tasks:
+    - name: Send request to web server for diagnostic result
+      uri:
+        url: "http://15.165.75.4/project/test/test.php"  # 웹 서버에서 결과를 표시하는 URL
+        return_content: yes
+      register: result
+
+    - name: Print the result from the web server
+      debug:
+        var: result
+
+    - name: Print the result content
+      debug:
+        var: result.content
