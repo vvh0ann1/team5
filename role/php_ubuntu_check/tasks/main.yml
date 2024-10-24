@@ -22,7 +22,7 @@
 
 
 # PHP3: 외부 URL 파일 인클루드 비활성화
-- name: Check allow_url_fopen in php.ini
+- name: Get allow_url_fopen in php.ini
   shell: "{{ get_path_3 }}"
   register: allow_url_check
   ignore_errors: yes
@@ -36,7 +36,7 @@
     status_3: "{{ 'V' if allow_url_check.stdout is not match('allow_url_fopen\\s*=\\s*Off') else 'S' }}"
 
 # PHP4:
-- name: Check disable_functions in php.ini
+- name: Get disable_functions in php.ini
   shell: "{{ get_path_4 }}"
   register: disable_functions_check
   ignore_errors: yes
@@ -47,7 +47,7 @@
 
 
 # PHP5: 실행 경로 제한
-- name: Check open_basedir in php.ini
+- name: Get open_basedir in php.ini
   shell: "{{ get_path_5 }}"
   register: open_basedir_check
 
