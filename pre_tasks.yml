@@ -162,12 +162,12 @@
 - name: Determine get_path_7_1 for RedHat (AmazonLinux 2023)
   set_fact:
     get_path_7_1: "{{ rhel_get_path_7_1 }}"
-  when: ansible_os_family == "RedHat" && ansible_os_verion == "2023"
+  when: ansible_os_family == "RedHat" and ansible_distribution_version is defined and ansible_distribution_version == "2023"
 
 - name: Determine get_path_7_1 for RedHat (AmazonLinux 2)
   set_fact:
-    get_path_7_1: "{{ rhel_get_path_7_1 }}"
-  when: ansible_os_family == "RedHat" && ansible_os_version == "2"
+    get_path_7_1: "{{ aws2_get_path_7_1 }}"
+  when: ansible_os_family == "RedHat" and ansible_distribution_version is defined and ansible_distribution_version == "2"
 
 - name: Determine get_path_7_1 for Debian
   set_fact:
