@@ -152,7 +152,7 @@
 
 - name: Parse RPM version
   set_fact:
-    rpm_version_9: "{{ rpm_version_output_9.stdout_lines[0].split('-')[4] }}"
+    rpm_version_9: "{{ rpm_version_output_9.stdout_lines[0] | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
 
 - name: Check Status
   set_fact:

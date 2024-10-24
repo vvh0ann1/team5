@@ -28,12 +28,14 @@ regi_users_3: ['mysql', 'root']
 regi_users_4: ['root', 'mysql']
 regi_pass_algo_7: ['ed25519','caching_sha2_password']
 
-mysql_config_path_6: '/etc/my.cnf'
+rhel_config_path_6: '/etc/my.cnf'
+debian_config_path_6: '/etc/mysql/my.cnf'
 get_path_5: ps -ef | grep mysql | grep -v grep
 docker_path_6: docker exec -it {{ docker_container_name }} ls -alL {{ mysql_config_path_6 }}
 normal_path_6: ls -alL {{ mysql_config_path_6 }}
 docker_path_9: docker exec -it {{ docker_container_name }} rpm -qa | grep mysql
-normal_path_9: rpm -qa | grep mysql
+rhel_normal_path_9: rpm -qa | grep mysql
+debian_normal_path_9: dpkg -l | grep mysql
 
 LAMP_type: 'Mysql'
 diag_file_path: 'home/ec2-user/result.txt'

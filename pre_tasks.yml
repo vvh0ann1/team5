@@ -26,3 +26,23 @@
 - name: Set Docker status variable
   set_fact:
     is_docker_running: "{{ mysql_docker_status.stdout is defined and mysql_docker_status.stdout | length > 0 }}"
+
+- name: Determine Mysql_config_path_6 for RedHat
+  set_fact:
+    mysql_config_path_6: "{{ rhel_config_path_6 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine Mysql_config_path_6 for RedHat
+  set_fact:
+    mysql_config_path_6: "{{ debian_config_path_6 }}"
+  when: ansible_os_family == "Debian"
+
+- name: Determine normal_path_9 for RedHat
+  set_fact:
+    normal_path_9: "{{ rhel_normal_path_9 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine normal_path_9 for RedHat
+  set_fact:
+    normal_path_9: "{{ debian_normal_path_9 }}"
+  when: ansible_os_family == "Debian"
