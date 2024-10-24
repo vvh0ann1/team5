@@ -1,0 +1,70 @@
+ssh_config_file: /etc/ssh/sshd_config
+pam_files:
+  - /etc/pam.d/system-auth
+  - /etc/pam.d/password-auth
+pwquality_conf_file: /etc/security/pwquality.conf
+system_auth_file: /etc/pam.d/system-auth
+passwd_file_path: '/etc/passwd'
+shadow_file_path: '/etc/shadow'
+services_file_path: '/etc/services'
+rsyslog_file_path: '/etc/rsyslog.conf'
+hosts_file_path: '/etc/hosts'
+home_dirs_path: '/home'
+login_defs_path: '/etc/login.defs'
+inetd_conf_paths:
+  - '/etc/inetd.conf'
+  - '/etc/xinetd.conf'
+syslog_files:
+  - '/etc/syslog.conf'
+  - '/etc/rsyslog.conf'
+finger_file_path: /etc/xinetd.d/finger
+xinetd_path: /etc/xinetd.conf
+xinetd_rsf_file: '/etc/xinetd.d/rsh'
+xinetd_rlogin_file: '/etc/xinetd.d/rlogin'
+xinetd_rexec_file: '/etc/xinetd.d/rexec'
+inted_conf: /etc/inetd.conf
+proftpd_file: /etc/proftpd/proftpd.conf
+vsfpd_file: /etc/vsftpd/vsftpd.conf
+rsh_path: /etc/xinetd.d/rsh
+rlogin_path: /etc/xinetd.d/rlogin
+rexec_path: /etc/xinetd.d/rexec
+hosts_deny_path: /etc/hosts.deny
+hosts_allow_path: /etc/hosts.allow
+home_dirs: "{{ lookup('pipe', 'ls /home').split() }}"
+services:
+  - echo
+  - discard
+  - daytime
+  - chargen
+max_days: 90
+secure_permissions: 644
+LAMP_type: 'Server(Linux)'
+# 해당 경로 추후 반드시 변경 하기
+#diag_file_path: '/home/ec2-user/Diag_File.txt'
+diag_file_path: '/project1/git_/team5/text1.txt'
+get_path_1: grep PermitRootLogin {{ ssh_config_file }}
+get_path_2_1: grep -E "minlen|minclass" {{ pwquality_conf_file }}
+get_path_2_2: grep enforce_for_root {{ system_auth_file }}
+get_path_3: grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}
+get_path_4: echo $PATH
+get_path_5: 'find /etc /tmp /bin /sbin \( -nouser -o -nogroup \) -xdev -exec ls -l {} \\; 2>/dev/null'
+get_path_9: 'cat {{ passwd_file_path }} | grep /home | cut -d: -f6'
+get_path_10_1:  '|
+    if [ -f /usr/sbin/ypserv ] && [ -f /usr/sbin/ypbind ] && [ -f /usr/sbin/ypxfrd ] && [ -f /usr/sbin/rpc.yppasswdd ] && [ -f /usr/sbin/rpc.yupdated ]; then
+      echo "installed"
+    fi'
+get_path_10_2: ps -ef | grep -E "ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.yupdated" | grep -v grep
+get_path_11_1: cat /etc/mail/sendmail.cf | grep DZ | awk '{print $1}' | sed 's/DZ//g'
+get_path_11_2: postconf -d | grep '^mail_version' | awk '{print $3}'
+get_path_11_3: yum info postfix | grep Version | awk '{print $3}'
+get_path_11_4: yum info sendmail | grep Version | awk '{print $3}'
+get_path_12_1: ps -ef | grep named | grep -v grep
+get_path_12_2: named -V
+get_path_12_3: yum info bind | grep Version
+get_path_15: grep '^PASS_MAX_DAYS' {{ login_defs_path }}
+get_path_19: 'find / -user root -type f \\( -perm -4000 -o -perm -2000 \\) -exec ls -lg {} + 2>/dev/null'
+get_path_20: find / -type f -perm -2 -exec ls -l {} + | grep -v '/tmp'
+get_path_24: grep ftp /etc/passwd
+get_path_26: rpm -q xinetd
+get_path_27: ps -ef | grep '[n]fsd'
+get_path_28: ps -ef | grep '[a]utomountd'

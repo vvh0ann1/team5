@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # cron 파일 소유자 및 권한 설정
 ---
 - name: Check permissions and ownership of /etc/crontab, /etc/cron.allow, and /etc/cron.deny
@@ -94,4 +95,35 @@
         line: "{{ LAMP_type }}, cron 파일 소유자 및 권한 설정, {{ diag_result }}, chown root 혹은 chmod 640으로 파일 소유자 및 권한 변경"
         create: yes
 
+=======
+---
+- name: Check cron.allow and cron.deny files
+  hosts: aws
+  become: yes
+  tasks:
+    - name: Check if cron.allow file exists
+      stat:
+        path: /etc/cron.allow
+      register: cron_allow
+
+    - name: Check if cron.deny file exists
+      stat:
+        path: /etc/cron.deny
+      register: cron_deny
+
+    - name: Evaluate cron.allow and cron.deny files
+      debug:
+        msg: "OK: Both cron.allow and cron.deny files are missing."
+      when: not cron_allow.stat.exists and not cron_deny.stat.exists
+
+    - name: Check permissions of cron.allow file
+      debug:
+        msg: "WARNING: cron.allow file exists with permissions exceeding 640."
+      when: cron_allow.stat.exists and cron_allow.stat.mode | int > 640
+
+    - name: Check permissions of cron.deny file
+      debug:
+        msg: "WARNING: cron.deny file exists with permissions exceeding 640."
+      when: cron_deny.stat.exists and cron_deny.stat.mode | int > 640
+>>>>>>> 509c195 (FIX:linux_ubuntu)
 
