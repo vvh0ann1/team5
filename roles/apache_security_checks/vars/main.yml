@@ -11,13 +11,26 @@ LAMP_type: 'Apache'
 rhel_diag_file_path: '/home/ec2-user/Diag_File.txt'
 debian_diag_fie_path: '/home/ubuntu/autoever/team5/Diag_File.txt'
 
-get_path_1: grep DocumentRoot {{ apache_config_path_2 }}
-get_path_2_1: find {{ apache_config_path_1 }} -name manual
-get_path_2_2: grep -i 'manual' {{ apache_config_path_2 }}
-get_path_3_1: grep FollowSymLinks {{ apache_config_path_2 }}
-get_path_3_2: grep '^Alias' {{ apache_config_path_2 }}
-get_path_4: grep LimitRequestBody {{ apache_config_path_2 }}
-get_path_5: grep -r 'Indexes' {{ apache_config_path_2 }}
+rhel_get_path_1: grep DocumentRoot {{ rhel_apache_config_path_2 }}
+debian_get_path_1: grep DocumentRoot {{ debian_apache_config_path_2 }}
+
+rhel_get_path_2_1: find {{ rhel_apache_config_path_1 }} -name manual
+debian_get_path_2_1: find {{ debian_apache_config_path_1 }} -name manual
+
+rhel_get_path_2_2: grep -i 'manual' {{ rhel_apache_config_path_2 }}
+debian_get_path_2_2: grep -i 'manual' {{ debian_apache_config_path_2 }}
+
+rhel_get_path_3_1: grep FollowSymLinks {{ rhel_apache_config_path_2 }}
+debian_get_path_3_1: grep FollowSymLinks {{ debian_apache_config_path_2 }}
+
+rhel_get_path_3_2: grep '^Alias' {{ rhel_apache_config_path_2 }}
+debian_get_path_3_2: grep '^Alias' {{ debian_apache_config_path_2 }}
+
+rhel_get_path_4: grep LimitRequestBody {{ rhel_apache_config_path_2 }}
+debian_get_path_4: grep LimitRequestBody {{ debian_apache_config_path_2 }}
+
+rhel_get_path_5: grep -r 'Indexes' {{ rhel_apache_config_path_2 }}
+debian_get_path_5: grep -r 'Indexes' {{ debian_apache_config_path_2 }}
 
 rhel_get_path_6: ps -ef | grep httpd
 debian_get_path_6: ps -ef | grep apache2
