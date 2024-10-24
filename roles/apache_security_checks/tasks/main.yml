@@ -1,5 +1,5 @@
 # Apache: 웹 서비스 영역의 분리
-- name: Check current DocumentRoot
+- name: Get the current DocumentRoot
   shell: "{{ get_path_1 }}"
   register: document_root_check
   ignore_errors: yes
@@ -10,12 +10,12 @@
 
 
 # Apache: 불필요한 파일 제거
-- name: Check if the manual directory exists
+- name: Get the status of the manual directory
   shell: "{{ get_path_2_1 }}"
   register: manual_dir_check
   ignore_errors: yes
 
-- name: Check for manual settings in httpd.conf
+- name: Get the manual settings from httpd.conf
   shell: "{{ get_path_2_2 }}"
   register: manual_setting_check
   ignore_errors: yes
@@ -26,35 +26,23 @@
 
 
 # Apache: 링크 사용 금지
-- name: Check if FollowSymLinks is enabled
+- name: Get the value of FollowSymLinks
   shell: "{{ get_path_3_1 }}"
   register: follow_symlinks_check
   ignore_errors: yes
 
-- name: Check for aliases in Apache configuration
+- name: Get the value of aliases
   shell: "{{ get_path_3_2 }}"
   register: alias_check
   ignore_errors: yes
 
 - name: Determine FollowSymLinks status
   set_fact:
-    symlink_result: "S"
-  when: follow_symlinks_check.stdout is not search('Indexes')
-
-- name: Update symlink_result if vulnerabilities exist
-  set_fact:
-    symlink_result: "V"
-  when: follow_symlinks_check.stdout is search('Indexes')
+    symlink_result: "{{ 'V' if follow_symlinks_check.stdout is search('Indexes') else 'S' }}"
 
 - name: Determine alias status
   set_fact:
-    alias_result: "S"
-  when: alias_check.stdout | length == 0
-
-- name: Update alias_result if vulnerabilities exist
-  set_fact:
-    alias_result: "V"
-  when: alias_check.stdout | length > 0
+    alias_result: "{{ 'V' if alias_check.stdout | length > 0 else 'S' }}"
 
 - name: Check Status
   set_fact:
@@ -62,7 +50,7 @@
 
 
 # Apache: 파일 업로드 및 다운로드 제한
-- name: Check if LimitRequestBody is set in httpd.conf
+- name: Get LimitRequestBody setting in httpd.conf
   shell: "{{ get_path_4 }}"
   register: limit_request_body
   ignore_errors: true
@@ -73,7 +61,7 @@
 
 
 # Apache: 디렉터리 리스팅 제거
-- name: Check if Indexes option is set in Apache configuration
+- name: Get Indexes option setting in Apache configuration
   shell: "{{ get_path_5 }}"
   register: index_option
   ignore_errors: true
@@ -84,7 +72,7 @@
 
 
 # Apache: 웹 프로세스 권한 제한
-- name: Check if Apache is running
+- name: Get the status of Apache
   shell: "{{ get_path_6 }}"
   register: apache_process
   changed_when: false
@@ -94,7 +82,7 @@
     apache_owner: "{{ item.split()[0] }}"
     temp_status: "{{ 'V' if item.split()[0] == 'root' and item.split()[2] != '1' and 'grep' not in item else 'S' }}"
   loop: "{{ apache_process.stdout_lines }}"
-  register: status_results  # 결과를 저장
+  register: status_results
 
 - name: Check Status
   set_fact:
@@ -104,12 +92,12 @@
 
 
 # Apache: 최신 보안 패치 적용
-- name: Check current Apache version
+- name: Get current Apache version
   shell: "{{ get_path_7_1 }}"
   register: current_apache_version
   changed_when: false
 
-- name: Check latest available Apache version
+- name: Get latest available Apache version
   shell: "{{ get_path_7_2 }}"
   register: latest_apache_info
   changed_when: false
