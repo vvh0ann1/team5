@@ -1,0 +1,71 @@
+- name: Determine php_get_path_1 for RedHat
+  set_fact:
+    php_get_path_1: "{{ rhel_php_get_path_1 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine php_get_path_1 for Debian
+  set_fact:
+    php_get_path_1: "{{ debian_php_get_path_1 }}"
+  when: ansible_os_family == "Debian"
+
+
+
+- name: Determine php_get_path_2 for RedHat
+  set_fact:
+    php_get_path_2: "{{ rhel_php_get_path_2 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine php_get_path_2 for Debian
+  set_fact:
+    php_get_path_2: "{{ debian_php_get_path_2 }}"
+  when: ansible_os_family == "Debian"
+
+
+
+- name: Determine php_get_path_3 for RedHat
+  set_fact:
+    php_get_path_3: "{{ rhel_php_get_path_3 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine php_get_path_3 for Debian
+  set_fact:
+    php_get_path_3: "{{ debian_php_get_path_3 }}"
+  when: ansible_os_family == "Debian"
+
+
+
+- name: Determine php_get_path_4 for RedHat
+  set_fact:
+    php_get_path_4: "{{ rhel_php_get_path_4 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine php_get_path_4 for Debian
+  set_fact:
+    php_get_path_4: "{{ debian_php_get_path_4 }}"
+  when: ansible_os_family == "Debian"
+
+
+
+- name: Determine php_get_path_5 for RedHat
+  set_fact:
+    php_get_path_5: "{{ rhel_php_get_path_5 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine php_get_path_5 for Debian
+  set_fact:
+    php_get_path_5: "{{ debian_php_get_path_5 }}"
+  when: ansible_os_family == "Debian"
+
+
+
+- name: Determine php_get_path_6 for RedHat
+  set_fact:
+    php_get_path_6: "{{ rhel_php_get_path_6 }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Determine php_get_path_6 for Debian
+  set_fact:
+    php_get_path_6: "{{ debian_php_get_path_6 }}"
+  when: ansible_os_family == "Debian"
+
+
