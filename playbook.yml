@@ -1,5 +1,5 @@
 ---
-- name: Security Checks_DB
+- name: Security Checks_Mysql
   hosts: aws_db, aws_server2, ubuntu
   pre_tasks:
     - include_tasks: roles/mysql_security_checks/pre_tasks.yml
@@ -7,14 +7,34 @@
     - mysql_security_checks
   tasks:
     - name: Intergration Testing
-      import_tasks: roles/mysql_security_checks/tests/Testing_intergration.yml
+      include_tasks: roles/mysql_security_checks/tests/Testing_intergration.yml
 
-- name: Security Checks_Web
+- name: Security Checks_Apache
   hosts: aws_web, aws_server2, ubuntu
   pre_tasks:
     - include_tasks: roles/apache_security_checks/pre_tasks.yml
-    - include_tasks: roles/php_security_checks/pre_tasks.yml
   roles:
     - apache_security_checks
+  tasks:
+    - name: Intergration Testing
+      include_tasks: roles/apache_security_checks/tests/Testing_intergration.yml
+
+- name: Security Checks_PHP
+  hosts: aws_web, aws_server2, ubuntu
+  pre_tasks:
+    - include_tasks: roles/php_security_checks/pre_tasks.yml
+  roles:
     - php_security_checks
+  tasks:
+    - name: Intergration Testing
+      include_tasks: roles/php_security_checks/tests/Testing_intergration.yml
+
+- name: Security Checks_ServerLinux
+  hosts: aws_web, aws_server2, ubuntu
+  pre_tasks:
+    - include_tasks: roles/linux_security_checks/pre_tasks.yml
+  roles:
     - linux_security_checks
+  tasks:
+    - name: Intergration Testing
+      include_tasks: roles/linux_security_checks/tests/Testing_intergration.yml

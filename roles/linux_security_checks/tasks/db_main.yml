@@ -1,0 +1,12 @@
+---
+- name: Debian linux
+  debug:
+    msg: "Debian linux"
+
+- name: set
+  set_fact:
+    status_1: D
+
+- name: debug
+  debug:
+    var: status_1

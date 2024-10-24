@@ -1,0 +1,7 @@
+- name: DB tasks
+  include_tasks: tasks/db_main.yml
+  when: ansible_os_family == "Debian"
+
+- name: RH tasks
+  include_tasks: tasks/rh_main.yml
+  when: ansible_os_family == "RedHat"

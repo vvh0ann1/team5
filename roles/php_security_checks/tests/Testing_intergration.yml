@@ -1,0 +1,7 @@
+---
+- name: Testing PHP status
+  assert:
+    that:
+      - vars['status_{}'.format(item)] in ['V', 'S']
+    fail_msg: "status_{{ item }} is not valid: {{ vars['status_{}'.format(item)] }}"
+  loop: "{{ range(1, 7) | list }}"
