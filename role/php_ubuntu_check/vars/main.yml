@@ -2,12 +2,12 @@
 php_path: /etc/php/8.3/cli/php.ini
 diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
 LAMP_type: 'PHP' # LAMP
-get_path1: "grep -E display_errors {{ custom_path }}"
-get_path2: "grep -E expose_php {{ custom_path }}"
-get_path3: "grep -E allow_url_fopen {{ custom_path }}"
-get_path4: "grep -E disable_functions {{ custom_path }}"
-get_path5: "grep -E open_basedir {{ custom_path }}"
-get_path6: "curl -s https://www.php.net/downloads.php"
+get_path_1: "grep -E display_errors {{ custom_path }}"
+get_path_2: "grep -E expose_php {{ custom_path }}"
+get_path_3: "grep -E allow_url_fopen {{ custom_path }}"
+get_path_4: "grep -E disable_functions {{ custom_path }}"
+get_path_5: "grep -E open_basedir {{ custom_path }}"
+get_path_6: "curl -s https://www.php.net/downloads.php"
 diag_file_value:
     - [1,'오류 메시지 노출','php.ini파일에서 display_errors = off로 변경']
     - [2,'불필요한 헤더 정보 노출','php.ini파일에서 expose_php = off로 변경']

@@ -2,7 +2,7 @@
 #PHP1. 오류 메시지 노출
 ---
 - name: Get display_errors in php.ini
-  shell: "{{ get_path1 }}"
+  shell: "{{ get_path_1 }}"
   register: display_errors_check
   ignore_errors: yes
 
@@ -13,11 +13,11 @@
 
 # PHP2: 불필요한 헤더 정보 노출
 - name: Get expose_php in php.ini
-  shell: "{{ get_path2 }}"
+  shell: "{{ get_path_2 }}"
   register: expose_php_check
   ignore_errors: yes
 
-- name: fail if expose_php is set to On
+- name: Check Status 
   set_fact:
     # display_errors -> expose_php로 변경
     status_2: "{{ 'V' if expose_php_check.stdout is not search('expose_php\\s*=\\s*Off') else 'S' }}"
@@ -25,11 +25,11 @@
 
 # PHP3: 외부 URL 파일 인클루드 비활성화
 - name: Get allow_url_fopen in php.ini
-  shell: "{{ get_path3 }}"
+  shell: "{{ get_path_3 }}"
   register: allow_url_check
   ignore_errors: yes
 
-- name: fail if allow_url_fopen is set to On
+- name: Check Status
   set_fact:
     # display_error -> allow_url_fopen로 변경
     status_3: "{{ 'V' if allow_url_check.stdout is not match('allow_url_fopen\\s*=\\s*Off') else 'S' }}"
@@ -37,18 +37,18 @@
 
 # PHP4:
 - name: Get disable_functions in php.ini
-  shell: "{{ get_path4 }}"
+  shell: "{{ get_path_4 }}"
   register: disable_functions_check
   ignore_errors: yes
 
-- name: fail if disable_functions is set
+- name: Check Status
   set_fact:
     status_4: "{{ 'V' if disable_functions_check.stdout is search('disable_functions =\\s*$') else 'S' }}"
 
 
 # PHP5: 실행 경로 제한
 - name: Get open_basedir in php.ini
-  shell: "{{ get_path5 }}"
+  shell: "{{ get_path_5 }}"
   register: open_basedir_check
 
 - name: Set open_basedir result if available
@@ -61,14 +61,14 @@
     value_after_equals: "{{ open_basedir_result.split('=')[1] | trim }}"
   when: open_basedir_result | length > 0
 
-- name: Fail if open_basedir is empty
+- name: Check Status
   set_fact:
     status_5: "{{ 'V' if value_after_equals | default('') == '' else 'S' }}"
 
 
 # PHP6: 최신 보안 패치 적용
 - name: Fetch PHP download page
-  shell: "{{ get_path6 }}"
+  shell: "{{ get_path_6 }}"
   register: php_download_page
 
 - name: Extract the latest PHP version
@@ -83,7 +83,7 @@
   set_fact:
     current_version: "{{ current_php_version.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
 
-- name: Display secure status
+- name: Check status
   set_fact:
     # 조건문 추가
     status_6: "{{ 'V' if current_version is defined and latest_php_version is defined and current_version != latest_php_version and current_version < latest_php_version else 'S' }}"
