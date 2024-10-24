@@ -1,26 +1,47 @@
-ssh_config_file: /etc/ssh/sshd_config
-pam_files:
+linuxserver_conf_path_1: /etc/ssh/sshd_config
+linuxserver_conf_path_3:
   - /etc/pam.d/system-auth
   - /etc/pam.d/password-auth
-pwquality_conf_file: /etc/security/pwquality.conf
-system_auth_file: /etc/pam.d/system-auth
-passwd_file_path: '/etc/passwd'
-shadow_file_path: '/etc/shadow'
-services_file_path: '/etc/services'
-hosts_file_path: '/etc/hosts'
+linuxserver_conf_path_2_1: /etc/security/pwquality.conf
+linuxserver_conf_path_2_2: /etc/pam.d/system-auth
+linuxserver_conf_path_6_9: '/etc/passwd'
+linuxserver_conf_path_7_16: '/etc/shadow'
+linuxserver_conf_path_8: '/etc/services'
+linuxserver_conf_path_9_21: "{{ lookup('pipe', 'ls /home').split() }}"
+linuxserver_conf_path_13: '/etc/hosts'
 home_dirs_path: '/home'
-login_defs_path: '/etc/login.defs'
+linuxserver_conf_path_15: '/etc/login.defs'
+linuxserver_conf_path_17:
+  - '/etc/inetd.conf'
+  - '/etc/xinetd.conf'
+linuxserver_conf_path_18:
+  - '/etc/syslog.conf'
+  - '/etc/rsyslog.conf'
+linuxserver_conf_path_22_1: /etc/hosts.deny
+linuxserver_conf_path_22_2: /etc/hosts.allow
+linuxserver_conf_path_23_1: /etc/xinetd.d/finger
+linuxserver_conf_path_23_2: /etc/inetd.conf
+linuxserver_conf_path_24_1: /etc/proftpd/proftpd.conf
+linuxserver_conf_path_24_2: /etc/vsftpd/vsftpd.conf
+linuxserver_conf_path_25_1: /etc/xinetd.d/rsh
+linuxserver_conf_path_25_2: /etc/xinetd.d/rlogin
+linuxserver_conf_path_25_3: /etc/xinetd.d/rexec
+services:
+  - echo
+  - discard
+  - daytime
+  - chargen
 max_days: 90
 secure_permissions: 644
 LAMP_type: 'Server(Linux)'
-diag_file_path: '/home/ec2-user/Diag_File.txt'
-get_path_1: grep PermitRootLogin {{ ssh_config_file }}
-get_path_2_1: grep -E "minlen|minclass" {{ pwquality_conf_file }}
-get_path_2_2: grep enforce_for_root {{ system_auth_file }}
+diag_file_path: '/var/www/html/project/test/csv/Diag_File.txt'
+get_path_1: grep PermitRootLogin {{ linuxserver_conf_path_1 }}
+get_path_2_1: grep -E "minlen|minclass" {{ linuxserver_conf_path_2_1 }}
+get_path_2_2: grep enforce_for_root {{ linuxserver_conf_path_2_2 }}
 get_path_3: grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}
 get_path_4: echo $PATH
 get_path_5: 'find /etc /tmp /bin /sbin \( -nouser -o -nogroup \) -xdev -exec ls -l {} \\; 2>/dev/null'
-get_path_9: 'cat {{ passwd_file_path }} | grep /home | cut -d: -f6'
+get_path_9: 'cat {{ linuxserver_conf_path_6_9 }} | grep /home | cut -d: -f6'
 get_path_10_1:  '|
     if [ -f /usr/sbin/ypserv ] && [ -f /usr/sbin/ypbind ] && [ -f /usr/sbin/ypxfrd ] && [ -f /usr/sbin/rpc.yppasswdd ] && [ -f /usr/sbin/rpc.yupdated ]; then
       echo "installed"
@@ -33,7 +54,18 @@ get_path_11_4: yum info sendmail | grep Version | awk '{print $3}'
 get_path_12_1: ps -ef | grep named | grep -v grep
 get_path_12_2: named -V
 get_path_12_3: yum info bind | grep Version
-get_path_15: grep '^PASS_MAX_DAYS' {{ login_defs_path }}
+get_path_15: grep '^PASS_MAX_DAYS' {{ linuxserver_conf_path_15 }}
+get_path_16: "awk -F: '$2 != \"x\" {print $1 \" : \" $2}' /etc/passwd"
+get_path_19: find / -user root -type f \\( -perm -4000 -o -perm -2000 \\) -exec ls -lg {} + 2>/dev/null
+get_path_20: find / -type f -perm -2 -exec ls -l {} + | grep -v '/tmp'
+get_path_22_1: command -v iptables
+get_path_22_2: "iptables -L"
+get_path_22_3: "firewall-cmd --list-all"
+get_path_24: grep ftp /etc/passwd
+get_path_26_1: rpm -q xinetd
+get_path_26_2: grep disable /etc/xinetd.d/{{ item }} | grep -q yes
+get_path_27: ps -ef | grep '[n]fsd'
+get_path_28: ps -ef | grep '[a]utomountd'
 
 diag_file_value:
   - [1,'root 계정 원격 접속 제한','root 계정 telnet과 ssh 접속 제한 설정']
@@ -51,3 +83,16 @@ diag_file_value:
   - [13,'/etc/hosts 파일 소유자 및 권한 설정','/etc/hosts 파일 접근 권한 644, 소유자 root로 변경']
   - [14,'cron 파일 소유자 및 권한 설정','chown root 혹은 chmod 640으로 파일 소유자 및 권한 변경']
   - [15,'패스워드 최대 사용 기간 설정','패스워드 최대 사용 기간 90일 이하로 설정']
+  - [16,'패스워드 파일 보호','/etc/shadow 파일 호 및 /etc/passwd 파일 보안 설정']
+  - [17,'/etc/(x)inetd.conf 파일 소유자 및 권한 설정','/etc/(x)inetd.conf 파일 접근 권한 644, 소유자 root로 변경']
+  - [18,'/etc/syslog.conf 파일 소유자 및 권한 설정','/etc/(r)syslog.conf 파일 접근 권한 644, 소유자 root로 변경']
+  - [19,'SUID, SGID, Sticky bit 설정 파일 점검', SUID, SGID Sticky bit 설정 파일 제거]
+  - [20,'world writable 파일 점검','일반 사용자 쓰기 권한 제거 및 파일 삭제']
+  - [21,'$HOME/.rhosts, hosts.equiv 사용 금지','hosts, hosts.equiv 파일 삭제 또는 권한 변경']
+  - [22,'접속 IP 및 포트 제한','/etc/hosts.deny 와 host.allow 파일 수정']
+  - [23,'Finger 서비스 비활성화','/etc/xinetd.d/finger 파일에서 서비스 비활성화 설정']
+  - [24,'Anonymous FTP 서비스 비활성화','automountd 서비스 데몬 실행 중지']
+  - [25,'r 계열 서비스 비활성화','/etc/xinetd.d/ 디렉터리 내 rlogin, rsh, rexec 파일 수정']
+  - [26,'DoS 공격에 취약한 서비스 비활성화',/etc/xinetd.d/ 디렉터리 내 echo, discard, daytime, chargen 파일 수정]
+  - [27,'NFS 서비스 비활성화','NFS 데몬(nfsd)을 중지']
+  - [28,'automountd 제거','automountd 서비스 데몬 실행 중지']
