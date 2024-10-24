@@ -2,7 +2,6 @@
 - name: Get the current DocumentRoot
   shell: "{{ get_path_1 }}"
   register: document_root_check
-  become: yes
 
 - name: Check Status
   set_fact:
