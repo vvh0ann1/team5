@@ -22,7 +22,7 @@
 
 - name: Check Status
   set_fact:
-    status_1: "{{ 'S' if (unregi_users_1 | length == 0) else 'V' }}"
+    status_1: "{{ 'V' if (unregi_users_1 | length > 0) else 'S' }}"
 
 # Mysql: "취약한 패스워드 사용 제한"
 - name: Filter policy
@@ -31,12 +31,12 @@
 
 - name: Check Status
   set_fact:
-    status_2: "{{ 'S' if policy_2 in ['MEDIUM', 'STRONG'] else 'V' }}"
+    status_2: "{{ 'V' if policy_2 == 'LOW' else 'S' }}"
 
 # Mysql: "타 사용자에 권한 부여 옵션 제한"
 - name: Filter 'Y' User
   set_fact:
-    priv_users_3: "{{ query_result_3.query_result[0] | selectattr(Grant_priv, 'equalto', 'Y') | map(attribute='user') | list }}"
+    priv_users_3: "{{ query_result_3.query_result[0] | selectattr('Grant_priv', 'equalto', 'Y') | map(attribute='user') | list }}"
 
 - name: Check unregi users
   set_fact:
@@ -44,12 +44,12 @@
 
 - name: Check Status
   set_fact:
-    status_3: "{{ 'S' if (unregi_users_3 | length == 0) else 'V' }}"
+    status_3: "{{ 'V' if (unregi_users_3 | length > 0) else 'S' }}"
 
 # Mysql: "사용자 계정 정보 테이블 접근 권한"
 - name: Filter 'Y' User
   set_fact:
-    priv_users_4: "{{ query_result_4.query_result[0] | selectattr(Select_priv, 'equalto', 'Y') | map(attribute='user') | list }}"
+    priv_users_4: "{{ query_result_4.query_result[0] | selectattr('select_priv', 'equalto', 'Y') | map(attribute='user') | list }}"
 
 - name: Check unregi users
   set_fact:
@@ -57,7 +57,7 @@
 
 - name: Check Status
   set_fact:
-    status_4: "{{ 'S' if (unregi_users_4 | length == 0) else 'V' }}"
+    status_4: "{{ 'V' if (unregi_users_4 | length > 0) else 'S' }}"
 
 # Mysql: "root 권한으로 서버 구동 제한"
 - name: Get mysqld process
@@ -104,12 +104,12 @@
 
 - name: Check Status
   set_fact:
-    status_6: "{{ 'S' if octal_perm_6 | int <= 640 else 'V' }}"
+    status_6: "{{ 'V' if octal_perm_6 | int > 640 else 'S' }}"
 
 # Mysql: "안전한 암호화 알고리즘 사용"
 - name: Filter plugin
   set_fact:
-    user_pass_algo_7: "{{ query_result_7.query_result[0] | map(attribute=plugin) | list }}"
+    user_pass_algo_7: "{{ query_result_7.query_result[0] | map(attribute='plugin') | list }}"
 
 - name: Check unsafe_algo
   set_fact:
@@ -117,7 +117,7 @@
 
 - name: Check Status
   set_fact:
-    status_7: "{{ 'S' if (unsafe_algo_7 | length == 0) else 'V' }}"
+    status_7: "{{ 'V' if (unsafe_algo_7 | length > 0) else 'S' }}"
 
 # Mysql: "로그 활성화"
 - name: Filter general log value
@@ -130,7 +130,7 @@
 
 - name: Check Status
   set_fact:
-    status_8: "{{ 'S' if (slow_log_value_8 == 'ON') else 'V' }}"
+    status_8: "{{ 'V' if (slow_log_value_8 != 'ON') else 'S' }}"
 
 # Mysql: "최신 보안 패치 적용"
 - name: Parse Mysql version
@@ -148,7 +148,7 @@
 
 - name: Check Status
   set_fact:
-    status_9: "{{ 'S' if (mysql_version_9 is not version(rpm_version_9, '<')) else 'V' }}" 
+    status_9: "{{ 'V' if (mysql_version_9 is version(rpm_version_9, '<')) else 'S' }}" 
 
     
 - name: Gather status

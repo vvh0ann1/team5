@@ -1,9 +1,10 @@
 login_user: 'root'
-login_password: 'guseodhxhdpqj2@'
+login_password: 'Guseodhxhdpqj2@'
 login_db: 'mysql'
 login_host: localhost
 queries:
   query_1: "SELECT host, user, authentication_string FROM user;"
+  query_2_0: "INSTALL COMPONENT 'file://component_validate_password';"
   query_2: "SHOW VARIABLES LIKE 'validate_password%';"
   query_3: "SELECT host, user, Grant_priv FROM user WHERE Grant_priv='Y';"
   query_4: "SELECT host, user, select_priv FROM mysql.user;"
@@ -13,6 +14,7 @@ queries:
   query_9: "SELECT @@version;"
 query_list:
   - { query: "{{ queries.query_1 }}", result_var: "query_result_1" }
+  - { query: "{{ queries.query_2_0 }}", result_var: "query_result_2_0" }
   - { query: "{{ queries.query_2 }}", result_var: "query_result_2" }
   - { query: "{{ queries.query_3 }}", result_var: "query_result_3" }
   - { query: "{{ queries.query_4 }}", result_var: "query_result_4" }
@@ -20,16 +22,19 @@ query_list:
   - { query: "{{ queries.query_8_1 }}", result_var: "query_result_8_1" }
   - { query: "{{ queries.query_8_2 }}", result_var: "query_result_8_2" }
   - { query: "{{ queries.query_9 }}", result_var: "query_result_9" }
+
 regi_users_1: ['test']
 regi_users_3: ['mysql', 'root']
 regi_users_4: ['root', 'mysql']
 regi_pass_algo_7: ['ed25519','caching_sha2_password']
-Grant_priv: 'Grant_priv'
-Select_priv: 'select_priv'
+
+mysql_config_path_6: '/etc/my.cnf'
 get_path_5: ps -ef | grep mysql | grep -v grep
-get_path_6: docker exec -it mysql-server ls -alL /etc/my.cnf
-get_path_9: docker exec -it mysql-server rpm -qa | grep mysql
-plugin: 'plugin'
+#get_path_6: docker exec -it mysql-container ls -alL {{ mysql_config_path_6 }}
+get_path_6: ls -alL {{ mysql_config_path_6 }}
+#get_path_9: docker exec -it mysql-container rpm -qa | grep mysql
+get_path_9: rpm -qa | grep mysql
+
 LAMP_type: 'Mysql'
 diag_file_path: 'home/ec2-user/result.txt'
 diag_file_value:

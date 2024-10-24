@@ -1,0 +1,11 @@
+---
+- name: Get mysqld process
+  shell: "{{ get_path_5 }}"
+  register: mysqld_process_5
+  changed_when: false
+
+- name: Testing
+  assert:
+    that:
+      - mysqld_process_5.stdout != ''
+    fail_msg: "Failed to Get mysqld process"
