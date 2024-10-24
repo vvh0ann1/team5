@@ -9,10 +9,10 @@ debian_apache_config_path_2: '/etc/apache2/apache2.conf'
 LAMP_type: 'Apache'
 
 rhel_diag_file_path: '/home/ec2-user/Diag_File.txt'
-debian_diag_fie_path: '/home/ubuntu/autoever/team5/Diag_File.txt'
+debian_diag_file_path: '/home/ubuntu/autoever/team5/Diag_File.txt'
 
 rhel_get_path_1: grep DocumentRoot {{ rhel_apache_config_path_2 }}
-debian_get_path_1: grep DocumentRoot {{ debian_apache_config_path_2 }}
+debian_get_path_1: grep DocumentRoot '/etc/apache2/sites-available/default-ssl.conf'
 
 rhel_get_path_2_1: find {{ rhel_apache_config_path_1 }} -name manual
 debian_get_path_2_1: find {{ debian_apache_config_path_1 }} -name manual
