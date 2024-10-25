@@ -18,16 +18,6 @@
     apache_config_path_2: "{{ debian_apache_config_path_2 }}"
   when: ansible_os_family == "Debian"
 
-- name: Determine diag_file_path for RedHat
-  set_fact:
-    diag_file_path: "{{ rhel_diag_file_path }}"
-  when: ansible_os_family == "RedHat"
-
-- name: Determine diag_file_path for Debian
-  set_fact:
-    diag_file_path: "{{ debian_diag_file_path }}"
-  when: ansible_os_family == "Debian"
-
 - name: Determine get_path_1 for RedHat
   set_fact:
     get_path_1: "{{ rhel_get_path_1 }}"

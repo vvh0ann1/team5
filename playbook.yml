@@ -9,6 +9,12 @@
   tasks:
     - name: Intergration Testing
       include_tasks: roles/mysql_security_checks/tests/Testing_intergration.yml
+  post_tasks:
+    - include_tasks: post_tasks.yml
+      vars:
+        LAMP_type: "{{ LAMP_type_m }}"
+        status_var: "{{ Mysql_status }}"
+        diag_file_value: "{{ diag_file_value_m }}"
 
 - name: Security Checks_Apache
   hosts: aws_web, aws_server2, ubuntu
@@ -20,6 +26,12 @@
   tasks:
     - name: Intergration Testing
       include_tasks: roles/apache_security_checks/tests/Testing_intergration.yml
+  post_tasks:
+    - include_tasks: post_tasks.yml
+      vars:
+        LAMP_type: "{{ LAMP_type_a }}"
+        status_var: "{{ Apache_status }}"
+        diag_file_value: "{{ diag_file_value_a }}"
 
 - name: Security Checks_PHP
   hosts: aws_web, aws_server2, ubuntu
@@ -31,6 +43,12 @@
   tasks:
     - name: Intergration Testing
       include_tasks: roles/php_security_checks/tests/Testing_intergration.yml
+  post_tasks:
+    - include_tasks: post_tasks.yml
+      vars:
+        LAMP_type: "{{ LAMP_type_p }}"
+        status_var: "{{ PHP_status }}"
+        diag_file_value: "{{ diag_file_value_p }}"
 
 - name: Security Checks_ServerLinux
   hosts: aws_web, aws_server2, ubuntu
@@ -42,3 +60,9 @@
   tasks:
     - name: Intergration Testing
       include_tasks: roles/linux_security_checks/tests/Testing_intergration.yml
+  post_tasks:
+    - include_tasks: post_tasks.yml
+      vars:
+        LAMP_type: "{{ LAMP_type_l }}"
+        status_var: "{{ ServerLinux_status }}"
+        diag_file_value: "{{ diag_file_value_l }}"

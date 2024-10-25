@@ -1,5 +1,4 @@
-LAMP_type: 'PHP' # LAMP
-diag_file_path: '/home/ec2-user/Diag_File.txt'  # 진단 결과 파일 경로
+LAMP_type_p: 'PHP' # LAMP
 
 rhel_php_ini_path: /etc/php.ini
 debian_php_ini_path: /etc/php/8.3/cli/php.ini
@@ -21,7 +20,7 @@ debian_php_get_path_5: grep -E open_basedir {{ debian_php_ini_path }}
 
 get_path_6: "curl -s https://www.php.net/downloads.php"
 
-diag_file_value:
+diag_file_value_p:
     - [1,'오류 메시지 노출','php.ini파일에서 display_errors = off로 변경']
     - [2,'불필요한 헤더 정보 노출','php.ini파일에서 expose_php = off로 변경']
     - [3,'외부 URL 파일 인클루드 비활성화','php.ini파일에서 allow_url_fopen = off로 변경']

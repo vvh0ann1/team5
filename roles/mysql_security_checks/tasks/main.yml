@@ -158,7 +158,6 @@
   set_fact:
     status_9: "{{ 'V' if (mysql_version_9 is version(rpm_version_9, '<')) else 'S' }}" 
 
-    
 - name: Gather status
   set_fact:
     Mysql_status:
@@ -171,14 +170,3 @@
       status7: "{{ status_7 }}"
       status8: "{{ status_8 }}"
       status9: "{{ status_9 }}"
-
-- name: Print status
-  debug:
-    var: Mysql_status
-
-- name: Status to file
-  lineinfile:
-    path: "{{ diag_file_path }}"
-    line: "{{ LAMP_type }}, {{ item[1] }}, {{ Mysql_status['status' ~ item[0]] }}, {{ item[2] }}"
-    create: yes
-  loop: "{{ diag_file_value }}"

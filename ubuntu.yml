@@ -44,8 +44,8 @@
     secure_permissions: 644
     LAMP_type: 'Server(Linux)'
     # 해당 경로 추후 반드시 변경 하기
-    #diag_file_path: '/home/ec2-user/Diag_File.txt'
-    diag_file_path: '/project1/git_/team5/text1.txt'
+    diag_file_path: '/home/ec2-user/Diag_File.txt'
+    #diag_file_path: '/project1/git_/team5/text1.txt'
     get_path_1: grep PermitRootLogin {{ ssh_config_file }}
     get_path_2_1: grep -E "minlen|minclass" {{ pwquality_conf_file }}
     get_path_2_2: grep enforce_for_root {{ system_auth_file }}
@@ -110,6 +110,7 @@
   tasks:
     # 1번: root 계정 원격 접속 제한
     - name: Check SSH root login setting
+      become: yes
       shell: "{{ get_path_1 }}"
       register: ssh_check
       changed_when: false
@@ -119,27 +120,24 @@
         status_1: "{{ 'V' if (ssh_check.stdout is defined and 'PermitRootLogin no' not in ssh_check.stdout) else 'S' }}"
   
     # 2번: 패스워드 복잡도 설정 - 파일이 존재하지 않아 발생하는 에러가 있다 - 다름
-    - name: Check SSH root login setting
-      become: yes
-      shell: "{{ get_path_2_1 }}"
-      register: enforce_root_check
-      ignore_errors: yes
-        
-    - name: Check pwquality.conf
-      become: yes
-      shell: "{{ get_path_2_2 }}"
-      register: pw_quality_check
-      ignore_errors: yes
+    - name: Check if pwquality.conf exists
+      stat:
+        path: "{{ get_path_2_1 }}"
+      register: pwquality_conf_stat
 
-    - name: Extract minlen and minclass from pwquality.conf
-      set_fact:
-        minlen_value: "{{ (pw_quality_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | first | int) }}" 
-        minclass_value: "{{ (pw_quality_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | first | int) }}"
-      when: pw_quality_check.stdout != ""
+    - name: Check if system-auth exists
+      stat:
+        path: "{{ get_path_2_2 }}"
+      register: system_auth_stat
 
-    - name: Check status
+    - name: Set status_2 based on conditions
       set_fact:
-        status_2: "{{ 'V' if not enforce_root_check.stdout and (minlen_value | default(0) | int < 8 or minclass_value | default(0) | int < 3) else 'S' }}"
+        status_2: >
+          {{ 'V' if not (pwquality_conf_stat.stat.exists and system_auth_stat.stat.exists) or
+                      (pw_quality_conf_stat.stat.exists and
+                      (pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | first | int < 8 or
+                        pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | first | int < 3 or
+                        'enforce_for_root' not in enforce_root_check.stdout)) else 'S' }}
 
     # 3번: 계정 잠금 임계값 설정 - 다름
     - name: Check pam_faillock.so existence and deny value in system-auth and password-auth

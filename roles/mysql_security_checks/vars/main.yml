@@ -37,9 +37,8 @@ docker_path_9: docker exec -it {{ docker_container_name }} rpm -qa | grep mysql
 rhel_normal_path_9: rpm -qa | grep mysql-community-server
 debian_normal_path_9: dpkg -l | grep mysql
 
-LAMP_type: 'Mysql'
-diag_file_path: 'home/ec2-user/result.txt'
-diag_file_value:
+LAMP_type_m: 'Mysql'
+diag_file_value_m:
   - [1,'불필요한 계정 제거','불필요한 계정 삭제']
   - [2,'취약한 패스워드 사용 제한','validate_password 패스워드 정책 설정']
   - [3,'타 사용자에 권한 부여 옵션 제한','불필요한 grant_priv 권한 제거']

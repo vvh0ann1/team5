@@ -116,8 +116,6 @@
   set_fact:
     status_7: "{{ 'V' if current_version_str is version(latest_version_str, '<') else 'S' }}"
 
-
-# Gather status
 - name: Gather status
   set_fact:
     Apache_status:
@@ -129,13 +127,3 @@
       status6: "{{ status_6 }}"
       status7: "{{ status_7 }}"
 
-- name: Print status
-  debug:
-    var: Apache_status
-
-- name: Status to file
-  lineinfile:
-    path: "{{ diag_file_path }}"
-    line: "{{ LAMP_type }}, {{ item[1] }}, {{ Apache_status['status' ~ item[0]] }}, {{ item[2] }}"
-    create: yes
-  loop: "{{ diag_file_value }}"

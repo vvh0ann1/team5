@@ -1,0 +1,14 @@
+- name: Print status
+  debug:
+    var: status_var
+
+- name: Define path
+  set_fact:
+    diag_file_path: "home/ec2-user/Diag_file.txt"
+
+- name: Status to file
+  lineinfile:
+    path: "{{ diag_file_path }}"
+    line: "{{ LAMP_type }}, {{ item[1] }}, {{ status_var['status' ~ item[0]] }}, {{ item[2] }}"
+    create: yes
+  loop: "{{ diag_file_value }}"

@@ -326,20 +326,23 @@
   set_fact:
     status_16: "{{ 'S' if shadow_file.stat.exists and passwd_check.stdout == '' else 'V' }}"
 
-# Sever(Linux) 17: /etc/(x)inetd.conf 파일 소유자 및 권한 설정
+# Server(Linux) 17: /etc/(x)inetd.conf 파일 소유자 및 권한 설정
+# 1. 파일 존재 여부 확인
 - name: Check file exists
   stat:
     path: "{{ item }}"
   with_items: "{{ linuxserver_conf_path_17 }}"
   register: inetd_conf_info
 
+# 2. inetd.conf 존재 여부 필터링
 - name: Filter inetd.conf existence
   set_fact:
     file_exists: "{{ inetd_conf_info.results | selectattr('stat.exists', 'equalto', True) | list | length > 0 }}"
 
+# 3. 상태 확인
 - name: Check Status
   set_fact:
-    status_17: "{{ 'S' if not file_exists else 'S' if inetd_conf_info.results[0].stat.pw_name == 'root' and inetd_conf_info.results[0].stat.mode | int <= 644 else 'V' }}"
+    status_17: "{{ 'S' if not file_exists else 'S' if inetd_conf_info.results | selectattr('stat.exists', 'equalto', True) | selectattr('stat.pw_name', 'equalto', 'root') | selectattr('stat.mode', 'le', secure_permissions | int) | map(attribute='stat.mode') | map('int') | select('le', secure_permissions | int) | list | length > 0 else 'V' | trim }}"
 
 # Sever(Linux) 18: /etc/syslog.conf 파일 소유자 및 권한 설정
 - name: Check syslog files
@@ -350,9 +353,9 @@
   ignore_errors: yes
   changed_when: false
 
-- name: Check Status
+- name: Check Status for syslog file permissions
   set_fact:
-    status_18: "{{ 'S' if syslog_file_info.results | selectattr('stat.exists', 'equalto', True) | selectattr('stat.pw_name', 'equalto', 'root') | selectattr('stat.mode', 'le', 644) | list | length == syslog_file_info.results | length else 'V' }}"
+    status_18: "{{ 'S' if syslog_file_info.results | selectattr('stat.exists', 'equalto', True) | selectattr('stat.pw_name', 'equalto', 'root') | selectattr('stat', 'defined') | selectattr('stat.mode', 'defined') | map(attribute='stat.mode') | map('int') | select('le', 644) | list | length == syslog_file_info.results | length else 'V' | trim }}"   
 
 #Server(Linux) 19: SUID, SGID, Sticky bit 설정 파일 점검
 # 1. SUID, SGID가 설정된 파일 검색
@@ -392,23 +395,28 @@
 
 #Serve(Linux) 21: $HOME/.rhosts, hosts.equiv 사용 금지
 # 1. /etc/hosts.equiv 파일 확인
-- name: Check perm
+- name: Check /etc/hosts.equiv file permissions
   stat:
     path: /etc/hosts.equiv
   register: hosts_equiv_info
   ignore_errors: yes
 
 # 2. $HOME/.rhosts 파일 확인
-- name: Check perm
+- name: Check .rhosts files in home directories
   stat:
     path: "{{ item }}/.rhosts"
   with_items: "{{ home_dirs }}"
   register: rhosts_info
   ignore_errors: yes
 
+# 상태 확인
 - name: Check Status
   set_fact:
-    status_21: "{{ 'S' if (hosts_equiv_info.stat.exists == False or (hosts_equiv_info.stat.pw_name == 'root' and hosts_equiv_info.stat.mode | int == 600)) and (rhosts_info.results | selectattr('stat.exists', 'eq', False) | list | length == home_dirs | length) else 'V' }}"
+    status_21: >-
+      {{ 'S' if (not hosts_equiv_info.stat.exists or 
+      (hosts_equiv_info.stat.pw_name == 'root' and hosts_equiv_info.stat.mode | int == 600)) 
+      and (rhosts_info.results | selectattr('stat.exists', 'eq', False) | list | length == home_dirs | length) 
+      else 'V' }}
 
 #Server(Linux) 22: 접속 IP 및 포트 제한
 # 1. /etc/hosts.deny 파일 확인
@@ -628,13 +636,3 @@
       status27: "{{ status_27 }}"
       status28: "{{ status_28 }}"
 
-- name: Print status
-  debug:
-    var: ServerLinux_status
-
-- name: Status to file
-  lineinfile:
-    path: "{{ diag_file_path }}"
-    line: "{{ LAMP_type }}, {{ item[1] }}, {{ ServerLinux_status['status' ~ item[0]] }}, {{ item[2] }}"
-    create: yes
-  loop: "{{ diag_file_value }}"
