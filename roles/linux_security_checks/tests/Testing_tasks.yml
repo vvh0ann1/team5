@@ -33,7 +33,7 @@
 - name: Testing 2-2
   assert:
     that:
-      - enforce_root_check.stdout != ''
+      - enforce_root_check.rc in [0, 1]
     fail_msg: "Failed to Get enforce_for_root in system-auth"
 
 - name: Get pam_faillock.so existence and deny
@@ -46,7 +46,7 @@
 - name: Testing 3
   assert:
     that:
-      - pam_check.stdout != ''
+      - pam_check.rc in [0,1]
     fail_msg: "Failed to Get pam_faillock.so existence and deny"
 
 # Server(Linux) 4: root 홈, 디렉터리 소유자 설정

@@ -110,7 +110,7 @@
   tasks:
     # 1번: root 계정 원격 접속 제한
     - name: Check SSH root login setting
-      become: yes
+    
       shell: "{{ get_path_1 }}"
       register: ssh_check
       changed_when: false
@@ -161,7 +161,6 @@
 
     # 4번. root 홈, 패스 디렉터리 권한 패스 설정 - 코드만 다름 확인 요망 
     - name: Get current PATH
-      become: true
       shell: "{{ get_path_4 }}"
       register: path_output
 
@@ -191,7 +190,6 @@
 
     # 7번. /etc/shadow 파일 소유자 및 권한 설정
     - name: Check ownership and permissions of /etc/shadow
-      become: yes
       stat:
         path: "{{ shadow_file_path }}"
       register: shadow_file_info
@@ -414,7 +412,6 @@
 
     # 17번. /etc/(x)inetd.conf 파일 소유자 및 권한 설정 - C/U 다름
     - name: Get /etc/xinetd.conf exists
-      become: true
       stat:
         path: "{{ xinetd_path }}"
       register: xinetd_conf_info

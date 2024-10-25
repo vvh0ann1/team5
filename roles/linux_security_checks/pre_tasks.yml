@@ -1,7 +1,15 @@
-- name: DB tasks
+- name: Set vars for Debian
+  include_vars: vars/db_vars.yml
+  when: ansible_os_family == "Debian"
+
+- name: Set vars for RedHat
+  include_vars: vars/rh_vars.yml
+  when: ansible_os_family == "RedHat"
+
+- name: Include DB tasks
   include_tasks: tasks/db_main.yml
   when: ansible_os_family == "Debian"
 
-- name: RH tasks
+- name: Include RH tasks
   include_tasks: tasks/rh_main.yml
   when: ansible_os_family == "RedHat"
