@@ -7,7 +7,7 @@ linuxserver_conf_path_2_2: /etc/pam.d/system-auth
 linuxserver_conf_path_6_9: '/etc/passwd'
 linuxserver_conf_path_7_16: '/etc/shadow'
 linuxserver_conf_path_8: '/etc/services'
-linuxserver_conf_path_9_21: "{{ lookup('pipe', 'ls /home').split() }}"
+home_dirs: "{{ lookup('pipe', 'ls /home').split() }}"
 linuxserver_conf_path_13: '/etc/hosts'
 home_dirs_path: '/home'
 linuxserver_conf_path_15: '/etc/login.defs'

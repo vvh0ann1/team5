@@ -1,0 +1,103 @@
+# testing_task
+---
+- name: Get the current DocumentRoot
+  shell: "{{ get_path_1 }}"
+  register: document_root_check
+  changed_when: false
+
+- name: Testing 1
+  assert:
+    that:
+      - document_root_check.stdout != ''
+    fail_msg: "Failed to Get the current DocumentRoot"
+
+- name: Get the manual settins from httpd.conf
+  shell: "{{ get_path_2_2 }}"
+  register: manual_setting_check
+  changed_when: false
+  ignore_errors: true
+
+- name: Testing 2_2
+  assert:
+    that:
+      - manual_setting_check.rc in [0,1]
+    fail_msg: "Failed to Get the manual settins from httpd.conf"
+
+- name: Get the value of FollowSymLinks
+  shell: "{{ get_path_3_1 }}"
+  register: follow_symlinks_check
+  changed_when: false
+
+- name: Testing 3_1
+  assert:
+    that:
+      - follow_symlinks_check.stdout != ''
+    fail_msg: "Failed to Get the value of FollowSymLinks"
+
+- name: Get the value of aliases
+  shell: "{{ get_path_3_2 }}"
+  register: alias_check
+  changed_when: false
+  ignore_errors: true
+
+- name: Testing 3_2
+  assert:
+    that:
+      - alias_check.rc in [0,1]
+    fail_msg: "Failed to Get the value of aliases"
+
+- name: Get LimitRequestBody setting in httpd.conf
+  shell: "{{ get_path_4 }}"
+  register: limit_request_body
+  changed_when: false
+  ignore_errors: true
+
+- name: Testing 4
+  assert:
+    that:
+      - limit_request_body.rc in [0, 1]
+    fail_msg: "Failed to Get LimitRequestBody setting in httpd.conf"
+
+- name: Get Indexes option setting in Apache configuration
+  shell: "{{ get_path_5 }}"
+  register: index_option
+  changed_when: false
+
+- name: Testing 5
+  assert:
+    that:
+      - index_option.stdout != ''
+    fail_msg: "Failed to Get Indexes option setting in Apache configuration"
+
+- name: Get the status of Apache
+  shell: "{{ get_path_6 }}"
+  register: apache_process
+  changed_when: false
+
+- name: Testing 6
+  assert:
+    that:
+      - apache_process.stdout != ''
+    fail_msg: "Failed to Get the status of Apache"
+
+- name: Get current Apache version
+  shell: "{{ get_path_7_1 }}"
+  register: current_apache_version
+  changed_when: false
+
+- name: Testing 7_1
+  assert:
+    that:
+      - current_apache_version.stdout != ''
+    fail_msg: "Failed to Get current Apache version"
+
+- name: Get latest available Apache version
+  shell: "{{ get_path_7_2 }}"
+  register: latest_apache_info
+  changed_when: false
+
+- name: Testing 7_2
+  assert:
+    that:
+      - latest_apache_info.stdout != ''
+    fail_msg: "Failed to Get latest available Apache version"

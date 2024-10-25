@@ -1,0 +1,366 @@
+# Server(Linux) 1: root 계정 원격 접속 제한
+- name: Get root setting
+  become: yes
+  shell: "{{ get_path_1 }}"
+  register: ssh_check
+  changed_when: false
+
+- name: Testing 1
+  assert:
+    that:
+      - ssh_check.stdout != ''
+    fail_msg: "Failed to Get root setting"
+
+# Server(Linux) 2: 패스워드 복잡도 설정
+- name: Get pwquality.conf
+  shell: "{{ get_path_2_1 }}"
+  register: pw_quality_conf_check
+  failed_when: false
+  changed_when: false
+
+- name: Testing 2-1
+  assert:
+    that:
+      - pw_quality_conf_check.stdout != ''
+    fail_msg: "Failed to Get pwquality.conf"
+
+- name: Get enforce_for_root in system-auth
+  shell: "{{ get_path_2_2 }}"
+  register: enforce_root_check
+  failed_when: false
+  changed_when: false
+
+- name: Testing 2-2
+  assert:
+    that:
+      - enforce_root_check.stdout != ''
+    fail_msg: "Failed to Get enforce_for_root in system-auth"
+
+- name: Get pam_faillock.so existence and deny
+  shell: "{{ get_path_3 }}"
+  with_items: "{{ linuxserver_conf_path_3 }}"
+  register: pam_check
+  failed_when: false
+  changed_when: false
+
+- name: Testing 3
+  assert:
+    that:
+      - pam_check.stdout != ''
+    fail_msg: "Failed to Get pam_faillock.so existence and deny"
+
+# Server(Linux) 4: root 홈, 디렉터리 소유자 설정
+- name: Get PATH
+  shell: "{{ get_path_4 }}"
+  register: path
+  changed_when: false
+
+- name: Testing 4
+  assert:
+    that:
+      - path.stdout != ''
+    fail_msg: "Failed to Get PATH"
+
+# Server(Linux) 5: 파일 및 디렉터리 소유자 설정
+- name: Get files and directories without valid owner or group
+  shell: "{{ get_path_5 }}"
+  register: invalid_files
+  changed_when: false
+
+
+- name: Testing 5
+  assert:
+    that:
+      - invalid_files.stdout != ''
+    fail_msg: "Failed to Get files and directories without valid owner or group"
+
+# Server(Linux) 9: 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
+- name: Get a list of user home directories
+  shell: "{{ get_path_9 }}"
+  register: home
+
+- name: Testing 9
+  assert:
+    that:
+      - home.stdout != ''
+    fail_msg: "Failed to Get pwquality.conf"
+
+# Server(Linux) 10: NIS, NIS+ 점검
+- name: Get files exist
+  shell: "{{ get_path_10_1 }}"
+  register: nis_installed
+  failed_when: false
+  changed_when: false
+
+- name: Testing 10-1
+  assert:
+    that:
+      - nis_installed.stdout != ''
+    fail_msg: "Failed to Get files exist"
+
+- name: Get running
+  shell: "{{ get_path_10_2 }}"
+  register: nis_running
+  failed_when: false
+  changed_when: false
+
+- name: Testing 10-2
+  assert:
+    that:
+      - nis_running.stdout != ''
+    fail_msg: "Failed to Get running"
+
+# Server(Linux) 11: Sendmail 버전 점검
+- name: Get Sendmail version
+  shell: "{{ get_path_11_1 }}"
+  register: sendmail_version
+  failed_when: false
+  changed_when: false
+
+- name: Testing 11-1
+  assert:
+    that:
+      - sendmail_version.stdout != ''
+    fail_msg: "Failed to Get Sendmail version"
+
+- name: Get Postfix version
+  shell: "{{ get_path_11_2 }}"
+  register: postfix_version
+  failed_when: false
+  changed_when: false
+
+- name: Testing 11-2
+  assert:
+    that:
+      - postfix_version.stdout != ''
+    fail_msg: "Failed to Get Postfix version"
+
+- name: Get lastest Postfix version
+  shell: "{{ get_path_11_3 }}"
+  register: postfix_latest_version
+  failed_when: false
+  changed_when: false
+
+- name: Testing 11-3
+  assert:
+    that:
+      - postfix_latest_version.stdout != ''
+    fail_msg: "Failed to Get lastest Postfix version"
+
+- name: Get latest Sendmail version
+  shell: "{{ get_path_11_4 }}"
+  register: sendmail_latest_version
+  failed_when: false
+  changed_when: false
+
+- name: Testing 11-4
+  assert:
+    that:
+      - sendmail_latest_version.stdout != ''
+    fail_msg: "Failed to Get latest Sendmail version"
+
+# Server(Linux) 12: DNS 보안 버전 패치
+- name: Get DNS service status
+  shell: "{{ get_path_12_1 }}"
+  register: named_process
+  failed_when: false
+  changed_when: false
+
+- name: Testing 12-1
+  assert:
+    that:
+      - named_process.stdout != ''
+    fail_msg: "Failed to Get DNS service status"
+
+- name: Get BIND version
+  shell: "{{ get_path_12_2 }}"
+  when: named_process.stdout != ''
+  register: bind_version
+  failed_when: false
+  changed_when: false
+
+- name: Testing 12-2
+  assert:
+    that:
+      - bind_version.stdout != ''
+    fail_msg: "Failed to Get BIND version"
+
+- name: Get latest BIND version
+  shell: "{{ get_path_12_3 }}"
+  register: yum_bind_version
+  failed_when: false
+  changed_when: false
+
+- name: Testing 12-3
+  assert:
+    that:
+      - yum_bind_version.stdout != ''
+    fail_msg: "Failed to Get latest BIND version"
+
+
+# Server(Linux) 15: 패스워드 최대 사용 기간 설정
+- name: Get /etc/login.defs
+  shell: "{{ get_path_15 }}"
+  register: max_days_info
+  changed_when: false
+
+- name: Testing 15
+  assert:
+    that:
+      - max_days_info.stdout != ''
+    fail_msg: "Failed to Get /etc/login.defs"
+
+
+# Sever(Linux) 16: 패스워드 파일 보호
+- name: Get /etc/passwd
+  shell: "{{ get_path_16 }}"
+  register: passwd_check
+  changed_when: false
+
+- name: Testing 16
+  assert:
+    that:
+      - passwd_check.stdout != ''
+    fail_msg: "Failed to Get /etc/passwd"
+
+#Server(Linux) 19: SUID, SGID, Sticky bit 설정 파일 점검
+- name: Get permissions
+  become: yes
+  shell: "{{ get_path_19 }}"
+  register: suid_sgid_files
+  ignore_errors: yes
+
+- name: Testing 19
+  assert:
+    that:
+      - suid_sgid_files.stdout != ''
+    fail_msg: "Failed to Get permissions"
+
+#Sever(Linux) 20: world writable 파일 점검
+- name: Get world writable files
+  shell: "{{ get_path_20 }}"
+  register: world_writable_files
+  ignore_errors: yes
+
+- name: Testing 20
+  assert:
+    that:
+      - world_writable_files.stdout != ''
+    fail_msg: "Failed to Get world writable files"
+
+#Server(Linux) 22: 접속 IP 및 포트 제한
+- name: Get iptables installation
+  shell: "{{ get_path_22_1 }}"
+  register: iptables_installed
+  ignore_errors: yes
+  changed_when: false
+
+- name: Testing 22-1
+  assert:
+    that:
+      - iptables_installed.stdout != ''
+    fail_msg: "Failed to Get iptables installation"
+
+
+- name: Get iptables rules
+  shell: "{{ get_path_22_2 }}"
+  register: iptables_rules
+  when: iptables_installed.rc == 0
+  ignore_errors: yes
+  changed_when: false
+
+
+- name: Testing 22-2
+  assert:
+    that:
+      - iptables_rules.stdout != ''
+    fail_msg: "Failed to Get iptables rules"
+
+- name: Check firewall-cmd rules
+  shell: "{{ get_path_22_3 }}"
+  register: firewall_rules
+  ignore_errors: yes
+  changed_when: false
+ 
+- name: Testing 22-3
+  assert:
+    that:
+      - firewall_rules.stdout != ''
+    fail_msg: "Failed to Check firewall-cmd rules"
+
+#Server(Linux) 24: Anonymous FTP 서비스 비활성화
+- name: Get ftp account status
+  shell: "{{ get_path_24 }}"
+  register: ftp_account
+  ignore_errors: yes 
+
+- name: Testing 24
+  assert:
+    that:
+      - ftp_account.stdout != ''
+    fail_msg: "Failed to Get ftp account statu"
+ 
+#Server(Linux) 26: DoS 공격에 취약한 서비스 비활성화
+- name: Get installation status
+  shell: "{{ get_path_26_1 }}"
+  register: xinetd_installed
+  ignore_errors: yes
+  changed_when: false
+
+- name: Testing 26-1
+  assert:
+    that:
+      - xinetd_installed.stdout != ''
+    fail_msg: "Failed to Get installation status"
+
+- name: Check disabled in xinetd
+  shell: "{{ get_path_26_2 }}"
+  register: disable_check
+  when: service_status.stat.exists and xinetd_installed.rc == 0
+  with_items: "{{ services }}"
+  ignore_errors: yes
+  changed_when: false
+
+- name: Testing 26-2
+  assert:
+    that:
+      - disable_check.stdout != ''
+    fail_msg: "Failed to Check disabled in xinetd"
+
+#Server(Linux) 27: NFS 서비스 비활성화
+- name: Get NFS daemon status
+  shell: "{{ get_path_27 }}"
+  register: nfsd_process
+  changed_when: false
+  ignore_errors: yes
+
+- name: Testing 27
+  assert:
+    that:
+      - nfsd_process.stdout != ''
+    fail_msg: "Failed to Get NFS daemon status"
+
+#Server(Linux) 28: automountd 제거
+- name: Get automountd daemon status
+  shell: "{{ get_path_28 }}"
+  register: automountd_status
+  changed_when: false
+  ignore_errors: yes
+
+- name: Testing 28
+  assert:
+    that:
+      - automountd_status.stdout != ''
+    fail_msg: "Failed to Get automountd daemon status"
+
+
+ 
+
+
+
+
+
+
+
+
+
