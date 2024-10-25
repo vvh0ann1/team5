@@ -1,0 +1,103 @@
+---
+#- name: Security Checks_Mysql
+#  hosts: aws_db, aws_server2, ubuntu
+#  pre_tasks:
+#    - include_tasks: roles/mysql_security_checks/pre_tasks.yml
+#    - include_tasks: roles/mysql_security_checks/tests/Testing_tasks.yml
+#  roles:
+#    - mysql_security_checks
+#  tasks:
+#    - name: Intergration Testing
+#      include_tasks: roles/mysql_security_checks/tests/Testing_intergration.yml
+#  post_tasks:
+#    - include_tasks: post_tasks.yml
+#      vars:
+#        LAMP_type: "{{ LAMP_type_m }}"
+#        status_var: "{{ Mysql_status }}"
+#        diag_file_value: "{{ diag_file_value_m }}"
+#
+#- name: Security Checks_Apache
+#  hosts: aws_web, aws_server2, ubuntu
+#  pre_tasks:
+#    - include_tasks: roles/apache_security_checks/pre_tasks.yml
+#    - include_tasks: roles/apache_security_checks/tests/Testing_tasks.yml
+#  roles:
+#    - apache_security_checks
+#  tasks:
+#    - name: Intergration Testing
+#      include_tasks: roles/apache_security_checks/tests/Testing_intergration.yml
+#  post_tasks:
+#    - include_tasks: post_tasks.yml
+#      vars:
+#        LAMP_type: "{{ LAMP_type_a }}"
+#        status_var: "{{ Apache_status }}"
+#        diag_file_value: "{{ diag_file_value_a }}"
+#
+#- name: Security Checks_PHP
+#  hosts: aws_web, aws_server2, ubuntu
+#  pre_tasks:
+#    - include_tasks: roles/php_security_checks/pre_tasks.yml
+#    - include_tasks: roles/php_security_checks/tests/Testing_tasks.yml
+#  roles:
+#    - php_security_checks
+#  tasks:
+#    - name: Intergration Testing
+#      include_tasks: roles/php_security_checks/tests/Testing_intergration.yml
+#  post_tasks:
+#    - include_tasks: post_tasks.yml
+#      vars:
+#        LAMP_type: "{{ LAMP_type_p }}"
+#        status_var: "{{ PHP_status }}"
+#        diag_file_value: "{{ diag_file_value_p }}"
+#
+
+- name: Security Checks_ServerLinux
+  hosts: aws_web, aws_server2, ubuntu
+  tasks:
+    - block:
+        - name: Include pre-tasks
+          include_tasks: roles/linux_security_checks/pre_tasks.yml
+
+#        - name: Include testing tasks
+#          include_tasks: roles/linux_security_checks/tests/Testing_tasks.yml
+
+        - name: Run roles
+          include_role:
+            name: linux_security_checks
+
+        - name: Intergration Testing
+          include_tasks: roles/linux_security_checks/tests/Testing_intergration.yml
+
+        - name: Include post-tasks
+          include_tasks: post_tasks.yml
+          vars:
+            LAMP_type: "{{ LAMP_type_l }}"
+            status_var: "{{ ServerLinux_status }}"
+            diag_file_value: "{{ diag_file_value_l }}"
+      when: ansible_os_family == "Debian"
+
+- name: Security Checks_ServerLinux
+  hosts: aws_web, aws_server2, ubuntu
+  tasks:
+    - block:
+        - name: Include pre-tasks
+          include_tasks: roles/linux_security_checks/pre_tasks.yml
+
+        - name: Include testing tasks
+          include_tasks: roles/linux_security_checks/tests/Testing_tasks.yml
+
+        - name: Run roles
+          include_role:
+            name: linux_security_checks
+
+        - name: Intergration Testing
+          include_tasks: roles/linux_security_checks/tests/Testing_intergration.yml
+
+        - name: Include post-tasks
+          include_tasks: post_tasks.yml
+          vars:
+            LAMP_type: "{{ LAMP_type_l }}"
+            status_var: "{{ ServerLinux_status }}"
+            diag_file_value: "{{ diag_file_value_l }}"
+      when: ansible_os_family == "RedHat"
+

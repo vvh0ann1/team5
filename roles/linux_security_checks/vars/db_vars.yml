@@ -39,32 +39,32 @@ services:
 max_days: 90
 secure_permissions: 644
 LAMP_type_l: 'Server(Linux)'
-get_path_1: grep PermitRootLogin {{ ssh_config_file }}
-get_path_2_1: grep -E "minlen|minclass" {{ pwquality_conf_file }}
-get_path_2_2: grep enforce_for_root {{ system_auth_file }}
-get_path_3: grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}
-get_path_4: echo $PATH
-get_path_5: 'find /etc /tmp /bin /sbin \( -nouser -o -nogroup \) -xdev -exec ls -l {} \\; 2>/dev/null'
-get_path_9: 'cat {{ passwd_file_path }} | grep /home | cut -d: -f6'
-get_path_10_1:  '|
+get_path_1_LR: grep PermitRootLogin {{ ssh_config_file }}
+get_path_2_1_LR: grep -E "minlen|minclass" {{ pwquality_conf_file }}
+get_path_2_2_LR: grep enforce_for_root {{ system_auth_file }}
+get_path_3_LR: grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}
+get_path_4_LR: echo $PATH
+get_path_5_LR: 'find /etc /tmp /bin /sbin \( -nouser -o -nogroup \) -xdev -exec ls -l {} \\; 2>/dev/null'
+get_path_9_LR: 'cat {{ passwd_file_path }} | grep /home | cut -d: -f6'
+get_path_10_1_LR:  '|
     if [ -f /usr/sbin/ypserv ] && [ -f /usr/sbin/ypbind ] && [ -f /usr/sbin/ypxfrd ] && [ -f /usr/sbin/rpc.yppasswdd ] && [ -f /usr/sbin/rpc.yupdated ]; then
       echo "installed"
     fi'
-get_path_10_2: ps -ef | grep -E "ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.yupdated" | grep -v grep
-get_path_11_1: cat /etc/mail/sendmail.cf | grep DZ | awk '{print $1}' | sed 's/DZ//g'
-get_path_11_2: postconf -d | grep '^mail_version' | awk '{print $3}'
-get_path_11_3: yum info postfix | grep Version | awk '{print $3}'
-get_path_11_4: yum info sendmail | grep Version | awk '{print $3}'
-get_path_12_1: ps -ef | grep named | grep -v grep
-get_path_12_2: named -V
-get_path_12_3: yum info bind | grep Version
-get_path_15: grep '^PASS_MAX_DAYS' {{ login_defs_path }}
-get_path_19: 'find / -user root -type f \\( -perm -4000 -o -perm -2000 \\) -exec ls -lg {} + 2>/dev/null'
-get_path_20: find / -type f -perm -2 -exec ls -l {} + | grep -v '/tmp'
-get_path_24: grep ftp /etc/passwd
-get_path_26: rpm -q xinetd
-get_path_27: ps -ef | grep '[n]fsd'
-get_path_28: ps -ef | grep '[a]utomountd'
+get_path_10_2_LR: ps -ef | grep -E "ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.yupdated" | grep -v grep
+get_path_11_1_LR: cat /etc/mail/sendmail.cf | grep DZ | awk '{print $1}' | sed 's/DZ//g'
+get_path_11_2_LR: postconf -d | grep '^mail_version' | awk '{print $3}'
+get_path_11_3_LR: yum info postfix | grep Version | awk '{print $3}'
+get_path_11_4_LR: yum info sendmail | grep Version | awk '{print $3}'
+get_path_12_1_LR: ps -ef | grep named | grep -v grep
+get_path_12_2_LR: named -V
+get_path_12_3_LR: yum info bind | grep Version
+get_path_15_LR: grep '^PASS_MAX_DAYS' {{ login_defs_path }}
+get_path_19_LR: 'find / -user root -type f \\( -perm -4000 -o -perm -2000 \\) -exec ls -lg {} + 2>/dev/null'
+get_path_20_LR: find / -type f -perm -2 -exec ls -l {} + | grep -v '/tmp'
+get_path_24_LR: grep ftp /etc/passwd
+get_path_26_1_LR: rpm -q xinetd
+get_path_27_LR: ps -ef | grep '[n]fsd'
+get_path_28_LR: ps -ef | grep '[a]utomountd'
 
 diag_file_value_l:
   - [1,'root 계정 원격 접속 제한','root 계정 telnet과 ssh 접속 제한 설정']
@@ -95,3 +95,4 @@ diag_file_value_l:
   - [26,'DoS 공격에 취약한 서비스 비활성화', '/etc/xinetd.d/ 디렉터리 내 echo, discard, daytime, chargen 파일 수정']
   - [27,'NFS 서비스 비활성화','NFS 데몬(nfsd)을 중지']
   - [28,'automountd 제거','automountd 서비스 데몬 실행 중지']
+

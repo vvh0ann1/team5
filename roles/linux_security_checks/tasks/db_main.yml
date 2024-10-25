@@ -1,7 +1,7 @@
 # 1번: root 계정 원격 접속 제한
 - name: Check SSH root login setting
 
-  shell: "{{ get_path_1 }}"
+  shell: "{{ get_path_1_LR }}"
   register: ssh_check
   changed_when: false
 
@@ -12,12 +12,12 @@
 # 2번: 패스워드 복잡도 설정 - 파일이 존재하지 않아 발생하는 에러가 있다 - 다름
 - name: Check if pwquality.conf exists
   stat:
-    path: "{{ get_path_2_1 }}"
+    path: "{{ get_path_2_1_LR }}"
   register: pwquality_conf_stat
 
 - name: Check if system-auth exists
   stat:
-    path: "{{ get_path_2_2 }}"
+    path: "{{ get_path_2_2_LR }}"
   register: system_auth_stat
 
 - name: Set status_2 based on conditions
@@ -29,9 +29,13 @@
                     pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | first | int < 3 or
                     'enforce_for_root' not in enforce_root_check.stdout)) else 'S' }}
 
+- name: Debug status_2
+  debug:
+    var: vars['status_{}'.format(item)]
+
 # 3번: 계정 잠금 임계값 설정 - 다름
 - name: Check pam_faillock.so existence and deny value in system-auth and password-auth
-  shell: "{{ get_path_3 }}"
+  shell: "{{ get_path_3_LR }}"
   with_items: "{{ pam_files }}"
   register: pam_check
   failed_when: false
@@ -51,7 +55,7 @@
 
 # 4번. root 홈, 패스 디렉터리 권한 패스 설정 - 코드만 다름 확인 요망
 - name: Get current PATH
-  shell: "{{ get_path_4 }}"
+  shell: "{{ get_path_4_LR }}"
   register: path_output
 
 - name: Check status_4
@@ -60,7 +64,7 @@
 
 # 5번. 파일 및 디렉터리 소유자 설정
 - name: Find files and directories without valid owner or group
-  shell: "{{ get_path_5 }}"
+  shell: "{{ get_path_5_LR }}"
   register: invalid_files
   changed_when: false
 
@@ -101,7 +105,7 @@
 
   # 9번. 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
 - name: Get a list of user home directories
-  shell: "{{ get_path_9 }}"
+  shell: "{{ get_path_9_LR }}"
   register: home_dirs
 
 - name: Get ownership and permissions for each home directory
@@ -118,13 +122,13 @@
 
 # 10번. NIS, NIS+ 점검','NFS 서비스 데몬 중지
 - name: Check if NIS related files exist
-  shell: "{{ get_path_10_1 }}"
+  shell: "{{ get_path_10_1_LR }}"
   register: nis_installed
   failed_when: false
   changed_when: false
 
 - name: Check if NIS service is running
-  shell: "{{ get_path_10_2 }}"
+  shell: "{{ get_path_10_2_LR }}"
   register: nis_running
   failed_when: false
   changed_when: false
@@ -136,25 +140,25 @@
 
 # 11번. 'Sendmail 버전 점검','Sendmail, postfix 서비스 실행 여부 및 버전 점검 후, OS 벤더사의 보안 패치 설치'
 - name: Check Sendmail version
-  shell: "{{ get_path_11_1 }}"
+  shell: "{{ get_path_11_1_LR }}"
   register: sendmail_version
   failed_when: false
   changed_when: false
 
 - name: Check Postfix version
-  shell: "{{ get_path_11_2 }}"
+  shell: "{{ get_path_11_2_LR }}"
   register: postfix_version
   failed_when: false
   changed_when: false
 
 - name: Get latest Postfix version from official repository
-  shell: "{{ get_path_11_3 }}"
+  shell: "{{ get_path_11_3_LR }}"
   register: postfix_latest_version
   failed_when: false
   changed_when: false
 
 - name: Get latest Sendmail version from official repository
-  shell: "{{ get_path_11_4 }}"
+  shell: "{{ get_path_11_4_LR }}"
   register: sendmail_latest_version
   failed_when: false
   changed_when: false
@@ -166,20 +170,20 @@
 
 # 12번. Server(Linux): DNS 보안 버전 패치
 - name: Check if DNS service is running
-  shell: "{{ get_path_12_1 }}"
+  shell: "{{ get_path_12_1_LR }}"
   register: named_process
   failed_when: false
   changed_when: false
 
 - name: Check BIND version if DNS service is running
-  shell: "{{ get_path_12_2 }}"
+  shell: "{{ get_path_12_2_LR }}"
   when: named_process.stdout != ''
   register: bind_version
   failed_when: false
   changed_when: false
 
 - name: Get latest BIND version from yum
-  shell: "{{ get_path_12_3 }}"
+  shell: "{{ get_path_12_3_LR }}"
   register: yum_bind_version
   failed_when: false
   changed_when: false
@@ -273,7 +277,7 @@
 
 # 15번. 패스워드 최대 사용 기간 설정
 - name: Check PASS_MAX_DAYS in /etc/login.defs
-  shell: "{{ get_path_15 }}"
+  shell: "{{ get_path_15_LR }}"
   register: max_days_info
   changed_when: false
 
@@ -325,7 +329,7 @@
 
 # 19번. SUID, SGID, Sticky bit 설정 파일 점검
 - name: Get files with SUID or SGID permissions
-  shell: "{{ get_path_19 }}"
+  shell: "{{ get_path_19_LR }}"
   register: suid_sgid_files
   ignore_errors: yes
 
@@ -340,7 +344,7 @@
 
 # 20번.  world writable 파일 점검
 - name: Get world writable files (excluding /tmp)
-  shell: "{{ get_path_20 }}"
+  shell: "{{ get_path_20_LR }}"
   register: world_writable_files
   ignore_errors: yes
 
@@ -442,7 +446,7 @@
 
 # 24번. Anonymous FTP 비활성화
 - name: Get ftp account exists in /etc/passwd
-  shell: "{{ get_path_24 }}"
+  shell: "{{ get_path_24_LR }}"
   register: ftp_account
   ignore_errors: yes
 
@@ -498,7 +502,7 @@
 # 26 에러
 # 1. xinetd가 설치되어 있는지 확인
 - name: Check if xinetd is installed
-  shell: "{{ get_path_26 }}"
+  shell: "{{ get_path_26_1_LR }}"
   register: xinetd_installed
   ignore_errors: yes
   changed_when: false
@@ -536,7 +540,7 @@
 
 # 27번. NFS 서비스 비활성화
 - name: Get if NFS daemon is running
-  shell: "{{ get_path_27 }}"
+  shell: "{{ get_path_27_LR }}"
   register: nfsd_process
   changed_when: false
   ignore_errors: yes
@@ -547,7 +551,7 @@
 
 # 28번. automountd 제거
 - name: Get if automountd daemon is running
-  shell: "{{ get_path_28 }}"
+  shell: "{{ get_path_28_LR }}"
   register: automountd_status
   changed_when: false
   ignore_errors: yes
@@ -588,5 +592,6 @@
       status26: "{{ status_26 }}"
       status27: "{{ status_27 }}"
       status28: "{{ status_28 }}"
+
 
 

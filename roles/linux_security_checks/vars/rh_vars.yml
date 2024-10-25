@@ -33,41 +33,41 @@ services:
   - chargen
 max_days: 90
 secure_permissions: 644
-LAMP_type_l: 'Server(Linux)'
-
-get_path_1: grep PermitRootLogin {{ linuxserver_conf_path_1 }}
-get_path_2_1: grep -E "minlen|minclass" {{ linuxserver_conf_path_2_1 }}
-get_path_2_2: grep enforce_for_root {{ linuxserver_conf_path_2_2 }}
-get_path_3: grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}
-get_path_4: echo $PATH
-get_path_5: 'find /etc /tmp /bin /sbin \( -nouser -o -nogroup \) -xdev -exec ls -l {} \\; 2>/dev/null'
-get_path_9: 'cat {{ linuxserver_conf_path_6_9 }} | grep /home | cut -d: -f6'
-get_path_10_1:  '|
+LAMP_type: 'Server(Linux)'
+diag_file_path: '/home/ec2-user/Diag_File.txt'
+get_path_1_LR: grep PermitRootLogin {{ linuxserver_conf_path_1 }}
+get_path_2_1_LR: grep -E "minlen|minclass" {{ linuxserver_conf_path_2_1 }}
+get_path_2_2_LR: grep enforce_for_root {{ linuxserver_conf_path_2_2 }}
+get_path_3_LR: grep -E 'pam_faillock.so' {{ item }} | grep deny || grep -E 'pam_faillock.so' {{ item }}
+get_path_4_LR: echo $PATH
+get_path_5_LR: 'find /etc /tmp /bin /sbin \( -nouser -o -nogroup \) -xdev -exec ls -l {} \\; 2>/dev/null'
+get_path_9_LR: 'cat {{ linuxserver_conf_path_6_9 }} | grep /home | cut -d: -f6'
+get_path_10_1_LR:  '|
     if [ -f /usr/sbin/ypserv ] && [ -f /usr/sbin/ypbind ] && [ -f /usr/sbin/ypxfrd ] && [ -f /usr/sbin/rpc.yppasswdd ] && [ -f /usr/sbin/rpc.yupdated ]; then
       echo "installed"
     fi'
-get_path_10_2: ps -ef | grep -E "ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.yupdated" | grep -v grep
-get_path_11_1: cat /etc/mail/sendmail.cf | grep DZ | awk '{print $1}' | sed 's/DZ//g'
-get_path_11_2: postconf -d | grep '^mail_version' | awk '{print $3}'
-get_path_11_3: yum info postfix | grep Version | awk '{print $3}'
-get_path_11_4: yum info sendmail | grep Version | awk '{print $3}'
-get_path_12_1: ps -ef | grep named | grep -v grep
-get_path_12_2: named -V
-get_path_12_3: yum info bind | grep Version
-get_path_15: grep '^PASS_MAX_DAYS' {{ linuxserver_conf_path_15 }}
-get_path_16: "awk -F: '$2 != \"x\" {print $1 \" : \" $2}' /etc/passwd"
-get_path_19: find / -user root -type f \\( -perm -4000 -o -perm -2000 \\) -exec ls -lg {} + 2>/dev/null
-get_path_20: find / -type f -perm -2 -exec ls -l {} + | grep -v '/tmp'
-get_path_22_1: command -v iptables
-get_path_22_2: "iptables -L"
-get_path_22_3: "firewall-cmd --list-all"
-get_path_24: grep ftp /etc/passwd
-get_path_26_1: rpm -q xinetd
-get_path_26_2: grep disable /etc/xinetd.d/{{ item }} | grep -q yes
-get_path_27: ps -ef | grep '[n]fsd'
-get_path_28: ps -ef | grep '[a]utomountd'
+get_path_10_2_LR: ps -ef | grep -E "ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.yupdated" | grep -v grep
+get_path_11_1_LR: cat /etc/mail/sendmail.cf | grep DZ | awk '{print $1}' | sed 's/DZ//g'
+get_path_11_2_LR: postconf -d | grep '^mail_version' | awk '{print $3}'
+get_path_11_3_LR: yum info postfix | grep Version | awk '{print $3}'
+get_path_11_4_LR: yum info sendmail | grep Version | awk '{print $3}'
+get_path_12_1_LR: ps -ef | grep named | grep -v grep
+get_path_12_2_LR: named -V
+get_path_12_3_LR: yum info bind | grep Version
+get_path_15_LR: grep '^PASS_MAX_DAYS' {{ linuxserver_conf_path_15 }}
+get_path_16_LR: "awk -F: '$2 != \"x\" {print $1 \" : \" $2}' /etc/passwd"
+get_path_19_LR: find / -user root -type f \\( -perm -4000 -o -perm -2000 \\) -exec ls -lg {} + 2>/dev/null
+get_path_20_LR: find / -type f -perm -2 -exec ls -l {} + | grep -v '/tmp'
+get_path_22_1_LR: command -v iptables
+get_path_22_2_LR: "iptables -L"
+get_path_22_3_LR: "firewall-cmd --list-all"
+get_path_24_LR: grep ftp /etc/passwd
+get_path_26_1_LR: rpm -q xinetd
+get_path_26_2_LR: grep disable /etc/xinetd.d/{{ item }} | grep -q yes
+get_path_27_LR: ps -ef | grep '[n]fsd'
+get_path_28_LR: ps -ef | grep '[a]utomountd'
 
-diag_file_value_l:
+diag_file_value:
   - [1,'root 계정 원격 접속 제한','root 계정 telnet과 ssh 접속 제한 설정']
   - [2,'패스워드 복잡도 설정','패스워드 복잡도 설정 및 enforce_for_root 적용']
   - [3,'계정 잠금 임계값 설정','계정 임계값 5회 이하로 설정']

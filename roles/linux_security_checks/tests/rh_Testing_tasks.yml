@@ -1,7 +1,7 @@
 # Server(Linux) 1: root 계정 원격 접속 제한
 - name: Get root setting
   become: yes
-  shell: "{{ get_path_1 }}"
+  shell: "{{ get_path_1_LR }}"
   register: ssh_check
   changed_when: false
 
@@ -13,7 +13,7 @@
 
 # Server(Linux) 2: 패스워드 복잡도 설정
 - name: Get pwquality.conf
-  shell: "{{ get_path_2_1 }}"
+  shell: "{{ get_path_2_1_LR }}"
   register: pw_quality_conf_check
   failed_when: false
   changed_when: false
@@ -25,7 +25,7 @@
     fail_msg: "Failed to Get pwquality.conf"
 
 - name: Get enforce_for_root in system-auth
-  shell: "{{ get_path_2_2 }}"
+  shell: "{{ get_path_2_2_LR }}"
   register: enforce_root_check
   failed_when: false
   changed_when: false
@@ -37,7 +37,7 @@
     fail_msg: "Failed to Get enforce_for_root in system-auth"
 
 - name: Get pam_faillock.so existence and deny
-  shell: "{{ get_path_3 }}"
+  shell: "{{ get_path_3_LR }}"
   with_items: "{{ linuxserver_conf_path_3 }}"
   register: pam_check
   failed_when: false
@@ -51,7 +51,7 @@
 
 # Server(Linux) 4: root 홈, 디렉터리 소유자 설정
 - name: Get PATH
-  shell: "{{ get_path_4 }}"
+  shell: "{{ get_path_4_LR }}"
   register: path
   changed_when: false
 
@@ -63,7 +63,7 @@
 
 # Server(Linux) 5: 파일 및 디렉터리 소유자 설정
 - name: Get files and directories without valid owner or group
-  shell: "{{ get_path_5 }}"
+  shell: "{{ get_path_5_LR }}"
   register: invalid_files
   changed_when: false
 
@@ -76,7 +76,7 @@
 
 # Server(Linux) 9: 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
 - name: Get a list of user home directories
-  shell: "{{ get_path_9 }}"
+  shell: "{{ get_path_9_LR }}"
   register: home
 
 - name: Testing 9
@@ -87,7 +87,7 @@
 
 # Server(Linux) 10: NIS, NIS+ 점검
 - name: Get files exist
-  shell: "{{ get_path_10_1 }}"
+  shell: "{{ get_path_10_1_LR }}"
   register: nis_installed
   failed_when: false
   changed_when: false
@@ -99,7 +99,7 @@
     fail_msg: "Failed to Get files exist"
 
 - name: Get running
-  shell: "{{ get_path_10_2 }}"
+  shell: "{{ get_path_10_2_LR }}"
   register: nis_running
   failed_when: false
   changed_when: false
@@ -112,7 +112,7 @@
 
 # Server(Linux) 11: Sendmail 버전 점검
 - name: Get Sendmail version
-  shell: "{{ get_path_11_1 }}"
+  shell: "{{ get_path_11_1_LR }}"
   register: sendmail_version
   failed_when: false
   changed_when: false
@@ -124,7 +124,7 @@
     fail_msg: "Failed to Get Sendmail version"
 
 - name: Get Postfix version
-  shell: "{{ get_path_11_2 }}"
+  shell: "{{ get_path_11_2_LR }}"
   register: postfix_version
   failed_when: false
   changed_when: false
@@ -136,7 +136,7 @@
     fail_msg: "Failed to Get Postfix version"
 
 - name: Get lastest Postfix version
-  shell: "{{ get_path_11_3 }}"
+  shell: "{{ get_path_11_3_LR }}"
   register: postfix_latest_version
   failed_when: false
   changed_when: false
@@ -148,7 +148,7 @@
     fail_msg: "Failed to Get lastest Postfix version"
 
 - name: Get latest Sendmail version
-  shell: "{{ get_path_11_4 }}"
+  shell: "{{ get_path_11_4_LR }}"
   register: sendmail_latest_version
   failed_when: false
   changed_when: false
@@ -161,7 +161,7 @@
 
 # Server(Linux) 12: DNS 보안 버전 패치
 - name: Get DNS service status
-  shell: "{{ get_path_12_1 }}"
+  shell: "{{ get_path_12_1_LR }}"
   register: named_process
   failed_when: false
   changed_when: false
@@ -173,7 +173,7 @@
     fail_msg: "Failed to Get DNS service status"
 
 - name: Get BIND version
-  shell: "{{ get_path_12_2 }}"
+  shell: "{{ get_path_12_2_LR }}"
   when: named_process.stdout != ''
   register: bind_version
   failed_when: false
@@ -186,7 +186,7 @@
     fail_msg: "Failed to Get BIND version"
 
 - name: Get latest BIND version
-  shell: "{{ get_path_12_3 }}"
+  shell: "{{ get_path_12_3_LR }}"
   register: yum_bind_version
   failed_when: false
   changed_when: false
@@ -200,7 +200,7 @@
 
 # Server(Linux) 15: 패스워드 최대 사용 기간 설정
 - name: Get /etc/login.defs
-  shell: "{{ get_path_15 }}"
+  shell: "{{ get_path_15_LR }}"
   register: max_days_info
   changed_when: false
 
@@ -213,7 +213,7 @@
 
 # Sever(Linux) 16: 패스워드 파일 보호
 - name: Get /etc/passwd
-  shell: "{{ get_path_16 }}"
+  shell: "{{ get_path_16_LR }}"
   register: passwd_check
   changed_when: false
 
@@ -226,7 +226,7 @@
 #Server(Linux) 19: SUID, SGID, Sticky bit 설정 파일 점검
 - name: Get permissions
   become: yes
-  shell: "{{ get_path_19 }}"
+  shell: "{{ get_path_19_LR }}"
   register: suid_sgid_files
   ignore_errors: yes
 
@@ -238,7 +238,7 @@
 
 #Sever(Linux) 20: world writable 파일 점검
 - name: Get world writable files
-  shell: "{{ get_path_20 }}"
+  shell: "{{ get_path_20_LR }}"
   register: world_writable_files
   ignore_errors: yes
 
@@ -250,7 +250,7 @@
 
 #Server(Linux) 22: 접속 IP 및 포트 제한
 - name: Get iptables installation
-  shell: "{{ get_path_22_1 }}"
+  shell: "{{ get_path_22_1_LR }}"
   register: iptables_installed
   ignore_errors: yes
   changed_when: false
@@ -263,7 +263,7 @@
 
 
 - name: Get iptables rules
-  shell: "{{ get_path_22_2 }}"
+  shell: "{{ get_path_22_2_LR }}"
   register: iptables_rules
   when: iptables_installed.rc == 0
   ignore_errors: yes
@@ -277,7 +277,7 @@
     fail_msg: "Failed to Get iptables rules"
 
 - name: Check firewall-cmd rules
-  shell: "{{ get_path_22_3 }}"
+  shell: "{{ get_path_22_3_LR }}"
   register: firewall_rules
   ignore_errors: yes
   changed_when: false
@@ -290,7 +290,7 @@
 
 #Server(Linux) 24: Anonymous FTP 서비스 비활성화
 - name: Get ftp account status
-  shell: "{{ get_path_24 }}"
+  shell: "{{ get_path_24_LR }}"
   register: ftp_account
   ignore_errors: yes 
 
@@ -302,7 +302,7 @@
  
 #Server(Linux) 26: DoS 공격에 취약한 서비스 비활성화
 - name: Get installation status
-  shell: "{{ get_path_26_1 }}"
+  shell: "{{ get_path_26_1_LR }}"
   register: xinetd_installed
   ignore_errors: yes
   changed_when: false
@@ -314,7 +314,7 @@
     fail_msg: "Failed to Get installation status"
 
 - name: Check disabled in xinetd
-  shell: "{{ get_path_26_2 }}"
+  shell: "{{ get_path_26_2_LR }}"
   register: disable_check
   when: service_status.stat.exists and xinetd_installed.rc == 0
   with_items: "{{ services }}"
@@ -329,7 +329,7 @@
 
 #Server(Linux) 27: NFS 서비스 비활성화
 - name: Get NFS daemon status
-  shell: "{{ get_path_27 }}"
+  shell: "{{ get_path_27_LR }}"
   register: nfsd_process
   changed_when: false
   ignore_errors: yes
@@ -342,7 +342,7 @@
 
 #Server(Linux) 28: automountd 제거
 - name: Get automountd daemon status
-  shell: "{{ get_path_28 }}"
+  shell: "{{ get_path_28_LR }}"
   register: automountd_status
   changed_when: false
   ignore_errors: yes
@@ -355,6 +355,7 @@
 
 
  
+
 
 
 
