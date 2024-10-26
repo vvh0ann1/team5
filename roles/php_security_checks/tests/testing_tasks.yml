@@ -1,9 +1,7 @@
-# testing_task
----
 - name: Get display_errors in php.ini
   shell: "{{ get_path_1 }}"
   register: display_errors_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Testing 1
   assert:
@@ -12,10 +10,11 @@
       - display_errors_check is not none
     fail_msg: "Failed to Get display_errors in php.ini"
 
+
 - name: Get expose_php in php.ini
   shell: "{{ get_path_2 }}"
   register: expose_php_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Testing 2
   assert:
@@ -24,10 +23,11 @@
       - expose_php_check is not none
     fail_msg: "Failed to Get expose_php in php.ini"
 
+
 - name: Get allow_url_fopen in php.ini
   shell: "{{ get_path_3 }}"
   register: allow_url_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Testing 3
   assert:
@@ -36,10 +36,11 @@
       - allow_url_check is not none
     fail_msg: "Failed to Get allow_url_fopen in php.ini"
 
+
 - name: Get disable_functions in php.ini
   shell: "{{ get_path_4 }}"
   register: disable_functions_check
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Testing 4
   assert:
@@ -47,6 +48,7 @@
       - allow_url_check.stdout is not none
       - allow_url_check is not none
     fail_msg: "Failed to Get disable_functions in php.ini"
+
 
 - name: Get open_basedir in php.ini
   shell: "{{ get_path_5 }}"
@@ -59,7 +61,8 @@
       - open_basedir_check is not none
     fail_msg: "Failed to Get open_basedir in php.ini"
 
-- name: Fetch PHP download page
+
+- name: Get PHP download page
   shell: "{{ get_path_6 }}"
   register: php_download_page
 
@@ -70,7 +73,7 @@
       - php_download_page is not none
     fail_msg: "Failed to Fetch PHP download page"
 
-- name: Check current PHP version
+- name: Get current PHP version
   shell: php -v
   register: current_php_version
 

@@ -3,12 +3,12 @@
   hosts: aws_db, aws_server2, ubuntu
   pre_tasks:
     - include_tasks: roles/mysql_security_checks/pre_tasks.yml
-    - include_tasks: roles/mysql_security_checks/tests/Testing_tasks.yml
+    - include_tasks: roles/mysql_security_checks/tests/testing_tasks.yml
   roles:
     - mysql_security_checks
   tasks:
-    - name: Intergration Testing
-      include_tasks: roles/mysql_security_checks/tests/Testing_intergration.yml
+    - name: Role Testing
+      include_tasks: roles/mysql_security_checks/tests/testing_role.yml
   post_tasks:
     - include_tasks: post_tasks.yml
       vars:
@@ -20,12 +20,12 @@
   hosts: aws_web, aws_server2, ubuntu
   pre_tasks:
     - include_tasks: roles/apache_security_checks/pre_tasks.yml
-    - include_tasks: roles/apache_security_checks/tests/Testing_tasks.yml
+    - include_tasks: roles/apache_security_checks/tests/testing_tasks.yml
   roles:
     - apache_security_checks
   tasks:
-    - name: Intergration Testing
-      include_tasks: roles/apache_security_checks/tests/Testing_intergration.yml
+    - name: Role Testing
+      include_tasks: roles/apache_security_checks/tests/testing_role.yml
   post_tasks:
     - include_tasks: post_tasks.yml
       vars:
@@ -37,12 +37,12 @@
   hosts: aws_web, aws_server2, ubuntu
   pre_tasks:
     - include_tasks: roles/php_security_checks/pre_tasks.yml
-    - include_tasks: roles/php_security_checks/tests/Testing_tasks.yml
+    - include_tasks: roles/php_security_checks/tests/testing_tasks.yml
   roles:
     - php_security_checks
   tasks:
-    - name: Intergration Testing
-      include_tasks: roles/php_security_checks/tests/Testing_intergration.yml
+    - name: Role Testing
+      include_tasks: roles/php_security_checks/tests/testing_role.yml
   post_tasks:
     - include_tasks: post_tasks.yml
       vars:
@@ -56,8 +56,8 @@
     - name: Include pre-tasks and Roles
       include_tasks: roles/linux_security_checks/pre_tasks.yml
 
-    - name: Intergration Testing
-      include_tasks: roles/linux_security_checks/tests/Testing_intergration.yml
+    - name: Role Testing
+      include_tasks: roles/linux_security_checks/tests/testing_role.yml
 
     - name: Include post-tasks
       include_tasks: post_tasks.yml

@@ -1,6 +1,3 @@
-
-# testing_task
----
 - name: Get mysqld process
   shell: "{{ get_path_5 }}"
   register: mysqld_process_5
@@ -12,6 +9,7 @@
       - mysqld_process_5.stdout is not none
       - mysqld_process_5 is not none
     fail_msg: "Failed to Get mysqld process"
+
 
 - name: Set Mysql path_6
   set_fact:
@@ -29,6 +27,7 @@
       - perm is not none
     fail_msg: "Failed to Get perm"
 
+
 - name: Set Mysql path_9
   set_fact:
     get_path_9: "{{ docker_path_9 if is_docker_running else normal_path_9 }}"
@@ -44,4 +43,3 @@
       - rpm_version_output_9.stdout is not none
       - rpm_version_output_9 is not none
     fail_msg: "Failed to Get installed mysql-server package version"
-

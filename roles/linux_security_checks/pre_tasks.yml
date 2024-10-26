@@ -1,23 +1,23 @@
 - name: Set vars for Debian
-  include_vars: vars/db_vars.yml
+  include_vars: vars/vars_db.yml
   when: ansible_os_family == "Debian"
 
 - name: Set vars for RedHat
-  include_vars: vars/rh_vars.yml
+  include_vars: vars/vars_rh.yml
   when: ansible_os_family == "RedHat"
 
 - name: Testing tasks
-  include_tasks: tests/db_Testing_tasks.yml
+  include_tasks: tests/testing_tasks_db.yml
   when: ansible_os_family == "Debian"
 
 - name: Testing tasks
-  include_tasks: tests/rh_Testing_tasks.yml
+  include_tasks: tests/testing_tasks_rh.yml
   when: ansible_os_family == "RedHat"
 
 - name: Include DB tasks
-  include_tasks: tasks/db_main.yml
+  include_tasks: tasks/main_db.yml
   when: ansible_os_family == "Debian"
 
 - name: Include RH tasks
-  include_tasks: tasks/rh_main.yml
+  include_tasks: tasks/main_rh.yml
   when: ansible_os_family == "RedHat"

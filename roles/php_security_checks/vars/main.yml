@@ -1,25 +1,19 @@
-LAMP_type_p: 'PHP' # LAMP
-
-rhel_php_ini_path: /etc/php.ini
-debian_php_ini_path: /etc/php/8.3/cli/php.ini
+rhel_php_ini_path: '/etc/php.ini'
+debian_php_ini_path: '/etc/php/8.3/cli/php.ini'
 
 rhel_php_get_path_1: grep -E display_errors {{ rhel_php_ini_path }}
 debian_php_get_path_1: grep -E display_errors {{ debian_php_ini_path }}
-
 rhel_php_get_path_2: grep -E expose_php {{ rhel_php_ini_path }}
 debian_php_get_path_2: grep -E expose_php {{ debian_php_ini_path }}
-
 rhel_php_get_path_3: grep -E allow_url_fopen {{ rhel_php_ini_path }}
 debian_php_get_path_3: grep -E allow_url_fopen {{ debian_php_ini_path }}
-
 rhel_php_get_path_4: grep -E disable_functions {{ rhel_php_ini_path }}
 debian_php_get_path_4: grep -E disable_functions {{ debian_php_ini_path }}
-
 rhel_php_get_path_5: grep -E open_basedir {{ rhel_php_ini_path }}
 debian_php_get_path_5: grep -E open_basedir {{ debian_php_ini_path }}
-
 get_path_6: "curl -s https://www.php.net/downloads.php"
 
+LAMP_type_p: 'PHP'
 diag_file_value_p:
     - [1,'오류 메시지 노출','php.ini파일에서 display_errors = off로 변경']
     - [2,'불필요한 헤더 정보 노출','php.ini파일에서 expose_php = off로 변경']

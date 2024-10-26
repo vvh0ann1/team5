@@ -1,43 +1,46 @@
 #PHP1. 오류 메시지 노출
----
 - name: Get display_errors in php.ini
   shell: "{{ get_path_1 }}"
   register: display_errors_check
-  ignore_errors: yes
+  ignore_errors: true
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_1: "{{ 'V' if display_errors_check.stdout is not search('display_errors\\s*=\\s*Off') else 'S' }}"
+
 
 # PHP2: 불필요한 헤더 정보 노출
 - name: Get expose_php in php.ini
   shell: "{{ get_path_2 }}"
   register: expose_php_check
-  ignore_errors: yes
+  ignore_errors: true
 
-- name: Check Status 
+- name: Set Status 
   set_fact:
     status_2: "{{ 'V' if expose_php_check.stdout is not search('expose_php\\s*=\\s*Off') else 'S' }}"
+
 
 # PHP3: 외부 URL 파일 인클루드 비활성화
 - name: Get allow_url_fopen in php.ini
   shell: "{{ get_path_3 }}"
   register: allow_url_check
-  ignore_errors: yes
+  ignore_errors: true
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_3: "{{ 'V' if allow_url_check.stdout is not match('allow_url_fopen\\s*=\\s*Off') else 'S' }}"
 
-# PHP4:
+
+# PHP4: 불필요한 명령어 사용 제한
 - name: Get disable_functions in php.ini
   shell: "{{ get_path_4 }}"
   register: disable_functions_check
-  ignore_errors: yes
+  ignore_errors: true
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_4: "{{ 'V' if disable_functions_check.stdout is search('disable_functions =\\s*$') else 'S' }}"
+
 
 # PHP5: 실행 경로 제한
 - name: Get open_basedir in php.ini
@@ -54,12 +57,13 @@
     value_after_equals: "{{ open_basedir_result.split('=')[1] | trim }}"
   when: open_basedir_result | length > 0
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_5: "{{ 'V' if value_after_equals | default('') == '' else 'S' }}"
 
+
 # PHP6: 최신 보안 패치 적용
-- name: Fetch PHP download page
+- name: Get PHP download page
   shell: "{{ get_path_6 }}"
   register: php_download_page
 
@@ -67,7 +71,7 @@
   set_fact:
     latest_php_version: "{{ php_download_page.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
 
-- name: Check current PHP version
+- name: Get current PHP version
   shell: php -v
   register: current_php_version
 
@@ -75,7 +79,7 @@
   set_fact:
     current_version: "{{ current_php_version.stdout | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
 
-- name: Check status
+- name: Set Status
   set_fact:
     status_6: "{{ 'V' if current_version is defined and latest_php_version is defined and current_version != latest_php_version and current_version < latest_php_version else 'S' }}"
 

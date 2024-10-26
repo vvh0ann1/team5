@@ -1,44 +1,32 @@
 document_root_path: '/var/www/html'
-
 rhel_apache_config_path_1: '/etc/httpd'
 debian_apache_config_path_1: '/etc/apache2'
-
 rhel_apache_config_path_2: '/etc/httpd/conf/httpd.conf'
 debian_apache_config_path_2: '/etc/apache2/apache2.conf'
 
-LAMP_type_a: 'Apache'
-
 rhel_get_path_1: grep DocumentRoot {{ rhel_apache_config_path_2 }}
 debian_get_path_1: grep DocumentRoot '/etc/apache2/sites-available/default-ssl.conf'
-
 rhel_get_path_2_1: find {{ rhel_apache_config_path_1 }} -name manual
 debian_get_path_2_1: find {{ debian_apache_config_path_1 }} -name manual
-
 rhel_get_path_2_2: grep -i 'manual' {{ rhel_apache_config_path_2 }}
 debian_get_path_2_2: grep -i 'manual' {{ debian_apache_config_path_2 }}
-
 rhel_get_path_3_1: grep FollowSymLinks {{ rhel_apache_config_path_2 }}
 debian_get_path_3_1: grep FollowSymLinks {{ debian_apache_config_path_2 }}
-
 rhel_get_path_3_2: grep '^Alias' {{ rhel_apache_config_path_2 }}
 debian_get_path_3_2: grep '^Alias' {{ debian_apache_config_path_2 }}
-
 rhel_get_path_4: grep LimitRequestBody {{ rhel_apache_config_path_2 }}
 debian_get_path_4: grep LimitRequestBody {{ debian_apache_config_path_2 }}
-
 rhel_get_path_5: grep -r 'Indexes' {{ rhel_apache_config_path_2 }}
 debian_get_path_5: grep -r 'Indexes' {{ debian_apache_config_path_2 }}
-
 rhel_get_path_6: ps -ef | grep httpd
 debian_get_path_6: ps -ef | grep apache2
-
 rhel_get_path_7_1: httpd -v
 debian_get_path_7_1: apache2 -v
 aws2_get_path_7_1: /usr/sbin/httpd -v
-
 rhel_get_path_7_2: yum info httpd | grep Version
 debian_get_path_7_2: apt show apache2 | grep Version
 
+LAMP_type_a: 'Apache'
 diag_file_value_a:
   - [1,'웹 서비스 영역의 분리','기본 디렉터리 변경']
   - [2,'불필요한 파일 제거','매뉴얼 디렉터리 삭제']
@@ -47,4 +35,3 @@ diag_file_value_a:
   - [5,'디렉터리 리스팅 제거','디렉터리 검색 기능 제거']
   - [6,'웹 프로세스 권한 제한','apache 데몬 user/group 변경']
   - [7,'최신 보안 패치 적용','보안 패치 적용']
-

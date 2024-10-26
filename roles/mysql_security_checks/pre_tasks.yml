@@ -1,26 +1,26 @@
 - name: Check docker installed
   shell: "which docker"
   register: docker_installed
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Get Docker ps
   shell: "docker ps --filter 'name=mysql' --format '{{ '{{' }}.ID{{ '}}'}}'"
   register: mysql_docker_status
   changed_when: false
-  ignore_errors: yes
+  ignore_errors: true
   when: docker_installed.rc == 0
 
 - name: Get container name
   shell: "docker ps --filter 'name=mysql' --format '{{ '{{' }}.Names{{ '}}' }}'"
   register: mysql_container_name
   changed_when: false
-  ignore_errors: yes
+  ignore_errors: true
   when: mysql_docker_status.stdout | length > 0
 
 - name: Set container name
   set_fact:
     docker_container_name: "{{ mysql_container_name.stdout }}"
-  ignore_errors: yes
+  ignore_errors: true
   when: mysql_docker_status.stdout | length > 0
 
 - name: Set Docker status variable
@@ -32,7 +32,7 @@
     mysql_config_path_6: "{{ rhel_config_path_6 }}"
   when: ansible_os_family == "RedHat"
 
-- name: Determine Mysql_config_path_6 for RedHat
+- name: Determine Mysql_config_path_6 for Debian
   set_fact:
     mysql_config_path_6: "{{ debian_config_path_6 }}"
   when: ansible_os_family == "Debian"
@@ -42,7 +42,29 @@
     normal_path_9: "{{ rhel_normal_path_9 }}"
   when: ansible_os_family == "RedHat"
 
-- name: Determine normal_path_9 for RedHat
+- name: Determine normal_path_9 for Debian
   set_fact:
     normal_path_9: "{{ debian_normal_path_9 }}"
   when: ansible_os_family == "Debian"
+
+- name: Set Mysql path_6
+  set_fact:
+    get_path_6: "{{ docker_path_6 if is_docker_running else normal_path_6 }}"
+
+- name: Set Mysql path_9
+  set_fact:
+    get_path_9: "{{ docker_path_9 if is_docker_running else normal_path_9 }}"
+
+
+- name: Init status dict
+  set_fact:
+    status_dict_mysql: {}
+
+- name: Run Queries
+  include_tasks: tasks/run_query.yml
+  loop: "{{ query_list }}"
+  loop_control:
+    loop_var: query_item
+  vars:
+    query_to_run: "{{ query_item.query }}"
+    result_variable: "{{ query_item.result_var }}"

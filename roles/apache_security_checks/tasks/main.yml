@@ -3,7 +3,7 @@
   shell: "{{ get_path_1 }}"
   register: document_root_check
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_1: "{{ 'V' if document_root_check.stdout | regex_search(document_root_path) or document_root_check.stdout | regex_search('htdocs') else 'S' }}"
 
@@ -18,7 +18,7 @@
   register: manual_setting_check
   ignore_errors: true
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_2: "{{ 'V' if not (manual_dir_check.stdout | length == 0 and manual_setting_check.stdout | length == 0) else 'S' }}"
 
@@ -41,7 +41,7 @@
   set_fact:
     alias_result: "{{ 'V' if alias_check.stdout | length > 0 else 'S' }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_3: "{{ 'V' if symlink_result == 'V' or alias_result == 'V' else 'S' }}"
 
@@ -52,7 +52,7 @@
   register: limit_request_body
   ignore_errors: true
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_4: "{{ 'V' if limit_request_body.rc != 0 else 'S' }}"
 
@@ -63,7 +63,7 @@
   register: index_option
   ignore_errors: true
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_5: "{{ 'V' if index_option.rc == 0 else 'S' }}"
 
@@ -81,7 +81,7 @@
   loop: "{{ apache_process.stdout_lines }}"
   register: status_results
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_6: "{{ 'V' if 'V' in temp_status_list else 'S' }}"
   vars:
@@ -112,7 +112,7 @@
     current_version_str: "{{ current_version | string }}"
     latest_version_str: "{{ latest_version | string }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_7: "{{ 'V' if current_version_str is version(latest_version_str, '<') else 'S' }}"
 
@@ -126,4 +126,3 @@
       status5: "{{ status_5 }}"
       status6: "{{ status_6 }}"
       status7: "{{ status_7 }}"
-

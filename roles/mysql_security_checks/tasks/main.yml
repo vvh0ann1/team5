@@ -1,24 +1,3 @@
-- name: Init status dict
-  set_fact:
-    status_dict_mysql: {}
-
-- name: Set Mysql path_6
-  set_fact:
-    get_path_6: "{{ docker_path_6 if is_docker_running else normal_path_6 }}"
-
-- name: Set Mysql path_9
-  set_fact:
-    get_path_9: "{{ docker_path_9 if is_docker_running else normal_path_9 }}"
-
-- name: Run Queries
-  include_tasks: run_query.yml
-  loop: "{{ query_list }}"
-  loop_control:
-    loop_var: query_item
-  vars:
-    query_to_run: "{{ query_item.query }}"
-    result_variable: "{{ query_item.result_var }}"
-
 # Mysql: "불필요한 계정 제거"
 - name: Filter User
   set_fact:
@@ -28,18 +7,20 @@
   set_fact:
     unregi_users_1: "{{ users_1 | difference(regi_users_1) }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_1: "{{ 'V' if (unregi_users_1 | length > 0) else 'S' }}"
+
 
 # Mysql: "취약한 패스워드 사용 제한"
 - name: Filter policy
   set_fact:
     policy_2: "{{ (query_result_2.query_result[0] | selectattr('Variable_name', 'equalto', 'validate_password.policy') | first).Value }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_2: "{{ 'V' if policy_2 == 'LOW' else 'S' }}"
+
 
 # Mysql: "타 사용자에 권한 부여 옵션 제한"
 - name: Filter 'Y' User
@@ -50,9 +31,10 @@
   set_fact:
     unregi_users_3: "{{ priv_users_3 | difference(regi_users_3) }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_3: "{{ 'V' if (unregi_users_3 | length > 0) else 'S' }}"
+
 
 # Mysql: "사용자 계정 정보 테이블 접근 권한"
 - name: Filter 'Y' User
@@ -63,9 +45,10 @@
   set_fact:
     unregi_users_4: "{{ priv_users_4 | difference(regi_users_4) }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_4: "{{ 'V' if (unregi_users_4 | length > 0) else 'S' }}"
+
 
 # Mysql: "root 권한으로 서버 구동 제한"
 - name: Get mysqld process
@@ -77,9 +60,10 @@
   set_fact:
     mysqld_user_5: "{{ mysqld_process_5.stdout_lines[0].split()[0] }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_5: "{{ 'V' if mysqld_user_5 == 'root' else 'S' }}"
+
 
 # Mysql: "환경설정 파일 접근 권한"
 - name: Get perm
@@ -110,9 +94,10 @@
   set_fact:
     octal_perm_6: "{{ '%o' | format(num_perm_6 | int) }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_6: "{{ 'V' if octal_perm_6 | int > 640 else 'S' }}"
+
 
 # Mysql: "안전한 암호화 알고리즘 사용"
 - name: Filter plugin
@@ -123,9 +108,10 @@
   set_fact:
     unsafe_algo_7: "{{ user_pass_algo_7 | difference(regi_pass_algo_7) }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_7: "{{ 'V' if (unsafe_algo_7 | length > 0) else 'S' }}"
+
 
 # Mysql: "로그 활성화"
 - name: Filter general log value
@@ -136,9 +122,10 @@
   set_fact:
     slow_log_value_8: "{{ query_result_8_2.query_result[0] | selectattr('Variable_name', 'equalto', 'slow_query_log') | map(attribute='Value') | first }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_8: "{{ 'V' if (slow_log_value_8 != 'ON') else 'S' }}"
+
 
 # Mysql: "최신 보안 패치 적용"
 - name: Parse Mysql version
@@ -154,7 +141,7 @@
   set_fact:
     rpm_version_9: "{{ rpm_version_output_9.stdout_lines[0] | regex_search('([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
 
-- name: Check Status
+- name: Set Status
   set_fact:
     status_9: "{{ 'V' if (mysql_version_9 is version(rpm_version_9, '<')) else 'S' }}" 
 
