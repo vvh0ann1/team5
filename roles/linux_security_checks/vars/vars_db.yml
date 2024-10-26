@@ -96,5 +96,3 @@ diag_file_value_l:
   - [26,'DoS 공격에 취약한 서비스 비활성화', '/etc/xinetd.d/ 디렉터리 내 echo / discard / daytime / chargen 파일 수정']
   - [27,'NFS 서비스 비활성화','NFS 데몬(nfsd)을 중지']
   - [28,'automountd 제거','automountd 서비스 데몬 실행 중지']
-
-

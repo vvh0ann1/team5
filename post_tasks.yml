@@ -1,6 +1,19 @@
-- name: Define path
+- name: Define if group_names has more than one group
   set_fact:
-    diag_file_path: "home/ec2-user/Diag_file.txt"
+    has_multiple_groups: "{{ group_names | length > 1 and groups[group_names[0]][0] != inventory_hostname }}"
+
+- name: Define_path
+  set_fact:
+    diag_file_path: >-
+      {% if has_multiple_groups %}
+        /home/ec2-user/Diag_file_{{ group_names[0] }}_{{ inventory_hostname }}.txt
+      {% else %}
+        /home/ec2-user/Diag_file_{{ group_names[0] }}.txt
+      {% endif %}
+
+- name: Trim whitespace from diag_file_path
+  set_fact:
+    diag_file_path: "{{ diag_file_path | trim }}"
 
 - name: Status to file
   lineinfile:
@@ -8,3 +21,38 @@
     line: "{{ LAMP_type }}, {{ item[1] }}, {{ status_var['status' ~ item[0]] }}, {{ item[2] }}"
     create: yes
   loop: "{{ diag_file_value }}"
+
+- name: Fetch file from db_server
+  fetch:
+    src: "{{ diag_file_path }}"
+    dest: "/home/ubuntu/work/project/Diag_file_{{ group_names[0] }}_{{ inventory_hostname }}.txt"
+    flat: yes
+  delegate_to: "{{ groups[group_names[0]][1] }}"
+  when: has_multiple_groups
+  register: fetch_result
+
+- name: Initialize file index
+  set_fact:
+    file_index: 1
+
+- name: Increment file index
+  set_fact:
+    file_index: "{{ file_index | int + 1 }}"
+  when: fetch_result is not skipped
+
+- name: Send file to web_server
+  copy: 
+    src: "/home/ubuntu/work/project/Diag_file_{{ group_names[0] }}_{{ inventory_hostname }}.txt"
+    dest: "/home/ec2-user/Diag_file_{{ group_names[0] }}_{{ file_index }}.txt" 
+  delegate_to: "{{ groups[group_names[0]][0] }}"
+  when: has_multiple_groups
+
+- name: Combine files on web_server
+  shell: cat /home/ec2-user/Diag_file_{{ group_names[0] }}_*.txt > /home/ec2-user/Diag_file_{{ group_names[0] }}.txt
+  delegate_to: "{{ groups[group_names[0]][0] }}"
+  when: has_multiple_groups
+
+- name: Move and rename file
+  become: true
+  shell: mv /home/ec2-user/Diag_file_{{ group_names[0] }}.txt /var/www/html/project/test/csv/Diag_file_{{ group_names[0] }}_{{ ansible_date_time.date }}.csv
+  when: final_diag_run | default(false) and groups[group_names[0]][0] == inventory_hostname

@@ -1,8 +1,11 @@
-[aws_web]
-web_instance ansible_host=15.165.19.0
-[aws_db]
-db_instance ansible_host=43.201.146.14
-[aws_server2]
-aws_instance ansible_host=15.165.75.4
-[ubuntu]
-ubuntu_instance ansible_host=192.168.171.130
+[server1:children]
+server1_web
+server1_db
+[server1_web]
+aws_web ansible_host=15.165.19.0
+[server1_db]
+aws_db ansible_host=43.201.146.14
+[server2]
+aws_2 ansible_host=15.165.75.4
+[server3]
+ubuntu_3 ansible_host=192.168.171.130
