@@ -636,13 +636,3 @@
       status27: "{{ status_27 }}"
       status28: "{{ status_28 }}"
 
-- name: Print status
-  debug:
-    var: ServerLinux_status
-
-- name: Status to file
-  lineinfile:
-    path: "{{ diag_file_path }}"
-    line: "{{ LAMP_type }}, {{ item[1] }}, {{ ServerLinux_status['status' ~ item[0]] }}, {{ item[2] }}"
-    create: yes
-  loop: "{{ diag_file_value }}"

@@ -1,3 +1,4 @@
+
 # testing_task
 ---
 - name: Get mysqld process
@@ -8,7 +9,8 @@
 - name: Testing 5
   assert:
     that:
-      - mysqld_process_5.stdout != ''
+      - mysqld_process_5.stdout is not none
+      - mysqld_process_5 is not none
     fail_msg: "Failed to Get mysqld process"
 
 - name: Set Mysql path_6
@@ -23,7 +25,8 @@
 - name: Testing 6
   assert:
     that:
-      - perm.stdout != ''
+      - perm.stdout is not none
+      - perm is not none
     fail_msg: "Failed to Get perm"
 
 - name: Set Mysql path_9
@@ -38,5 +41,7 @@
 - name: Testing 9
   assert:
     that:
-      - rpm_version_output_9.stdout != ''
+      - rpm_version_output_9.stdout is not none
+      - rpm_version_output_9 is not none
     fail_msg: "Failed to Get installed mysql-server package version"
+

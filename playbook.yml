@@ -50,54 +50,19 @@
         status_var: "{{ PHP_status }}"
         diag_file_value: "{{ diag_file_value_p }}"
 
-
 - name: Security Checks_ServerLinux
   hosts: aws_web, aws_server2, ubuntu
   tasks:
-    - block:
-        - name: Include pre-tasks
-          include_tasks: roles/linux_security_checks/pre_tasks.yml
+    - name: Include pre-tasks and Roles
+      include_tasks: roles/linux_security_checks/pre_tasks.yml
 
-        - name: Include testing tasks
-          include_tasks: roles/linux_security_checks/tests/db_Testing_tasks.yml
+    - name: Intergration Testing
+      include_tasks: roles/linux_security_checks/tests/Testing_intergration.yml
 
-        - name: Run roles
-          include_role:
-            name: linux_security_checks
-
-        - name: Intergration Testing
-          include_tasks: roles/linux_security_checks/tests/Testing_intergration.yml
-
-        - name: Include post-tasks
-          include_tasks: post_tasks.yml
-          vars:
-            LAMP_type: "{{ LAMP_type_l }}"
-            status_var: "{{ ServerLinux_status }}"
-            diag_file_value: "{{ diag_file_value_l }}"
-      when: ansible_os_family == "Debian"
-
-- name: Security Checks_ServerLinux
-  hosts: aws_web, aws_server2, ubuntu
-  tasks:
-    - block:
-        - name: Include pre-tasks
-          include_tasks: roles/linux_security_checks/pre_tasks.yml
-
-        - name: Include testing tasks
-          include_tasks: roles/linux_security_checks/tests/rh_Testing_tasks.yml
-
-        - name: Run roles
-          include_role:
-            name: linux_security_checks
-
-        - name: Intergration Testing
-          include_tasks: roles/linux_security_checks/tests/Testing_intergration.yml
-
-        - name: Include post-tasks
-          include_tasks: post_tasks.yml
-          vars:
-            LAMP_type: "{{ LAMP_type_l }}"
-            status_var: "{{ ServerLinux_status }}"
-            diag_file_value: "{{ diag_file_value_l }}"
-      when: ansible_os_family == "RedHat"
+    - name: Include post-tasks
+      include_tasks: post_tasks.yml
+      vars:
+        LAMP_type: "{{ LAMP_type_l }}"
+        status_var: "{{ ServerLinux_status }}"
+        diag_file_value: "{{ diag_file_value_l }}"
 

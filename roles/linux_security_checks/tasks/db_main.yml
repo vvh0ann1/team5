@@ -1,6 +1,5 @@
 # 1번: root 계정 원격 접속 제한
 - name: Check SSH root login setting
-
   shell: "{{ get_path_1_LR }}"
   register: ssh_check
   changed_when: false
@@ -22,16 +21,16 @@
 
 - name: Set status_2 based on conditions
   set_fact:
-    status_2: >
+    temp_status_2: |
       {{ 'V' if not (pwquality_conf_stat.stat.exists and system_auth_stat.stat.exists) or
                   (pw_quality_conf_stat.stat.exists and
                   (pw_quality_conf_check.stdout | regex_search('minlen\\s*=\\s*(\\d+)', '\\1') | first | int < 8 or
                     pw_quality_conf_check.stdout | regex_search('minclass\\s*=\\s*(\\d+)', '\\1') | first | int < 3 or
                     'enforce_for_root' not in enforce_root_check.stdout)) else 'S' }}
 
-- name: Debug status_2
-  debug:
-    var: vars['status_{}'.format(item)]
+- name: Check Status
+  set_fact:
+    status_2: "{{ 'V' if temp_status_2 | trim == 'V' else 'S' }}"
 
 # 3번: 계정 잠금 임계값 설정 - 다름
 - name: Check pam_faillock.so existence and deny value in system-auth and password-auth
@@ -416,15 +415,18 @@
   ignore_errors: yes
   changed_when: false
 
-- name: Check Status
+- name: Determine Status
   set_fact:
-    status_22: >
+    temp_status_22: >
       {{
         'V' if (hosts_deny_file.stat.exists and hosts_allow_file.stat.exists and
         (iptables_installed.rc == 0 and iptables_rules.stdout != '') and firewall_rules.stdout != '')
         else 'S'
       }}
 
+- name: Check Status
+  set_fact:
+    status_22: "{{ 'V' if temp_status_22 | trim == 'V' else 'S' }}"
 
 # 23번. Finger 서비스 비활성화
 - name: Get if /etc/xinetd.d/finger file exists
@@ -486,9 +488,9 @@
   register: rexec_file
   ignore_errors: yes
 
-- name: Check Status
+- name: Determine Status
   set_fact:
-    status_25: >
+    temp_status_25: >
       {{
         'V' if (
           (rsh_file.stat.exists or rlogin_file.stat.exists or rexec_file.stat.exists) and
@@ -499,6 +501,11 @@
           )
         ) else 'S'
       }}
+
+- name: Check Status
+  set_fact:
+    status_25: "{{ 'V' if temp_status_25 | trim == 'V' else 'S' }}"
+
 # 26 에러
 # 1. xinetd가 설치되어 있는지 확인
 - name: Check if xinetd is installed

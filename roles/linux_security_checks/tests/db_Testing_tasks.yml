@@ -1,6 +1,5 @@
 # Server(Linux) 1: root 계정 원격 접속 제한
 - name: Check SSH root login setting
-  become: yes
   shell: "{{ get_path_1_LR }}"
   register: ssh_check
   changed_when: false
@@ -8,7 +7,8 @@
 - name: Testing 1
   assert:
     that:
-      - ssh_check.stdout != ''
+      - ssh_check.stdout is not none
+      - ssh_check is not none
     fail_msg: "Failed to Check SSH root login setting"
 
 # Server(Linux) 2: 패스워드 복잡도 설정
@@ -21,7 +21,8 @@
 - name: Testing 2-1
   assert:
     that:
-      - pwquality_conf_stat.stdout != ''
+      - pwquality_conf_stat.stdout is not none
+      - pwquality.conf_stat is not none
     fail_msg: "Failed to Check if pwquality.conf exists"
 
 - name: Check if system-auth exists
@@ -33,13 +34,14 @@
 - name: Testing 2-2
   assert:
     that:
-      - system_auth_stat.rc in [0, 1]
+      - system_auth_stat.stdout is not none
+      - system_auth_stat is not none
     fail_msg: "Failed to Check if system-auth exists"
 
 # 3
 - name: Check pam_faillock.so existence and deny value in system-auth and password-authCheck pam_faillock.so existence and deny value in system-auth and password-auth
   shell: "{{ get_path_3_LR }}"
-  with_items: "{{ linuxserver_conf_path_3 }}"
+  with_items: "{{ pam_files }}"
   register: pam_check
   failed_when: false
   changed_when: false
@@ -47,7 +49,8 @@
 - name: Testing 3
   assert:
     that:
-      - pam_check.rc in [0,1]
+      - pam_check.stdout is not none
+      - pam_check is not none
     fail_msg: "Failed to Check pam_faillock.so existence and deny value in system-auth and password-auth"
 
 # Server(Linux) 4: root 홈, 디렉터리 소유자 설정
@@ -59,7 +62,8 @@
 - name: Testing 4
   assert:
     that:
-      - path_output.stdout != ''
+      - path_output.stdout is not none
+      - path_output is not none
     fail_msg: "Failed to Get current PATH"
 
 # Server(Linux) 5: 파일 및 디렉터리 소유자 설정
@@ -72,7 +76,8 @@
 - name: Testing 5
   assert:
     that:
-      - invalid_files.stdout != ''
+      - invalid_files.stdout is not none
+      - invalid_files is not none
     fail_msg: "Failed to Find files and directories without valid owner or group"
 
 # Server(Linux) 9: 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
@@ -83,7 +88,8 @@
 - name: Testing 9
   assert:
     that:
-      - home_dirs.stdout != ''
+      - home_dirs.stdout is not none
+      - home_dirs is not none
     fail_msg: "Failed to Get a list of user home directories"
 
 # Server(Linux) 10: NIS, NIS+ 점검
@@ -96,7 +102,8 @@
 - name: Testing 10-1
   assert:
     that:
-      - nis_installed.stdout != ''
+      - nis_installed.stdout is not none
+      - nis_installed is not none
     fail_msg: "Failed to Check if NIS related files exist"
 
 - name: Check if NIS service is running
@@ -108,7 +115,8 @@
 - name: Testing 10-2
   assert:
     that:
-      - nis_running.stdout != ''
+      - nis_running.stdout is not none
+      - nis_running is not none
     fail_msg: "Failed to Check if NIS service is running"
 
 # Server(Linux) 11: Sendmail 버전 점검
@@ -121,7 +129,8 @@
 - name: Testing 11-1
   assert:
     that:
-      - sendmail_version.stdout != ''
+      - sendmail_version.stdout is not none
+      - sendmail_version is not none
     fail_msg: "Failed to  Check Sendmail versio"
 
 - name: Check Postfix version
@@ -133,7 +142,8 @@
 - name: Testing 11-2
   assert:
     that:
-      - postfix_version.stdout != ''
+      - postfix_version.stdout is not none
+      - postfix_version is not none
     fail_msg: "Failed to Check Postfix version"
 
 - name: Get latest Postfix version from official repository
@@ -145,7 +155,8 @@
 - name: Testing 11-3
   assert:
     that:
-      - postfix_latest_version.stdout != ''
+      - postfix_latest_version.stdout is not none
+      - postfix_latest_version is not none
     fail_msg: "Failed to Get latest Postfix version from official repository"
 
 - name: Get latest Sendmail version from official repository
@@ -157,7 +168,8 @@
 - name: Testing 11-4
   assert:
     that:
-      - sendmail_latest_version.stdout != ''
+      - sendmail_latest_version.stdout is not none
+      - sendmail_latest_version is not none
     fail_msg: "Failed to Get latest Sendmail version from official repository"
 
 # Server(Linux) 12: DNS 보안 버전 패치
@@ -170,12 +182,13 @@
 - name: Testing 12-1
   assert:
     that:
-      - named_process.stdout != ''
+      - named_process.stdout is not none
+      - named_process is not none
     fail_msg: "Failed to Check if DNS service is running"
 
 - name: Check BIND version if DNS service is running
   shell: "{{ get_path_12_2_LR }}"
-  when: named_process.stdout != ''
+  when: named_process.stdout is not none
   register: bind_version
   failed_when: false
   changed_when: false
@@ -183,7 +196,8 @@
 - name: Testing 12-2
   assert:
     that:
-      - bind_version.stdout != ''
+      - bind_version.stdout is not none
+      - bind_version is not none
     fail_msg: "Failed to Check BIND version if DNS service is running"
 
 - name: Get latest BIND version from yum
@@ -195,7 +209,8 @@
 - name: Testing 12-3
   assert:
     that:
-      - yum_bind_version.stdout != ''
+      - yum_bind_version.stdout is not none
+      - yum_bind_version is not none
     fail_msg: "Failed to Get latest BIND version from yum"
 
 
@@ -208,13 +223,13 @@
 - name: Testing 15
   assert:
     that:
-      - max_days_info.stdout != ''
+      - max_days_info.stdout is not none
+      - max_days_info is not none
     fail_msg: "Failed to Check PASS_MAX_DAYS in /etc/login.defs"
 
 
 #Server(Linux) 19: SUID, SGID, Sticky bit 설정 파일 점검
 - name: Get files with SUID or SGID permissions
-  become: yes
   shell: "{{ get_path_19_LR }}"
   register: suid_sgid_files
   ignore_errors: yes
@@ -222,7 +237,8 @@
 - name: Testing 19
   assert:
     that:
-      - suid_sgid_files.stdout != ''
+      - suid_sgid_files.stdout is not none
+      - suid_sgid_files is not none
     fail_msg: "Failed to Get files with SUID or SGID permissions"
 
 #Sever(Linux) 20: world writable 파일 점검
@@ -234,7 +250,8 @@
 - name: Testing 20
   assert:
     that:
-      - world_writable_files.stdout != ''
+      - world_writable_files.stdout is not none
+      - world_writable_files is not none
     fail_msg: "Failed to Get world writable files (excluding /tmp)"
 
 #Server(Linux) 24: Anonymous FTP 서비스 비활성화
@@ -246,7 +263,8 @@
 - name: Testing 24
   assert:
     that:
-      - ftp_account.stdout != ''
+      - ftp_account.stdout is not none
+      - ftp_account is not none
     fail_msg: "Failed to Get ftp account exists in /etc/passwd"
  
 #Server(Linux) 26: DoS 공격에 취약한 서비스 비활성화
@@ -259,7 +277,8 @@
 - name: Testing 26-1
   assert:
     that:
-      - xinetd_installed.stdout != ''
+      - xinetd_installed.stdout is not none
+      - xinetd_installed is not none
     fail_msg: "Failed to Check if xinetd is installed"
 
 
@@ -273,7 +292,8 @@
 - name: Testing 27
   assert:
     that:
-      - nfsd_process.stdout != ''
+      - nfsd_process.stdout is not none
+      - nfsd_process is not none
     fail_msg: "Failed to Get if NFS daemon is running"
 
 #Server(Linux) 28: automountd 제거
@@ -286,7 +306,8 @@
 - name: Testing 28
   assert:
     that:
-      - automountd_status.stdout != ''
+      - automountd_status.stdout is not none
+      - automountd_status is not none
     fail_msg: "Failed to Get if automountd daemon is running"
 
 

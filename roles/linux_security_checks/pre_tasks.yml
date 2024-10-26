@@ -6,6 +6,14 @@
   include_vars: vars/rh_vars.yml
   when: ansible_os_family == "RedHat"
 
+- name: Testing tasks
+  include_tasks: tests/db_Testing_tasks.yml
+  when: ansible_os_family == "Debian"
+
+- name: Testing tasks
+  include_tasks: tests/rh_Testing_tasks.yml
+  when: ansible_os_family == "RedHat"
+
 - name: Include DB tasks
   include_tasks: tasks/db_main.yml
   when: ansible_os_family == "Debian"

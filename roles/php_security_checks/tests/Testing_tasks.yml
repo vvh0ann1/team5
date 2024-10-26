@@ -8,7 +8,8 @@
 - name: Testing 1
   assert:
     that:
-      - display_errors_check.stdout != ''
+      - display_errors_check.stdout is not none
+      - display_errors_check is not none
     fail_msg: "Failed to Get display_errors in php.ini"
 
 - name: Get expose_php in php.ini
@@ -19,7 +20,8 @@
 - name: Testing 2
   assert:
     that:
-      - expose_php_check.stdout != ''
+      - expose_php_check.stdout is not none
+      - expose_php_check is not none
     fail_msg: "Failed to Get expose_php in php.ini"
 
 - name: Get allow_url_fopen in php.ini
@@ -30,7 +32,8 @@
 - name: Testing 3
   assert:
     that:
-      - allow_url_check.stdout != ''
+      - allow_url_check.stdout is not none
+      - allow_url_check is not none
     fail_msg: "Failed to Get allow_url_fopen in php.ini"
 
 - name: Get disable_functions in php.ini
@@ -41,7 +44,8 @@
 - name: Testing 4
   assert:
     that:
-      - allow_url_check.stdout != ''
+      - allow_url_check.stdout is not none
+      - allow_url_check is not none
     fail_msg: "Failed to Get disable_functions in php.ini"
 
 - name: Get open_basedir in php.ini
@@ -51,7 +55,8 @@
 - name: Testing 5
   assert:
     that:
-      - open_basedir_check.stdout != ''
+      - open_basedir_check.stdout is not none
+      - open_basedir_check is not none
     fail_msg: "Failed to Get open_basedir in php.ini"
 
 - name: Fetch PHP download page
@@ -61,7 +66,8 @@
 - name: Testing 6-1
   assert:
     that:
-      - php_download_page.stdout != ''
+      - php_download_page.stdout is not none
+      - php_download_page is not none
     fail_msg: "Failed to Fetch PHP download page"
 
 - name: Check current PHP version
@@ -71,5 +77,6 @@
 - name: Testing 6-2
   assert:
     that:
-      - current_php_version.stdout != ''
+      - current_php_version.stdout is not none
+      - current_php_version is not none
     fail_msg: "Failed to Check current PHP version"

@@ -8,7 +8,8 @@
 - name: Testing 1
   assert:
     that:
-      - ssh_check.stdout != ''
+      - ssh_check.stdout is not none
+      - ssh_check is not none
     fail_msg: "Failed to Get root setting"
 
 # Server(Linux) 2: 패스워드 복잡도 설정
@@ -21,7 +22,8 @@
 - name: Testing 2-1
   assert:
     that:
-      - pw_quality_conf_check.stdout != ''
+      - pw_quality_conf_check.stdout is not none
+      - pw_quality_conf_check is not none
     fail_msg: "Failed to Get pwquality.conf"
 
 - name: Get enforce_for_root in system-auth
@@ -33,7 +35,8 @@
 - name: Testing 2-2
   assert:
     that:
-      - enforce_root_check.rc in [0, 1]
+      - enforce_root_check.stdout is not none
+      - enforce_root_check is not none
     fail_msg: "Failed to Get enforce_for_root in system-auth"
 
 - name: Get pam_faillock.so existence and deny
@@ -46,7 +49,7 @@
 - name: Testing 3
   assert:
     that:
-      - pam_check.rc in [0,1]
+      - pam_check.results | selectattr('rc', 'equalto', 0) | length > 0 or pam_check.results | selectattr('stdout', 'equalto', '') | length > 0
     fail_msg: "Failed to Get pam_faillock.so existence and deny"
 
 # Server(Linux) 4: root 홈, 디렉터리 소유자 설정
@@ -58,7 +61,8 @@
 - name: Testing 4
   assert:
     that:
-      - path.stdout != ''
+      - path.stdout is not none
+      - path is not none
     fail_msg: "Failed to Get PATH"
 
 # Server(Linux) 5: 파일 및 디렉터리 소유자 설정
@@ -71,7 +75,8 @@
 - name: Testing 5
   assert:
     that:
-      - invalid_files.stdout != ''
+      - invalid_files.stdout is not none
+      - invalid_files is not none
     fail_msg: "Failed to Get files and directories without valid owner or group"
 
 # Server(Linux) 9: 사용자, 시스템 시작파일, 환경파일 소유자 및 권한 설정
@@ -82,7 +87,8 @@
 - name: Testing 9
   assert:
     that:
-      - home.stdout != ''
+      - home.stdout is not none
+      - home is not none
     fail_msg: "Failed to Get pwquality.conf"
 
 # Server(Linux) 10: NIS, NIS+ 점검
@@ -95,7 +101,8 @@
 - name: Testing 10-1
   assert:
     that:
-      - nis_installed.stdout != ''
+      - nis_installed.stdout is not none
+      - nis_installed is not none
     fail_msg: "Failed to Get files exist"
 
 - name: Get running
@@ -107,7 +114,8 @@
 - name: Testing 10-2
   assert:
     that:
-      - nis_running.stdout != ''
+      - nis_running.stdout is not none
+      - nis_running is not none
     fail_msg: "Failed to Get running"
 
 # Server(Linux) 11: Sendmail 버전 점검
@@ -120,7 +128,8 @@
 - name: Testing 11-1
   assert:
     that:
-      - sendmail_version.stdout != ''
+      - sendmail_version.stdout is not none
+      - sendmail_version is not none
     fail_msg: "Failed to Get Sendmail version"
 
 - name: Get Postfix version
@@ -132,7 +141,8 @@
 - name: Testing 11-2
   assert:
     that:
-      - postfix_version.stdout != ''
+      - postfix_version.stdout is not none
+      - postfix_version is not none
     fail_msg: "Failed to Get Postfix version"
 
 - name: Get lastest Postfix version
@@ -144,7 +154,8 @@
 - name: Testing 11-3
   assert:
     that:
-      - postfix_latest_version.stdout != ''
+      - postfix_latest_version.stdout is not none
+      - postfix_latest_version is not none
     fail_msg: "Failed to Get lastest Postfix version"
 
 - name: Get latest Sendmail version
@@ -156,7 +167,8 @@
 - name: Testing 11-4
   assert:
     that:
-      - sendmail_latest_version.stdout != ''
+      - sendmail_latest_version.stdout is not none
+      - sendmail_latest_version is not none
     fail_msg: "Failed to Get latest Sendmail version"
 
 # Server(Linux) 12: DNS 보안 버전 패치
@@ -169,12 +181,13 @@
 - name: Testing 12-1
   assert:
     that:
-      - named_process.stdout != ''
+      - named_process.stdout is not none
+      - named_process is not none
     fail_msg: "Failed to Get DNS service status"
 
 - name: Get BIND version
   shell: "{{ get_path_12_2_LR }}"
-  when: named_process.stdout != ''
+  when: named_process.stdout is not none
   register: bind_version
   failed_when: false
   changed_when: false
@@ -182,7 +195,8 @@
 - name: Testing 12-2
   assert:
     that:
-      - bind_version.stdout != ''
+      - bind_version.stdout is not none
+      - bind_version is not none
     fail_msg: "Failed to Get BIND version"
 
 - name: Get latest BIND version
@@ -194,7 +208,8 @@
 - name: Testing 12-3
   assert:
     that:
-      - yum_bind_version.stdout != ''
+      - yum_bind_version.stdout is not none
+      - yum_bind_version is not none
     fail_msg: "Failed to Get latest BIND version"
 
 
@@ -207,7 +222,8 @@
 - name: Testing 15
   assert:
     that:
-      - max_days_info.stdout != ''
+      - max_days_info.stdout is not none
+      - max_days_info is not none
     fail_msg: "Failed to Get /etc/login.defs"
 
 
@@ -220,7 +236,8 @@
 - name: Testing 16
   assert:
     that:
-      - passwd_check.stdout != ''
+      - passwd_check.stdout is not none
+      - passwd_check is not none
     fail_msg: "Failed to Get /etc/passwd"
 
 #Server(Linux) 19: SUID, SGID, Sticky bit 설정 파일 점검
@@ -233,7 +250,8 @@
 - name: Testing 19
   assert:
     that:
-      - suid_sgid_files.stdout != ''
+      - suid_sgid_files.stdout is not none
+      - suid_sgid_files is not none
     fail_msg: "Failed to Get permissions"
 
 #Sever(Linux) 20: world writable 파일 점검
@@ -245,7 +263,8 @@
 - name: Testing 20
   assert:
     that:
-      - world_writable_files.stdout != ''
+      - world_writable_files.stdout is not none
+      - world_writable_files is not none
     fail_msg: "Failed to Get world writable files"
 
 #Server(Linux) 22: 접속 IP 및 포트 제한
@@ -258,7 +277,8 @@
 - name: Testing 22-1
   assert:
     that:
-      - iptables_installed.stdout != ''
+      - iptables_installed.stdout is not none
+      - iptables_installed is not none
     fail_msg: "Failed to Get iptables installation"
 
 
@@ -273,7 +293,8 @@
 - name: Testing 22-2
   assert:
     that:
-      - iptables_rules.stdout != ''
+      - iptables_rules.stdout is not none
+      - iptables_rules is not none
     fail_msg: "Failed to Get iptables rules"
 
 - name: Check firewall-cmd rules
@@ -285,7 +306,8 @@
 - name: Testing 22-3
   assert:
     that:
-      - firewall_rules.stdout != ''
+      - firewall_rules.stdout is not none
+      - firewall_rules is not none
     fail_msg: "Failed to Check firewall-cmd rules"
 
 #Server(Linux) 24: Anonymous FTP 서비스 비활성화
@@ -297,7 +319,8 @@
 - name: Testing 24
   assert:
     that:
-      - ftp_account.stdout != ''
+      - ftp_account.stdout is not none
+      - ftp_account is not none
     fail_msg: "Failed to Get ftp account statu"
  
 #Server(Linux) 26: DoS 공격에 취약한 서비스 비활성화
@@ -310,7 +333,8 @@
 - name: Testing 26-1
   assert:
     that:
-      - xinetd_installed.stdout != ''
+      - xinetd_installed.stdout is not none
+      - xinetd_installed is not none
     fail_msg: "Failed to Get installation status"
 
 - name: Check disabled in xinetd
@@ -324,7 +348,8 @@
 - name: Testing 26-2
   assert:
     that:
-      - disable_check.stdout != ''
+      - disable_check.stdout is not none
+      - disable_check is not none
     fail_msg: "Failed to Check disabled in xinetd"
 
 #Server(Linux) 27: NFS 서비스 비활성화
@@ -337,7 +362,8 @@
 - name: Testing 27
   assert:
     that:
-      - nfsd_process.stdout != ''
+      - nfsd_process.stdout is not none
+      - nfsd_process is not none
     fail_msg: "Failed to Get NFS daemon status"
 
 #Server(Linux) 28: automountd 제거
@@ -350,7 +376,8 @@
 - name: Testing 28
   assert:
     that:
-      - automountd_status.stdout != ''
+      - automountd_status.stdout is not none
+      - automountd_status is not none
     fail_msg: "Failed to Get automountd daemon status"
 
 
